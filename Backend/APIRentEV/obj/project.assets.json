@@ -3310,29 +3310,30 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.10",
+      "Repository >= 1.0.0",
       "Service >= 1.0.0",
       "Swashbuckle.AspNetCore >= 6.4.0",
       "System.IdentityModel.Tokens.Jwt >= 8.14.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Acer\\.nuget\\packages\\": {},
+    "C:\\Users\\Duong Nguyen\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\SWP391RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
+      "projectUniqueName": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
       "projectName": "APIRentEV",
-      "projectPath": "D:\\SWP391RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
-      "packagesPath": "C:\\Users\\Acer\\.nuget\\packages\\",
-      "outputPath": "D:\\SWP391RentEV\\Backend\\APIRentEV\\obj\\",
+      "projectPath": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
+      "packagesPath": "C:\\Users\\Duong Nguyen\\.nuget\\packages\\",
+      "outputPath": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Acer\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Duong Nguyen\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -3341,16 +3342,17 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
-        "C:\\Users\\Acer\\.nuget\\packages": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\SWP391RentEV\\Backend\\Service\\Service.csproj": {
-              "projectPath": "D:\\SWP391RentEV\\Backend\\Service\\Service.csproj"
+            "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj": {
+              "projectPath": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj"
+            },
+            "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Service.csproj": {
+              "projectPath": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Service.csproj"
             }
           }
         }
@@ -3359,7 +3361,13 @@
         "warnAsError": [
           "NU1605"
         ]
-      }
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -3397,7 +3405,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.102/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
