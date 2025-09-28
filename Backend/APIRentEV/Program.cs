@@ -1,12 +1,14 @@
-﻿using Repository.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Microsoft.OpenApi.Models;
+using Repository.Implementations;
+using Repository.Models;
 using Repository.Repositories;
 using Service.Interface;
 using Service.Services;
-using Microsoft.OpenApi.Models;
-using Microsoft.EntityFrameworkCore;
+using Services;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -52,6 +54,10 @@ builder.Services.AddDbContext<SWP391RentEVContext>(options =>
 
 builder.Services.AddScoped<AuthenRepository>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
+
+builder.Services.AddScoped< UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 
 // JWT config
 var jwtKey = builder.Configuration["Jwt:Key"];
