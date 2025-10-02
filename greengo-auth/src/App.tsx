@@ -1,19 +1,22 @@
-import { useState } from "react";
-import AuthHero from "./components/AuthHero";
-import AuthForm from "./components/AuthForm";
-
+import { Routes, Route, Navigate } from "react-router-dom";
+import AuthHero from "./components/AuthHero";   // ⟵ dùng làm trang login
+import HomePage from "./pages/Homepage";
+import SearchResults from "./pages/SearchResults";
+import "./App.css";
 export type Mode = "login" | "register";
-
 export default function App() {
-  const [mode, setMode] = useState<Mode>("login"); // chuyển qua lại login/register
-
   return (
-    <div className="auth-page">
-      <AuthHero mode={mode} />
-      <AuthForm
-        mode={mode}
-        onSwitch={() => setMode(mode === "login" ? "register" : "login")}
-      />
-    </div>
+    <Routes>
+      {/* Mặc định vào / sẽ tới trang login (AuthHero) */}
+      <Route path="/" element={<AuthHero />} />
+      <Route path="/login" element={<AuthHero />} />
+
+      {/* Trang sau đăng nhập */}
+      <Route path="/home" element={<HomePage />} />
+      <Route path="/search" element={<SearchResults />} />
+
+      {/* fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
