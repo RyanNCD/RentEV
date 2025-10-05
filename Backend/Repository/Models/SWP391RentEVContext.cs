@@ -180,9 +180,12 @@ public partial class SWP391RentEVContext : DbContext
             entity.HasIndex(e => e.LicensePlate, "UQ__Vehicle__026BC15C3389ECA9").IsUnique();
 
             entity.Property(e => e.VehicleId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Description).HasMaxLength(300);
             entity.Property(e => e.LicensePlate).HasMaxLength(20);
-            entity.Property(e => e.PricePerHour).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.PricePerDay).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.Utilities).HasMaxLength(300);
+            entity.Property(e => e.VehicleName).HasMaxLength(50);
             entity.Property(e => e.VehicleType).HasMaxLength(50);
 
             entity.HasOne(d => d.Station).WithMany(p => p.Vehicles)

@@ -58,6 +58,8 @@ builder.Services.AddScoped<IAuthenService, AuthenService>();
 builder.Services.AddScoped< UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+builder.Services.AddScoped<VehicleRepository>();
+builder.Services.AddScoped<IVehivleService,VehicleService>();
 
 // JWT config
 var jwtKey = builder.Configuration["Jwt:Key"];
