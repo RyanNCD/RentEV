@@ -1,34 +1,43 @@
-import { cities } from "../data/cities";
-
 type Props = {
-  city:string; onCity:(v:string)=>void;
-  start:string; end:string; onStart:(v:string)=>void; onEnd:(v:string)=>void;
-  onFind:()=>void;
+  city: string;
+  from: string;
+  to: string;
+  onCity: (v: string) => void;
+  onFrom: (v: string) => void;
+  onTo: (v: string) => void;
+  onSearch: () => void;
 };
 
-export default function SearchBar({ city,onCity,start,end,onStart,onEnd,onFind }: Props){
+export default function SearchBar({ city, from, to, onCity, onFrom, onTo, onSearch }: Props) {
   return (
-    <div className="grid">
-      <div>
-        <div className="label">Địa điểm</div>
-        <div className="select-wrap">
-          <select className="select" value={city} onChange={e=>onCity(e.target.value)}>
-            {cities.map(c => <option key={c}>{c}</option>)}
-          </select>
+    <form
+      className="searchbar"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSearch();
+      }}
+    >
+      <label className="field big">
+        <span>Địa điểm</span>
+        <div className="input-like">
+          <span className="icon"></span>
+          <input placeholder="Thành phố Hồ Chí Minh" value={city} onChange={(e) => onCity(e.target.value)} />
           <span className="chev">▾</span>
         </div>
-      </div>
-      <div>
-        <div className="label">Thời gian bắt đầu</div>
-        <input className="input" type="datetime-local" value={start} onChange={e=>onStart(e.target.value)} />
-      </div>
-      <div>
-        <div className="label">Thời gian kết thúc</div>
-        <input className="input" type="datetime-local" value={end} onChange={e=>onEnd(e.target.value)} />
-      </div>
-      <div className="actions-col">
-        <button className="btn btn-primary find" onClick={onFind}>Tìm xe</button>
-      </div>
-    </div>
+      </label>
+
+      <label className="field big">
+        <span>Thời gian thuê</span>
+        <div className="input-like range">
+          <span className="icon"></span>
+          <input type="datetime-local" value={from} onChange={(e) => onFrom(e.target.value)} />
+          <span className="dash">—</span>
+          <input type="datetime-local" value={to} onChange={(e) => onTo(e.target.value)} />
+          <span className="chev">▾</span>
+        </div>
+      </label>
+
+      <button className="btn cta" type="submit">Tìm xe</button>
+    </form>
   );
 }

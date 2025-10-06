@@ -1,25 +1,22 @@
-import { Link, useNavigate } from "react-router-dom";
-
-export default function Navbar(){
-  const nav = useNavigate();
+export default function Navbar() {
   return (
-    <header className="header">
-      <div className="container header-in">
-        <Link to="/home" className="brand" style={{gap:6}}>
-          <img src="/logo.png" alt="Logo" style={{height:80}} />
-  <div className="brand-text" style={{marginLeft:"6px"}}>GREENGO</div>
-        </Link>
+    <header className="nav-wrap">
+      <div className="container nav">
+        <div className="brand">
+          <img src="/logo.png" alt="GreenGo" />
+          <span>GREENGO</span>
+        </div>
 
-        <nav className="nav">
-          <a href="#">Trang chủ</a>
-          <a href="#">Về chúng tôi</a>
-          <a href="#">Bảng giá</a>
-          <a href="#">Kí gửi xe</a>
+        <nav className="nav-links">
+          <a className="active">Trang chủ</a>
+          <a>Về chúng tôi</a>
+          <a>Bảng giá</a>
+          <a>Kí gửi xe</a>
         </nav>
 
-        <div className="actions">
-          <button className="btn btn-ghost" onClick={()=>nav("/login")}>Đăng nhập</button>
-          <button className="btn btn-primary">Đăng kí</button>
+        <div className="nav-cta">
+          <a className="btn ghost" href="/login">Đăng nhập</a>
+          <a className="btn primary sm" href="/register">Đăng kí →</a>
         </div>
       </div>
     </header>
