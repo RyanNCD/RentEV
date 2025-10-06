@@ -1,53 +1,44 @@
 import { useState } from "react";
-import type { Mode } from "../App";
-import IconEye from "./IconEye";
+import { useNavigate } from "react-router-dom";
 
-type Props = {
-  mode: Mode;
-  onSwitch: () => void;
-};
+type Mode = "login" | "register";
+type Props = { mode: Mode; onSwitch: () => void };
 
 export default function AuthForm({ mode, onSwitch }: Props) {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [show, setShow] = useState(false);
   const [remember, setRemember] = useState(false);
+  const navigate = useNavigate();
 
-  const title = mode === "login" ? "Đăng nhập" : "Đăng kí";
-  const cta = mode === "login" ? "Đăng nhập ngay" : "Đăng kí ngay";
-  const bottomText =
-    mode === "login" ? (
-      <>Chưa có tài khoản? <button className="link" onClick={onSwitch}>Đăng ký miễn phí</button></>
-    ) : (
-      <>Chưa đã có tài khoản? <button className="link" onClick={onSwitch}>Đăng nhập</button></>
-    );
-
-  const onSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(
-      JSON.stringify(
-        { mode, email, pw, remember },
-        null,
-        2
-      )
-    );
+
+    // 👉 Giả lập đăng nhập thành công
+    if (mode === "login") {
+      alert("Đăng nhập thành công!");
+      navigate("/home"); // ✅ chuyển sang trang home
+    } else {
+      alert("Đăng ký thành công!");
+      navigate("/login"); // ✅ quay lại login sau khi đăng ký
+    }
   };
 
   return (
     <section className="panel">
       <div className="lang">
-        <button className="lang-btn" aria-label="Đổi ngôn ngữ">VIE 🇻🇳</button>
+        <button className="lang-btn">VIE 🇻🇳</button>
       </div>
 
       <div className="panel-inner">
-        <h2 className="title">{title}</h2>
+        <h2 className="title">{mode === "login" ? "Đăng nhập" : "Đăng kí"}</h2>
         <p className="subtitle">
           {mode === "login"
             ? "Nhập thông tin để truy cập tài khoản"
             : "Nhập thông tin để đăng kí tài khoản"}
         </p>
 
-        <form className="form" onSubmit={onSubmit}>
+        <form className="form" onSubmit={handleSubmit}>
           <label className="field">
             <span>Địa chỉ Email</span>
             <input
@@ -69,48 +60,25 @@ export default function AuthForm({ mode, onSwitch }: Props) {
                 onChange={(e) => setPw(e.target.value)}
                 required
               />
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={() => setShow((s) => !s)}
-                aria-label={show ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-                title={show ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
-              >
-                <IconEye open={show} />
+              <button type="button" className="icon-btn" onClick={() => setShow((s) => !s)}>
+                {show ? "🙈" : "👁️"}
               </button>
             </div>
           </label>
 
-          <div className="row between">
-            <label className="check">
-              <input
-                type="checkbox"
-                checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
-              />
-              <span>Ghi nhớ đăng nhập</span>
-            </label>
-            <button className="link" type="button">Quên mật khẩu?</button>
-          </div>
+          {mode === "login" && (
+            <div className="row between">
+              <label className="check">
+                <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
+                <span>Ghi nhớ đăng nhập</span>
+              </label>
+              <button className="link" type="button">Quên mật khẩu?</button>
+            </div>
+          )}
 
-          <button className="primary" type="submit">{cta}</button>
-
-          <div className="divider"><span>Hoặc {mode === "login" ? "đăng nhập" : "đăng kí"} với</span></div>
-
-          <div className="row social">
-            <button type="button" className="social-btn">
-              <span>G</span> Google
-            </button>
-            <button type="button" className="social-btn">
-              <span>f</span> Facebook
-            </button>
-          </div>
-
-          <p className="bottom">{bottomText}</p>
-
-          <div className="foot-links">
-            <a>Điều khoản</a> • <a>Bảo mật</a> • <a>Hỗ trợ</a>
-          </div>
+          <button className="primary" type="submit">
+            {mode === "login" ? "Đăng nhập ngay" : "Đăng kí ngay"}
+          </button>
         </form>
       </div>
     </section>

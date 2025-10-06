@@ -1,56 +1,76 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Tabs from "../components/Tabs";
 import SearchBar from "../components/SearchBar";
 import PromoCard from "../components/PromoCard";
+import CarCard from "../components/CarCard";
 
-const HERO_URL = "/hero.jpg";
+const MOCK_CARS = [
+  { id: "1", name: "Toyota Vios 2022", pricePerDay: 650000, image: "/car1.jpg", tags: ["Số tự động", "5 chỗ"] },
+  { id: "2", name: "Kia Seltos 2023", pricePerDay: 820000, image: "/car2.jpg", tags: ["SUV", "7 túi khí"] },
+  { id: "3", name: "Hyundai Accent", pricePerDay: 600000, image: "/car3.jpg", tags: ["Tiết kiệm", "5 chỗ"] },
+];
 
-export default function HomePage(){
-  const nav = useNavigate();
+<section className="grid-cars">
+  {MOCK_CARS.map(c => <CarCard key={c.id} {...c} />)}
+</section>
 
-  const [tab, setTab] = useState<"self"|"withDriver"|"longTerm">("self");
-  const [city, setCity] = useState("TP. Hồ Chí Minh");
-  const [start, setStart] = useState(new Date().toISOString().slice(0,16));
-  const [end, setEnd] = useState(() => { const d=new Date(); d.setDate(d.getDate()+1); return d.toISOString().slice(0,16); });
+export default function HomePage() {
+  const [tab, setTab] = useState<"self" | "with" | "long">("self");
+  const [city, setCity] = useState("Thành phố Hồ Chí Minh");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
+  const [cars, setCars] = useState(MOCK_CARS);
 
-  const onFind = () => {
-    const q = new URLSearchParams({
-      city,
-      start,
-      end,
-      mode: tab,
-    });
-    nav(`/search?${q.toString()}`);
-  };
+  function handleSearch() {
+    // chỗ này bạn giữ logic hiện có (call API / filter)
+    // demo: lọc nhẹ theo tab (chỉ để có phản hồi)
+    if (tab === "with") setCars(MOCK_CARS.slice(0, 2));
+    else if (tab === "long") setCars(MOCK_CARS.slice(1));
+    else setCars(MOCK_CARS);
+  }
 
   return (
-    <>
+    <div className="page">
       <Navbar />
-      <div className="container">
-        <Tabs value={tab} onChange={setTab}/>
-        <section className="card search">
+
+      <main className="container">
+        <Tabs active={tab} onChange={setTab} />
+
+        <div className="search-card">
           <SearchBar
-            city={city} onCity={setCity}
-            start={start} end={end}
-            onStart={setStart} onEnd={setEnd}
-            onFind={onFind}
+            city={city}
+            from={from}
+            to={to}
+            onCity={setCity}
+            onFrom={setFrom}
+            onTo={setTo}
+            onSearch={handleSearch}
           />
-          <div className="hero"><img src={HERO_URL} alt="Hero" /></div>
+        </div>
+
+        <PromoCard />
+
+        <section className="section">
+          <h2 className="section-title">Chương Trình Khuyến Mãi</h2>
+          <p className="section-sub">Nhận nhiều ưu đãi hấp dẫn từ GreenGo</p>
         </section>
 
-        <section className="promo">
-          <h2>Chương Trình Khuyến Mãi</h2>
-          <p className="sub">Nhận nhiều ưu đãi hấp dẫn từ GreenGo</p>
-          <div className="promo-grid">
-            <PromoCard title="Miễn phí giao xe" desc="Bán kính 10km (đơn > 2 ngày)"/>
-            <PromoCard title="Giảm 15% xe tự lái" desc="Cho khách mới"/>
-            <PromoCard title="Tặng 1 ngày" desc="Thuê 6 ngày tặng 1"/>
-          </div>
+        <section className="grid-cars">
+          {cars.map((c) => (
+            <CarCard key={c.id} {...c} />
+          ))}
         </section>
-      </div>
-      <footer className="footer"><div className="container">© {new Date().getFullYear()} GreenGo.</div></footer>
-    </>
+      </main>
+
+      <footer className="footer">
+        <div className="container foot">
+          <span>© {new Date().getFullYear()} GreenGo</span>
+          <nav className="foot-links">
+            <a>Điều khoản</a><a>Bảo mật</a><a>Hỗ trợ</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
   );
 }

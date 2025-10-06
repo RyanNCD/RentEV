@@ -1,8 +1,8 @@
-export default function PromoCard({ title, desc }:{title:string; desc:string}) {
+export default function PromoCard() {
   return (
-    <div className="card promo-card">
-      <div className="promo-title">{title}</div>
-      <div className="promo-desc">{desc}</div>
-    </div>
+    <section className="promo">
+      {/* đặt ảnh khuyến mãi của bạn vào public/hero.jpg */}
+      <img className="promo-img" src="/hero.png" alt="Khuyến mãi" />
+    </section>
   );
 }
