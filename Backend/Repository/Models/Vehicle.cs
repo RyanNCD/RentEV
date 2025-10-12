@@ -12,6 +12,8 @@ public partial class Vehicle
     public Guid StationId { get; set; }
 
     public string VehicleName { get; set; }
+
+    public string VehicleName { get; set; }
     
     public string VehicleType { get; set; }
 
