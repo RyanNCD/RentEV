@@ -7,84 +7,136 @@
       "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\base\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\base\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\userupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\userupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\service\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|solutionrelative:service\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\controllers\\weatherforecastcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\controllers\\usercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\apirentev.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\apirentev.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\weatherforecast.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\usercreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\usercreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\mapper\\usermapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\mapper\\usermapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\userregisterdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\userregisterdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\repository.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\repository.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\apirentev.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\apirentev.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\service\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|solutionrelative:service\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\base\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\base\\genericrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\mapper\\usermapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\mapper\\usermapper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\controllers\\rentalcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\controllers\\rentalcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\service\\services\\rentalservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|solutionrelative:service\\services\\rentalservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\rentalupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\rentalupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\rentalcreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\rentalcreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\service\\interface\\irentalservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|solutionrelative:service\\interface\\irentalservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\repositories\\rentalrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\repositories\\rentalrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\rentaldto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\rentaldto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\models\\vehicle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\models\\vehicle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\models\\rental.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\models\\rental.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\models\\swp391rentevcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\models\\swp391rentevcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\service\\interface\\iauthenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|solutionrelative:service\\interface\\iauthenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\userupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\userupdatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\repositories\\authenrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\repositories\\authenrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\controllers\\authencontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\controllers\\authencontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\userdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\service\\services\\authenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|solutionrelative:service\\services\\authenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\service\\interface\\iauthenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|solutionrelative:service\\interface\\iauthenservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\service\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|solutionrelative:service\\services\\userservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\usercreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\usercreatedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\service\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8B216F53-DE34-48D8-A6E3-484688BE7CAB}|Service\\Service.csproj|solutionrelative:service\\interface\\iuserservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\repositories\\authenrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\repositories\\authenrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\logindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\logindto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\models\\deposit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\models\\deposit.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\apirentev.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\apirentev.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\dto\\userregisterdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\dto\\userregisterdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\repository\\repository.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\repository.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\semster 5\\swp391\\new folder\\rentev\\backend\\apirentev\\controllers\\authencontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\controllers\\authencontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -94,20 +146,46 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 18,
               "Title": "UserUpdateDto.cs",
               "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\UserUpdateDto.cs",
               "RelativeDocumentMoniker": "Repository\\DTO\\UserUpdateDto.cs",
               "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\UserUpdateDto.cs",
               "RelativeToolTip": "Repository\\DTO\\UserUpdateDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAFAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-25T00:59:46.466Z",
               "IsPinned": true
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "APIRentEV.http",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\APIRentEV.http",
+              "RelativeDocumentMoniker": "APIRentEV\\APIRentEV.http",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\APIRentEV.http",
+              "RelativeToolTip": "APIRentEV\\APIRentEV.http",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2025-10-12T13:33:14.834Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "WeatherForecastController.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Controllers\\WeatherForecastController.cs",
+              "RelativeDocumentMoniker": "APIRentEV\\Controllers\\WeatherForecastController.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Controllers\\WeatherForecastController.cs",
+              "RelativeToolTip": "APIRentEV\\Controllers\\WeatherForecastController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-12T13:32:41.13Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Bookmark",
@@ -115,68 +193,207 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "APIRentEV.csproj",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
-              "RelativeDocumentMoniker": "APIRentEV\\APIRentEV.csproj",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
-              "RelativeToolTip": "APIRentEV\\APIRentEV.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAKAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-09-25T00:47:02.133Z"
+              "DocumentIndex": 5,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Program.cs",
+              "RelativeDocumentMoniker": "APIRentEV\\Program.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Program.cs",
+              "RelativeToolTip": "APIRentEV\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADYAAAA8AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-24T15:56:37.722Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 0,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\appsettings.json",
+              "RelativeDocumentMoniker": "APIRentEV\\appsettings.json",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\appsettings.json",
+              "RelativeToolTip": "APIRentEV\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-09-24T15:56:37.718Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "WeatherForecast.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\WeatherForecast.cs",
+              "RelativeDocumentMoniker": "APIRentEV\\WeatherForecast.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\WeatherForecast.cs",
+              "RelativeToolTip": "APIRentEV\\WeatherForecast.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T00:45:46.494Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "UserController.cs",
               "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Controllers\\UserController.cs",
               "RelativeDocumentMoniker": "APIRentEV\\Controllers\\UserController.cs",
               "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Controllers\\UserController.cs",
               "RelativeToolTip": "APIRentEV\\Controllers\\UserController.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABQAAABBAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABUAAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-24T16:11:06.644Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "UserRegisterDto.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\UserRegisterDto.cs",
-              "RelativeDocumentMoniker": "Repository\\DTO\\UserRegisterDto.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\UserRegisterDto.cs",
-              "RelativeToolTip": "Repository\\DTO\\UserRegisterDto.cs",
-              "ViewState": "AgIAAAYAAAAAAAAAAAAAABAAAAAeAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-24T15:56:37.73Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "UserService.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Services\\UserService.cs",
-              "RelativeDocumentMoniker": "Service\\Services\\UserService.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Services\\UserService.cs",
-              "RelativeToolTip": "Service\\Services\\UserService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-24T16:10:02.079Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "UserRepository.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repositories\\UserRepository.cs",
-              "RelativeDocumentMoniker": "Repository\\Repositories\\UserRepository.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repositories\\UserRepository.cs",
-              "RelativeToolTip": "Repository\\Repositories\\UserRepository.cs",
-              "ViewState": "AgIAAA8AAAAAAAAAAAAYwB8AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-24T16:00:17.673Z",
+              "WhenOpened": "2025-09-24T16:11:06.644Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "GenericRepository.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Base\\GenericRepository.cs",
+              "RelativeDocumentMoniker": "Repository\\Base\\GenericRepository.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Base\\GenericRepository.cs",
+              "RelativeToolTip": "Repository\\Base\\GenericRepository.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAAwHkAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-28T07:58:08.185Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "RentalController.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Controllers\\RentalController.cs",
+              "RelativeDocumentMoniker": "APIRentEV\\Controllers\\RentalController.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Controllers\\RentalController.cs",
+              "RelativeToolTip": "APIRentEV\\Controllers\\RentalController.cs",
+              "ViewState": "AgIAADAAAAAAAAAAAADgv1IAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T01:12:46.38Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "RentalService.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Services\\RentalService.cs",
+              "RelativeDocumentMoniker": "Service\\Services\\RentalService.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Services\\RentalService.cs",
+              "RelativeToolTip": "Service\\Services\\RentalService.cs",
+              "ViewState": "AgIAABgAAAAAAAAAAAAYwDMAAAAxAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T01:11:09.513Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "RentalCreateDto.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\RentalCreateDto.cs",
+              "RelativeDocumentMoniker": "Repository\\DTO\\RentalCreateDto.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\RentalCreateDto.cs",
+              "RelativeToolTip": "Repository\\DTO\\RentalCreateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T01:02:25.831Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "UserMapper.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Mapper\\UserMapper.cs",
+              "RelativeDocumentMoniker": "APIRentEV\\Mapper\\UserMapper.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Mapper\\UserMapper.cs",
+              "RelativeToolTip": "APIRentEV\\Mapper\\UserMapper.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACkAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-25T00:46:51.552Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "RentalRepository.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repositories\\RentalRepository.cs",
+              "RelativeDocumentMoniker": "Repository\\Repositories\\RentalRepository.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repositories\\RentalRepository.cs",
+              "RelativeToolTip": "Repository\\Repositories\\RentalRepository.cs",
+              "ViewState": "AgIAAA4AAAAAAAAAAAAAwCYAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T01:37:58.042Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "IRentalService.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Interface\\IRentalService.cs",
+              "RelativeDocumentMoniker": "Service\\Interface\\IRentalService.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Interface\\IRentalService.cs",
+              "RelativeToolTip": "Service\\Interface\\IRentalService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAuwA4AAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T01:09:59.336Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 10,
+              "Title": "RentalUpdateDto.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\RentalUpdateDto.cs",
+              "RelativeDocumentMoniker": "Repository\\DTO\\RentalUpdateDto.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\RentalUpdateDto.cs",
+              "RelativeToolTip": "Repository\\DTO\\RentalUpdateDto.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAuwAoAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-09T01:19:02.72Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "RentalDto.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\RentalDto.cs",
+              "RelativeDocumentMoniker": "Repository\\DTO\\RentalDto.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\RentalDto.cs",
+              "RelativeToolTip": "Repository\\DTO\\RentalDto.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAwAAAArAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T01:03:04.883Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "Vehicle.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\Vehicle.cs",
+              "RelativeDocumentMoniker": "Repository\\Models\\Vehicle.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\Vehicle.cs",
+              "RelativeToolTip": "Repository\\Models\\Vehicle.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAA4AAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-06T01:38:52.408Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "Rental.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\Rental.cs",
+              "RelativeDocumentMoniker": "Repository\\Models\\Rental.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\Rental.cs",
+              "RelativeToolTip": "Repository\\Models\\Rental.cs",
+              "ViewState": "AgIAAAsAAAAAAAAAAAAAAAsAAAADAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T01:40:23.474Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "SWP391RentEVContext.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\SWP391RentEVContext.cs",
+              "RelativeDocumentMoniker": "Repository\\Models\\SWP391RentEVContext.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\SWP391RentEVContext.cs",
+              "RelativeToolTip": "Repository\\Models\\SWP391RentEVContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-24T15:56:37.427Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
               "Title": "UserDto.cs",
               "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\UserDto.cs",
               "RelativeDocumentMoniker": "Repository\\DTO\\UserDto.cs",
@@ -188,152 +405,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "appsettings.json",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\appsettings.json",
-              "RelativeDocumentMoniker": "APIRentEV\\appsettings.json",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\appsettings.json",
-              "RelativeToolTip": "APIRentEV\\appsettings.json",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAADAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-09-24T15:56:37.718Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "GenericRepository.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Base\\GenericRepository.cs",
-              "RelativeDocumentMoniker": "Repository\\Base\\GenericRepository.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Base\\GenericRepository.cs",
-              "RelativeToolTip": "Repository\\Base\\GenericRepository.cs",
-              "ViewState": "AgIAAFsAAAAAAAAAAAAIwHkAAAAeAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-28T07:58:08.185Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "UserMapper.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Mapper\\UserMapper.cs",
-              "RelativeDocumentMoniker": "APIRentEV\\Mapper\\UserMapper.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Mapper\\UserMapper.cs",
-              "RelativeToolTip": "APIRentEV\\Mapper\\UserMapper.cs",
-              "ViewState": "AgIAAAkAAAAAAAAAAAAcwCkAAAAjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-25T00:46:51.552Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "UserCreateDto.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\UserCreateDto.cs",
-              "RelativeDocumentMoniker": "Repository\\DTO\\UserCreateDto.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\UserCreateDto.cs",
-              "RelativeToolTip": "Repository\\DTO\\UserCreateDto.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAoAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-25T00:58:44.026Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "Repository.csproj",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj",
-              "RelativeDocumentMoniker": "Repository\\Repository.csproj",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj",
-              "RelativeToolTip": "Repository\\Repository.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-09-25T00:45:41.482Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "IUserService.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Interface\\IUserService.cs",
-              "RelativeDocumentMoniker": "Service\\Interface\\IUserService.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Interface\\IUserService.cs",
-              "RelativeToolTip": "Service\\Interface\\IUserService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAEAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-24T16:09:34.79Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "SWP391RentEVContext.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\SWP391RentEVContext.cs",
-              "RelativeDocumentMoniker": "Repository\\Models\\SWP391RentEVContext.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\SWP391RentEVContext.cs",
-              "RelativeToolTip": "Repository\\Models\\SWP391RentEVContext.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAFAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-24T15:56:37.427Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Program.cs",
-              "RelativeDocumentMoniker": "APIRentEV\\Program.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Program.cs",
-              "RelativeToolTip": "APIRentEV\\Program.cs",
-              "ViewState": "AgIAACMAAAAAAAAAAAAAADUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-24T15:56:37.722Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "AuthenRepository.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repositories\\AuthenRepository.cs",
-              "RelativeDocumentMoniker": "Repository\\Repositories\\AuthenRepository.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repositories\\AuthenRepository.cs",
-              "RelativeToolTip": "Repository\\Repositories\\AuthenRepository.cs",
-              "ViewState": "AgIAAEgAAAAAAAAAAAAqwGUAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-24T15:56:37.714Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 20,
-              "Title": "LoginDto.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\LoginDto.cs",
-              "RelativeDocumentMoniker": "Repository\\DTO\\LoginDto.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\LoginDto.cs",
-              "RelativeToolTip": "Repository\\DTO\\LoginDto.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAoAAAApAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-24T15:56:37.716Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 19,
               "Title": "AuthenService.cs",
               "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Services\\AuthenService.cs",
               "RelativeDocumentMoniker": "Service\\Services\\AuthenService.cs",
               "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Services\\AuthenService.cs",
               "RelativeToolTip": "Service\\Services\\AuthenService.cs",
-              "ViewState": "AQIAABkAAAAAAAAAAAAAABkAAAAIAAAA",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-24T15:56:37.724Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "User.cs",
-              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\User.cs",
-              "RelativeDocumentMoniker": "Repository\\Models\\User.cs",
-              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\User.cs",
-              "RelativeToolTip": "Repository\\Models\\User.cs",
-              "ViewState": "AgIAAAoAAAAAAAAAAAAYwB4AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-24T15:56:37.731Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 21,
               "Title": "IAuthenService.cs",
               "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Interface\\IAuthenService.cs",
               "RelativeDocumentMoniker": "Service\\Interface\\IAuthenService.cs",
@@ -345,7 +429,139 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 22,
+              "Title": "UserService.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Services\\UserService.cs",
+              "RelativeDocumentMoniker": "Service\\Services\\UserService.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Services\\UserService.cs",
+              "RelativeToolTip": "Service\\Services\\UserService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-24T16:10:02.079Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 23,
+              "Title": "UserRepository.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repositories\\UserRepository.cs",
+              "RelativeDocumentMoniker": "Repository\\Repositories\\UserRepository.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repositories\\UserRepository.cs",
+              "RelativeToolTip": "Repository\\Repositories\\UserRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-24T16:00:17.673Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 24,
+              "Title": "UserCreateDto.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\UserCreateDto.cs",
+              "RelativeDocumentMoniker": "Repository\\DTO\\UserCreateDto.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\UserCreateDto.cs",
+              "RelativeToolTip": "Repository\\DTO\\UserCreateDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-25T00:58:44.026Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 25,
+              "Title": "IUserService.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Interface\\IUserService.cs",
+              "RelativeDocumentMoniker": "Service\\Interface\\IUserService.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Service\\Interface\\IUserService.cs",
+              "RelativeToolTip": "Service\\Interface\\IUserService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAEAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-24T16:09:34.79Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 26,
+              "Title": "AuthenRepository.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repositories\\AuthenRepository.cs",
+              "RelativeDocumentMoniker": "Repository\\Repositories\\AuthenRepository.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repositories\\AuthenRepository.cs",
+              "RelativeToolTip": "Repository\\Repositories\\AuthenRepository.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAGUAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-24T15:56:37.714Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 28,
+              "Title": "Deposit.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\Deposit.cs",
+              "RelativeDocumentMoniker": "Repository\\Models\\Deposit.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\Deposit.cs",
+              "RelativeToolTip": "Repository\\Models\\Deposit.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-02T00:44:41.906Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 27,
+              "Title": "LoginDto.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\LoginDto.cs",
+              "RelativeDocumentMoniker": "Repository\\DTO\\LoginDto.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\LoginDto.cs",
+              "RelativeToolTip": "Repository\\DTO\\LoginDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-24T15:56:37.716Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 31,
+              "Title": "UserRegisterDto.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\UserRegisterDto.cs",
+              "RelativeDocumentMoniker": "Repository\\DTO\\UserRegisterDto.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\DTO\\UserRegisterDto.cs",
+              "RelativeToolTip": "Repository\\DTO\\UserRegisterDto.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABAAAAAeAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-24T15:56:37.73Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 29,
+              "Title": "User.cs",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\User.cs",
+              "RelativeDocumentMoniker": "Repository\\Models\\User.cs",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Models\\User.cs",
+              "RelativeToolTip": "Repository\\Models\\User.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-24T15:56:37.731Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 30,
+              "Title": "APIRentEV.csproj",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
+              "RelativeDocumentMoniker": "APIRentEV\\APIRentEV.csproj",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
+              "RelativeToolTip": "APIRentEV\\APIRentEV.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABMAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-25T00:47:02.133Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 32,
+              "Title": "Repository.csproj",
+              "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj",
+              "RelativeDocumentMoniker": "Repository\\Repository.csproj",
+              "ToolTip": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj",
+              "RelativeToolTip": "Repository\\Repository.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-25T00:45:41.482Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 33,
               "Title": "AuthenController.cs",
               "DocumentMoniker": "D:\\Semster 5\\SWP391\\New folder\\RentEV\\Backend\\APIRentEV\\Controllers\\AuthenController.cs",
               "RelativeDocumentMoniker": "APIRentEV\\Controllers\\AuthenController.cs",
@@ -354,10 +570,6 @@
               "ViewState": "AQIAABsAAAAAAAAAAAAmwBwAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-24T15:56:37.727Z"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
             }
           ]
         }
