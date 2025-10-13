@@ -288,7 +288,6 @@ D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\staticw
 D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\staticwebassets.build.json.cache
 D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\staticwebassets.development.json
 D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\staticwebassets.build.endpoints.json
-D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\APIRentEV.csproj.Up2Date
 D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\APIRentEV.dll
 D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\refint\APIRentEV.dll
@@ -394,3 +393,9 @@ C:\Users\Acer\Desktop\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\refin
 C:\Users\Acer\Desktop\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\APIRentEV.pdb
 C:\Users\Acer\Desktop\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\APIRentEV.genruntimeconfig.cache
 C:\Users\Acer\Desktop\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\ref\APIRentEV.dll
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\out\web.config
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\out\APIRentEV.deps.json
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\out\APIRentEV.runtimeconfig.json
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\out\appsettings.Development.json
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\out\appsettings.json
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

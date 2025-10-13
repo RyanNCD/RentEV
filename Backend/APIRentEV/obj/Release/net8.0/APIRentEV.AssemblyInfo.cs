@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("APIRentEV")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e11cc89fb96df29b698c252dd47db5ff6285cbd4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+208f812870364781f8d65b0ee7a37651cfb8b12f")]
 [assembly: System.Reflection.AssemblyProductAttribute("APIRentEV")]
 [assembly: System.Reflection.AssemblyTitleAttribute("APIRentEV")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

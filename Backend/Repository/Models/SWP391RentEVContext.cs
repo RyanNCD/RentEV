@@ -35,7 +35,7 @@ public partial class SWP391RentEVContext : DbContext
     {
         modelBuilder.Entity<Deposit>(entity =>
         {
-            entity.HasKey(e => e.DepositId).HasName("PK__Deposit__AB60DF7182A4D739");
+            entity.HasKey(e => e.DepositId).HasName("PK__Deposit__AB60DF71B5D4AD66");
 
             entity.ToTable("Deposit");
 
@@ -46,12 +46,12 @@ public partial class SWP391RentEVContext : DbContext
             entity.HasOne(d => d.Rental).WithMany(p => p.Deposits)
                 .HasForeignKey(d => d.RentalId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Deposit__RentalI__68487DD7");
+                .HasConstraintName("FK__Deposit__RentalI__4E88ABD4");
         });
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__9B556A38E975E0E1");
+            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__9B556A38FC965342");
 
             entity.ToTable("Payment");
 
@@ -66,12 +66,12 @@ public partial class SWP391RentEVContext : DbContext
             entity.HasOne(d => d.Rental).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.RentalId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Payment__RentalI__6754599E");
+                .HasConstraintName("FK__Payment__RentalI__4F7CD00D");
         });
 
         modelBuilder.Entity<Rental>(entity =>
         {
-            entity.HasKey(e => e.RentalId).HasName("PK__Rental__97005943CC48336A");
+            entity.HasKey(e => e.RentalId).HasName("PK__Rental__970059434AA6ED73");
 
             entity.ToTable("Rental");
 
@@ -88,20 +88,20 @@ public partial class SWP391RentEVContext : DbContext
             entity.HasOne(d => d.PickupStation).WithMany(p => p.RentalPickupStations)
                 .HasForeignKey(d => d.PickupStationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Rental__PickupSt__6477ECF3");
+                .HasConstraintName("FK__Rental__PickupSt__5070F446");
 
             entity.HasOne(d => d.ReturnStation).WithMany(p => p.RentalReturnStations)
                 .HasForeignKey(d => d.ReturnStationId)
-                .HasConstraintName("FK__Rental__ReturnSt__656C112C");
+                .HasConstraintName("FK__Rental__ReturnSt__5165187F");
 
             entity.HasOne(d => d.Staff).WithMany(p => p.RentalStaffs)
                 .HasForeignKey(d => d.StaffId)
-                .HasConstraintName("FK__Rental__StaffId__66603565");
+                .HasConstraintName("FK__Rental__StaffId__52593CB8");
 
             entity.HasOne(d => d.User).WithMany(p => p.RentalUsers)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Rental__UserId__628FA481");
+                .HasConstraintName("FK__Rental__UserId__534D60F1");
 
             entity.HasOne(d => d.Vehicle).WithMany(p => p.Rentals)
                 .HasForeignKey(d => d.VehicleId)
@@ -111,11 +111,11 @@ public partial class SWP391RentEVContext : DbContext
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__8AFACE1A3FED48E3");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__8AFACE1A76DBDF65");
 
             entity.ToTable("Role");
 
-            entity.HasIndex(e => e.RoleName, "UQ__Role__8A2B61603186C871").IsUnique();
+            entity.HasIndex(e => e.RoleName, "UQ__Role__8A2B61602D65CA4A").IsUnique();
 
             entity.Property(e => e.RoleId).HasDefaultValueSql("(newid())");
             entity.Property(e => e.RoleName)
@@ -125,7 +125,7 @@ public partial class SWP391RentEVContext : DbContext
 
         modelBuilder.Entity<Station>(entity =>
         {
-            entity.HasKey(e => e.StationId).HasName("PK__Station__E0D8A6BDB38A55C6");
+            entity.HasKey(e => e.StationId).HasName("PK__Station__E0D8A6BDB988F012");
 
             entity.ToTable("Station");
 
@@ -142,11 +142,11 @@ public partial class SWP391RentEVContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4C5BE06184");
+            entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4CC44C381C");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.Email, "UQ__User__A9D105341CE3F883").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__User__A9D1053476B1B10E").IsUnique();
 
             entity.Property(e => e.UserId).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CreatedAt)
@@ -168,7 +168,7 @@ public partial class SWP391RentEVContext : DbContext
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User__RoleId__60A75C0F");
+                .HasConstraintName("FK__User__RoleId__5535A963");
         });
 
         modelBuilder.Entity<Vehicle>(entity =>
@@ -180,7 +180,6 @@ public partial class SWP391RentEVContext : DbContext
             entity.HasIndex(e => e.LicensePlate, "UQ__Vehicle__026BC15C3389ECA9").IsUnique();
 
             entity.Property(e => e.VehicleId).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.Description).HasMaxLength(300);
             entity.Property(e => e.LicensePlate).HasMaxLength(20);
             entity.Property(e => e.PricePerDay).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Status).HasMaxLength(50);

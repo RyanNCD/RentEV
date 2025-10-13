@@ -51,6 +51,11 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<SWP391RentEVContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<RentalRepository>();
+builder.Services.AddScoped<IRentalService, RentalService>();
+
+builder.Services.AddScoped<RentalRepository>();
+builder.Services.AddScoped<IRentalService, RentalService>();
 
 builder.Services.AddScoped<AuthenRepository>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
@@ -84,11 +89,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+app.UseSwagger();
+app.UseSwaggerUI();
+//}
 
 app.UseHttpsRedirection();
 
