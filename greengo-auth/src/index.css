@@ -6,8 +6,16 @@
     --muted: #64748b;
 
     --primary: #19B305;
+    --primary-500: #22c55e;
+    --primary-600: #16a34a;
     --primary-700: #19B305;
     --ring: 0 0 0 3px rgba(5, 150, 105, .25);
+
+    --text-primary: #0f172a;
+    --text-secondary: #334155;
+    --border: #e2e8f0;
+    --bg-secondary: #f8fafc;
+    --bg-hover: #f1f5f9;
 
     --radius: 18px;
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, .06);
@@ -303,4 +311,31 @@ a:hover {
 .footer .container {
     font-size: 14px;
     color: #64748b;
+}
+
+/* ===== auth ===== */
+.auth-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 32px;
+}
+
+@media (max-width: 768px) {
+    .auth-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 14px;
 }

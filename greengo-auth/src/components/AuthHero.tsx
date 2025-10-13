@@ -1,24 +1,37 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// Demo accounts với role-based routing
+const DEMO_ACCOUNTS = [
+  { email: "admin@greengo.vn", password: "admin123", role: "admin", redirect: "/admin" },
+  { email: "staff@greengo.vn", password: "staff123", role: "staff", redirect: "/staff" },
+  { email: "demo@greengo.vn", password: "greengo123", role: "renter", redirect: "/home" },
+];
+
 /** Trang đăng nhập (dùng trực tiếp trong router) */
 export default function AuthHero() {
   const nav = useNavigate();
 
-  // demo: có thể đổi sang state/validate thật
-  const [email, setEmail] = useState("demo@greengo.vn");
-  const [password, setPassword] = useState("greengo123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const onSubmit: React.FormEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
     setError(null);
 
-    // TODO: gọi API thật. Demo: cho qua nếu dùng demo@greengo.vn / greengo123
-    if (email.trim().toLowerCase() === "demo@greengo.vn" && password === "greengo123") {
-      nav("/home");
+    // Kiểm tra tài khoản demo
+    const account = DEMO_ACCOUNTS.find(
+      (acc) => acc.email.toLowerCase() === email.trim().toLowerCase() && acc.password === password
+    );
+
+    if (account) {
+      // Lưu role vào localStorage (trong thực tế dùng JWT token)
+      localStorage.setItem("userRole", account.role);
+      localStorage.setItem("userEmail", account.email);
+      nav(account.redirect);
     } else {
-      setError("Email hoặc mật khẩu không đúng (demo: demo@greengo.vn / greengo123)");
+      setError("Email hoặc mật khẩu không đúng");
     }
   };
 
@@ -26,15 +39,13 @@ export default function AuthHero() {
     <div className="container" style={{ paddingTop: 28 }}>
       <div className="auth-grid">
         {/* Khối hero bên trái */}
-        <aside className="hero">
-          <div className="hero-inner" style={{ padding: 24 }}>
-            <img src="/logo.png" alt="GreenGo" style={{ width: 160, height: "auto" }} />
-            <div className="hero-text" style={{ textAlign: "center" }}>
-              <h1 style={{ margin: "12px 0", color: "var(--primary-700)" }}>Chào mừng trở lại!</h1>
-              <p style={{ margin: 0, color: "var(--muted)" }}>
-                Đăng nhập để tiếp tục hành trình của bạn cùng GreenGo
-              </p>
-            </div>
+        <aside className="card" style={{ padding: "32px 24px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+          <img src="/logo.png" alt="GreenGo" style={{ width: 160, height: "auto", marginBottom: "20px" }} />
+          <div style={{ textAlign: "center" }}>
+            <h1 style={{ margin: "12px 0", color: "var(--primary-700)" }}>Chào mừng trở lại!</h1>
+            <p style={{ margin: 0, color: "var(--muted)" }}>
+              Đăng nhập để tiếp tục hành trình của bạn cùng GreenGo
+            </p>
           </div>
         </aside>
 

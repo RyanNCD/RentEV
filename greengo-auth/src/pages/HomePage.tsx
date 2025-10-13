@@ -5,7 +5,7 @@ import Tabs from "../components/Tabs";
 import SearchBar from "../components/SearchBar";
 import PromoCard from "../components/PromoCard";
 
-const HERO_URL = "/hero.jpg";
+const HERO_URL = "/logo.png";
 
 export default function HomePage(){
   const nav = useNavigate();

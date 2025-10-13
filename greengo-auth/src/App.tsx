@@ -1,9 +1,13 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import AuthHero from "./components/AuthHero";   // ⟵ dùng làm trang login
-import HomePage from "./pages/Homepage";
+import AuthHero from "./components/AuthHero";
+import HomePage from "./pages/HomePage";
 import SearchResults from "./pages/SearchResults";
+import AdminPage from "./pages/AdminPage";
+import StaffPage from "./pages/StaffPage";
 import "./App.css";
+
 export type Mode = "login" | "register";
+
 export default function App() {
   return (
     <Routes>
@@ -14,6 +18,10 @@ export default function App() {
       {/* Trang sau đăng nhập */}
       <Route path="/home" element={<HomePage />} />
       <Route path="/search" element={<SearchResults />} />
+      
+      {/* Trang quản trị */}
+      <Route path="/admin" element={<AdminPage />} />
+      <Route path="/staff" element={<StaffPage />} />
 
       {/* fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
