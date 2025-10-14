@@ -398,4 +398,5 @@ D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\out\API
 D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\out\APIRentEV.runtimeconfig.json
 D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\out\appsettings.Development.json
 D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\out\appsettings.json
-D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\MySqlConnector.dll
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\Pomelo.EntityFrameworkCore.MySql.dll
