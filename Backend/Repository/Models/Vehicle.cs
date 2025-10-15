@@ -11,15 +11,23 @@ public partial class Vehicle
 
     public Guid StationId { get; set; }
 
+    public string VehicleName { get; set; }
+
     public string VehicleType { get; set; }
 
     public int? BatteryCapacity { get; set; }
 
     public string Status { get; set; }
 
-    public decimal? PricePerHour { get; set; }
+    public decimal? PricePerDay { get; set; }
 
     public string LicensePlate { get; set; }
+
+    public string Description { get; set; }
+
+    public int? SeatingCapacity { get; set; }
+
+    public string Utilities { get; set; }
 
     public virtual ICollection<Rental> Rentals { get; set; } = new List<Rental>();
 

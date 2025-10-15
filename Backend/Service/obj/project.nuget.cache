@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "JAyPA0HrXDpvA5/mi6nudXvjSiI7oPP80Fx9QLLy+CdjJwzM7IdObHZwWMTD4A7JBhsRtKtXpCaYo7CVNZoqpg==",
+  "dgSpecHash": "QuNCPS+MINFTCxJFA90A+04n/sy3Bq2ZMGxjjeUt0/jDHvhCXbmn1sRAoZ3CheRRFbx9k23W6Vhpd9KSJvk84g==",
   "success": true,
-  "projectFilePath": "D:\\SWP391RentEV\\Backend\\Service\\Service.csproj",
+  "projectFilePath": "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\Service\\Service.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Acer\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\Acer\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

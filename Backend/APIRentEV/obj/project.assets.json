@@ -3310,6 +3310,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.10",
+      "Repository >= 1.0.0",
       "Service >= 1.0.0",
       "Swashbuckle.AspNetCore >= 6.4.0",
       "System.IdentityModel.Tokens.Jwt >= 8.14.0"
@@ -3322,11 +3323,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\SWP391RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
+      "projectUniqueName": "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
       "projectName": "APIRentEV",
-      "projectPath": "D:\\SWP391RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
+      "projectPath": "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\APIRentEV\\APIRentEV.csproj",
       "packagesPath": "C:\\Users\\Acer\\.nuget\\packages\\",
-      "outputPath": "D:\\SWP391RentEV\\Backend\\APIRentEV\\obj\\",
+      "outputPath": "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\APIRentEV\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -3349,8 +3350,11 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\SWP391RentEV\\Backend\\Service\\Service.csproj": {
-              "projectPath": "D:\\SWP391RentEV\\Backend\\Service\\Service.csproj"
+            "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj": {
+              "projectPath": "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj"
+            },
+            "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\Service\\Service.csproj": {
+              "projectPath": "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\Service\\Service.csproj"
             }
           }
         }
@@ -3397,7 +3401,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.102/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

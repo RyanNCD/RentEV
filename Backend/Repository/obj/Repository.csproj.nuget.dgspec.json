@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\SWP391RentEV\\Backend\\Repository\\Repository.csproj": {}
+    "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj": {}
   },
   "projects": {
-    "D:\\SWP391RentEV\\Backend\\Repository\\Repository.csproj": {
+    "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\SWP391RentEV\\Backend\\Repository\\Repository.csproj",
+        "projectUniqueName": "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj",
         "projectName": "Repository",
-        "projectPath": "D:\\SWP391RentEV\\Backend\\Repository\\Repository.csproj",
+        "projectPath": "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\Repository\\Repository.csproj",
         "packagesPath": "C:\\Users\\Acer\\.nuget\\packages\\",
-        "outputPath": "D:\\SWP391RentEV\\Backend\\Repository\\obj\\",
+        "outputPath": "C:\\Users\\Acer\\Desktop\\New folder\\RentEV\\Backend\\Repository\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -89,7 +89,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.102/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.101/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

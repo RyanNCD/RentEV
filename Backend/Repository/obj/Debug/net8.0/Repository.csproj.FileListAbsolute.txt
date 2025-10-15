@@ -27,3 +27,33 @@ D:\SWP391RentEV\Backend\Repository\obj\Debug\net8.0\refint\Repository.dll
 D:\SWP391RentEV\Backend\Repository\obj\Debug\net8.0\Repository.pdb
 D:\SWP391RentEV\Backend\Repository\obj\Debug\net8.0\Repository.genruntimeconfig.cache
 D:\SWP391RentEV\Backend\Repository\obj\Debug\net8.0\ref\Repository.dll
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\bin\Debug\net8.0\Repository.deps.json
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\bin\Debug\net8.0\Repository.runtimeconfig.json
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\bin\Debug\net8.0\Repository.dll
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\bin\Debug\net8.0\Repository.pdb
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.csproj.AssemblyReference.cache
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.GeneratedMSBuildEditorConfig.editorconfig
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.AssemblyInfoInputs.cache
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.AssemblyInfo.cs
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.csproj.CoreCompileInputs.cache
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.sourcelink.json
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.dll
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\refint\Repository.dll
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.pdb
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.genruntimeconfig.cache
+D:\Semster 5\SWP391\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\ref\Repository.dll
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\bin\Debug\net8.0\Repository.deps.json
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\bin\Debug\net8.0\Repository.runtimeconfig.json
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\bin\Debug\net8.0\Repository.dll
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\bin\Debug\net8.0\Repository.pdb
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.csproj.AssemblyReference.cache
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.AssemblyInfoInputs.cache
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.AssemblyInfo.cs
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.csproj.CoreCompileInputs.cache
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.sourcelink.json
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.dll
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\refint\Repository.dll
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.pdb
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\Repository.genruntimeconfig.cache
+C:\Users\Acer\Desktop\New folder\RentEV\Backend\Repository\obj\Debug\net8.0\ref\Repository.dll
