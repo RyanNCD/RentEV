@@ -41,3 +41,15 @@
   color: #888;
 }
 
+.btn-outline{
+  display: inline-flex;
+  align-items: center;
+  height: 42px;
+  padding: 0 16px;
+  border: 1px solid #22c55e;
+  color: #16a34a;
+  border-radius: 10px;
+  font-weight: 800;
+  text-decoration: none;
+}
+.btn-outline:hover{ background: #CCEDD2; }
