@@ -30,9 +30,15 @@ export default function Navbar({ logoSrc = "/images/logo.svg", brandText = "Gree
           <NavLink to="/pricing" className={({isActive}) => `nav__link ${isActive ? "active" : ""}`}>
             Bảng giá
           </NavLink>
+          <NavLink to="/profile" className={({isActive}) => `nav__link ${isActive ? "active" : ""}`}>
+            Hồ sơ
+          </NavLink>
         </nav>
 
         {/* RIGHT: Auth actions */}
+        
+      
+
         <div className="nav__actions">
           <Link to="/login" className="btn btn--ghost">Đăng nhập</Link>
           <Link to="/register" className="btn btn--primary">Đăng ký</Link>

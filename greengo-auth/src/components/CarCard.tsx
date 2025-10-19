@@ -1,30 +1,45 @@
+import "./carcard.css";
 
-import { Link } from "react-router-dom";
-import { HeartIcon } from "../assets/icons";
-import type { Car } from "../data/cars";
+export type Badge =
+  | { text: string; tone?: "success" | "warning" | "muted" | "info" };
 
-type Props = { car: Car; highlighted?: boolean };
+export type CarCardProps = {
+  image: string;
+  name: string;          // ví dụ: "VinFast VF 7 2024"
+  href?: string;         // nếu muốn click vào chi tiết
+  badges?: Badge[];      // các nhãn nhỏ ngay dưới ảnh
+  className?: string;
+};
 
-export default function CarCard({ car, highlighted }: Props) {
-  const vnd = new Intl.NumberFormat("vi-VN").format(car.pricePerDay);
-
+export default function CarCard({
+  image,
+  name,
+  href,
+  badges = [],
+  className = "",
+}: CarCardProps) {
+  const Tag = href ? "a" : "div";
+  const props = href ? { href } : {};
   return (
-    <article className={`car ${highlighted ? "car--highlight" : ""}`}>
-      <button className="car__wish" aria-label="Yêu thích">
-        <HeartIcon size={18} color="#16a34a" />
-      </button>
-
-      {/* ảnh lấy từ public/images */}
-      <img src={`/images/${car.image}`} alt={car.name} className="car__img" />
-
-      <h4 className="car__name">{car.name}</h4>
-
-      <div className="car__price">
-        <span>Chỉ từ</span>
-        <strong>{vnd}</strong><small> VND/ngày</small>
+    <Tag className={`car-card ${className}`} {...(props as any)}>
+      <div className="car-card__media">
+        <img src={image} alt={name} loading="lazy" />
       </div>
 
-      <Link to="/register" className="car__btn">Thuê ngay</Link>
-    </article>
+      {badges.length > 0 && (
+        <div className="car-card__badges">
+          {badges.map((b, i) => (
+            <span key={i} className={`badge ${b.tone ?? "muted"}`}>
+              {b.text}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="car-card__body">
+        <h3 className="car-card__title">{name}</h3>
+      </div>
+    </Tag>
   );
 }
+
