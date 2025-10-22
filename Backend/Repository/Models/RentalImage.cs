@@ -5,15 +5,19 @@ using System.Collections.Generic;
 
 namespace Repository.Models;
 
-public partial class Deposit
+public partial class RentalImage
 {
-    public Guid DepositId { get; set; }
+    public Guid ImageId { get; set; }
 
     public Guid RentalId { get; set; }
 
-    public decimal Amount { get; set; }
+    public string ImageUrl { get; set; }
 
-    public string Status { get; set; }
+    public string Type { get; set; }
+
+    public string Description { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
 
     public virtual Rental Rental { get; set; }
 }

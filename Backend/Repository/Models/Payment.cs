@@ -11,13 +11,19 @@ public partial class Payment
 
     public Guid RentalId { get; set; }
 
+    public Guid UserId { get; set; }
+
     public decimal Amount { get; set; }
 
-    public string Method { get; set; }
+    public DateTime? PaymentDate { get; set; }
+
+    public string PaymentMethod { get; set; }
+
+    public string Type { get; set; }
 
     public string Status { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
-
     public virtual Rental Rental { get; set; }
+
+    public virtual User User { get; set; }
 }

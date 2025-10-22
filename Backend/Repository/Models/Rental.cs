@@ -9,6 +9,8 @@ public partial class Rental
 {
     public Guid RentalId { get; set; }
 
+    public Guid ContractId { get; set; }
+
     public Guid UserId { get; set; }
 
     public Guid VehicleId { get; set; }
@@ -25,21 +27,25 @@ public partial class Rental
 
     public string PickupNote { get; set; }
 
-    public string PickupPhotoUrl { get; set; }
-
     public string ReturnNote { get; set; }
-
-    public string ReturnPhotoUrl { get; set; }
 
     public decimal? TotalCost { get; set; }
 
     public string Status { get; set; }
 
-    public virtual ICollection<Deposit> Deposits { get; set; } = new List<Deposit>();
+    public DateTime? CreatedAt { get; set; }
+
+    public virtual Contract Contract { get; set; }
+
+    public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
+
+    public virtual ICollection<IncidentReport> IncidentReports { get; set; } = new List<IncidentReport>();
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
     public virtual Station PickupStation { get; set; }
+
+    public virtual ICollection<RentalImage> RentalImages { get; set; } = new List<RentalImage>();
 
     public virtual Station ReturnStation { get; set; }
 

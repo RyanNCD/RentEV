@@ -49,11 +49,14 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+//builder.Services.AddDbContext<SWP391RentEVContext>(options =>
+//    options.UseMySql(
+//    builder.Configuration.GetConnectionString("DefaultConnection"),
+//    new MySqlServerVersion(new Version(8, 0, 36)) 
+//));
 builder.Services.AddDbContext<SWP391RentEVContext>(options =>
-    options.UseMySql(
-    builder.Configuration.GetConnectionString("DefaultConnection"),
-    new MySqlServerVersion(new Version(8, 0, 36)) 
-));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 builder.Services.AddScoped<RentalRepository>();
 builder.Services.AddScoped<IRentalService, RentalService>();
@@ -68,7 +71,10 @@ builder.Services.AddScoped< UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<VehicleRepository>();
-builder.Services.AddScoped<IVehivleService,VehicleService>();
+builder.Services.AddScoped<IVehicleService,VehicleService>();
+
+builder.Services.AddScoped<StationRepository>();
+builder.Services.AddScoped<IStationService ,StationService>();
 
 // JWT config
 var jwtKey = builder.Configuration["Jwt:Key"];

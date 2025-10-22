@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Service.Services
 {
-    public class VehicleService : IVehivleService
+    public class VehicleService : IVehicleService
     {
         private readonly VehicleRepository _vehicleRepository;
         public VehicleService(VehicleRepository vehicleRepository)

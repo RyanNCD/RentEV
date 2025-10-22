@@ -9,6 +9,7 @@
       "APIRentEV/1.0.0": {
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.JwtBearer": "8.0.10",
+          "Microsoft.EntityFrameworkCore.SqlServer": "9.0.9",
           "MySqlConnector": "2.4.0",
           "Pomelo.EntityFrameworkCore.MySql": "9.0.0",
           "Repository": "1.0.0",
@@ -773,10 +774,7 @@
           "System.IdentityModel.Tokens.Jwt": "8.14.0"
         },
         "runtime": {
-          "Repository.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
+          "Repository.dll": {}
         }
       },
       "Service/1.0.0": {
@@ -784,10 +782,7 @@
           "Repository": "1.0.0"
         },
         "runtime": {
-          "Service.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
+          "Service.dll": {}
         }
       }
     }

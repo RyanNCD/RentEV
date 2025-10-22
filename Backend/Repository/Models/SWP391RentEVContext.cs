@@ -17,11 +17,21 @@ public partial class SWP391RentEVContext : DbContext
     {
     }
 
-    public virtual DbSet<Deposit> Deposits { get; set; }
+    public virtual DbSet<Blacklist> Blacklists { get; set; }
+
+    public virtual DbSet<Contract> Contracts { get; set; }
+
+    public virtual DbSet<Feedback> Feedbacks { get; set; }
+
+    public virtual DbSet<IncidentReport> IncidentReports { get; set; }
 
     public virtual DbSet<Payment> Payments { get; set; }
 
     public virtual DbSet<Rental> Rentals { get; set; }
+
+    public virtual DbSet<RentalImage> RentalImages { get; set; }
+
+    public virtual DbSet<Reservation> Reservations { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
 
@@ -31,93 +41,262 @@ public partial class SWP391RentEVContext : DbContext
 
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
+    public virtual DbSet<VehicleInspection> VehicleInspections { get; set; }
+
+    public virtual DbSet<VehicleTransfer> VehicleTransfers { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Deposit>(entity =>
+        modelBuilder.Entity<Blacklist>(entity =>
         {
-            entity.HasKey(e => e.DepositId).HasName("PK__Deposit__AB60DF71B5D4AD66");
+            entity.HasKey(e => e.BlacklistId).HasName("PK__Blacklis__AFDBF4182C7461E8");
 
-            entity.ToTable("Deposit");
+            entity.ToTable("Blacklist");
 
-            entity.Property(e => e.DepositId).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.Amount).HasColumnType("decimal(10, 2)");
-            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.BlacklistId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Reason)
+                .IsRequired()
+                .HasMaxLength(255);
 
-            entity.HasOne(d => d.Rental).WithMany(p => p.Deposits)
+            entity.HasOne(d => d.CreatedByNavigation).WithMany(p => p.BlacklistCreatedByNavigations)
+                .HasForeignKey(d => d.CreatedBy)
+                .HasConstraintName("FK__Blacklist__Creat__3493CFA7");
+
+            entity.HasOne(d => d.User).WithMany(p => p.BlacklistUsers)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Blacklist__UserI__339FAB6E");
+        });
+
+        modelBuilder.Entity<Contract>(entity =>
+        {
+            entity.HasKey(e => e.ContractId).HasName("PK__Contract__C90D3469C4705457");
+
+            entity.ToTable("Contract");
+
+            entity.Property(e => e.ContractId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.EndDate).HasColumnType("datetime");
+            entity.Property(e => e.StartDate).HasColumnType("datetime");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Active");
+            entity.Property(e => e.Terms).HasMaxLength(1000);
+            entity.Property(e => e.TotalAmount).HasColumnType("decimal(10, 2)");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Contracts)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Contract__UserId__5EBF139D");
+
+            entity.HasOne(d => d.Vehicle).WithMany(p => p.Contracts)
+                .HasForeignKey(d => d.VehicleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Contract__Vehicl__5FB337D6");
+        });
+
+        modelBuilder.Entity<Feedback>(entity =>
+        {
+            entity.HasKey(e => e.FeedbackId).HasName("PK__Feedback__6A4BEDD6E580CFC0");
+
+            entity.ToTable("Feedback");
+
+            entity.Property(e => e.FeedbackId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Comment).HasMaxLength(500);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.Rental).WithMany(p => p.Feedbacks)
                 .HasForeignKey(d => d.RentalId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Deposit__RentalI__4E88ABD4");
+                .HasConstraintName("FK__Feedback__Rental__778AC167");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Feedbacks)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Feedback__UserId__76969D2E");
+        });
+
+        modelBuilder.Entity<IncidentReport>(entity =>
+        {
+            entity.HasKey(e => e.ReportId).HasName("PK__Incident__D5BD4805714850A8");
+
+            entity.ToTable("IncidentReport");
+
+            entity.Property(e => e.ReportId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Description)
+                .IsRequired()
+                .HasMaxLength(500);
+            entity.Property(e => e.ReportDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Open");
+
+            entity.HasOne(d => d.Rental).WithMany(p => p.IncidentReports)
+                .HasForeignKey(d => d.RentalId)
+                .HasConstraintName("FK__IncidentR__Renta__2BFE89A6");
+
+            entity.HasOne(d => d.Staff).WithMany(p => p.IncidentReportStaffs)
+                .HasForeignKey(d => d.StaffId)
+                .HasConstraintName("FK__IncidentR__Staff__2EDAF651");
+
+            entity.HasOne(d => d.User).WithMany(p => p.IncidentReportUsers)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__IncidentR__UserI__2DE6D218");
+
+            entity.HasOne(d => d.Vehicle).WithMany(p => p.IncidentReports)
+                .HasForeignKey(d => d.VehicleId)
+                .HasConstraintName("FK__IncidentR__Vehic__2CF2ADDF");
         });
 
         modelBuilder.Entity<Payment>(entity =>
         {
-            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__9B556A38FC965342");
+            entity.HasKey(e => e.PaymentId).HasName("PK__Payment__9B556A383F0D9C78");
 
             entity.ToTable("Payment");
 
             entity.Property(e => e.PaymentId).HasDefaultValueSql("(newid())");
             entity.Property(e => e.Amount).HasColumnType("decimal(10, 2)");
-            entity.Property(e => e.CreatedAt)
+            entity.Property(e => e.PaymentDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
-            entity.Property(e => e.Method).HasMaxLength(50);
-            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.PaymentMethod).HasMaxLength(50);
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Pending");
+            entity.Property(e => e.Type).HasMaxLength(50);
 
             entity.HasOne(d => d.Rental).WithMany(p => p.Payments)
                 .HasForeignKey(d => d.RentalId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Payment__RentalI__4F7CD00D");
+                .HasConstraintName("FK__Payment__RentalI__6FE99F9F");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Payments)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Payment__UserId__70DDC3D8");
         });
 
         modelBuilder.Entity<Rental>(entity =>
         {
-            entity.HasKey(e => e.RentalId).HasName("PK__Rental__970059434AA6ED73");
+            entity.HasKey(e => e.RentalId).HasName("PK__Rental__97005943384E2FF7");
 
             entity.ToTable("Rental");
 
             entity.Property(e => e.RentalId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
             entity.Property(e => e.EndTime).HasColumnType("datetime");
             entity.Property(e => e.PickupNote).HasMaxLength(255);
-            entity.Property(e => e.PickupPhotoUrl).HasMaxLength(255);
             entity.Property(e => e.ReturnNote).HasMaxLength(255);
-            entity.Property(e => e.ReturnPhotoUrl).HasMaxLength(255);
             entity.Property(e => e.StartTime).HasColumnType("datetime");
-            entity.Property(e => e.Status).HasMaxLength(50);
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Pending");
             entity.Property(e => e.TotalCost).HasColumnType("decimal(10, 2)");
+
+            entity.HasOne(d => d.Contract).WithMany(p => p.Rentals)
+                .HasForeignKey(d => d.ContractId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Rental__Contract__656C112C");
 
             entity.HasOne(d => d.PickupStation).WithMany(p => p.RentalPickupStations)
                 .HasForeignKey(d => d.PickupStationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Rental__PickupSt__5070F446");
+                .HasConstraintName("FK__Rental__PickupSt__68487DD7");
 
             entity.HasOne(d => d.ReturnStation).WithMany(p => p.RentalReturnStations)
                 .HasForeignKey(d => d.ReturnStationId)
-                .HasConstraintName("FK__Rental__ReturnSt__5165187F");
+                .HasConstraintName("FK__Rental__ReturnSt__693CA210");
 
             entity.HasOne(d => d.Staff).WithMany(p => p.RentalStaffs)
                 .HasForeignKey(d => d.StaffId)
-                .HasConstraintName("FK__Rental__StaffId__52593CB8");
+                .HasConstraintName("FK__Rental__StaffId__6A30C649");
 
             entity.HasOne(d => d.User).WithMany(p => p.RentalUsers)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Rental__UserId__534D60F1");
+                .HasConstraintName("FK__Rental__UserId__66603565");
 
             entity.HasOne(d => d.Vehicle).WithMany(p => p.Rentals)
                 .HasForeignKey(d => d.VehicleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Rental__VehicleI__6383C8BA");
+                .HasConstraintName("FK__Rental__VehicleI__6754599E");
+        });
+
+        modelBuilder.Entity<RentalImage>(entity =>
+        {
+            entity.HasKey(e => e.ImageId).HasName("PK__RentalIm__7516F70C713896C0");
+
+            entity.ToTable("RentalImage");
+
+            entity.Property(e => e.ImageId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(255);
+            entity.Property(e => e.ImageUrl)
+                .IsRequired()
+                .HasMaxLength(255);
+            entity.Property(e => e.Type)
+                .IsRequired()
+                .HasMaxLength(50);
+
+            entity.HasOne(d => d.Rental).WithMany(p => p.RentalImages)
+                .HasForeignKey(d => d.RentalId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__RentalIma__Renta__17F790F9");
+        });
+
+        modelBuilder.Entity<Reservation>(entity =>
+        {
+            entity.HasKey(e => e.ReservationId).HasName("PK__Reservat__B7EE5F2483D8858D");
+
+            entity.ToTable("Reservation");
+
+            entity.Property(e => e.ReservationId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.EndDate).HasColumnType("datetime");
+            entity.Property(e => e.ReservedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.StartDate).HasColumnType("datetime");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Pending");
+
+            entity.HasOne(d => d.Station).WithMany(p => p.Reservations)
+                .HasForeignKey(d => d.StationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Reservati__Stati__1F98B2C1");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Reservations)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Reservati__UserI__1DB06A4F");
+
+            entity.HasOne(d => d.Vehicle).WithMany(p => p.Reservations)
+                .HasForeignKey(d => d.VehicleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Reservati__Vehic__1EA48E88");
         });
 
         modelBuilder.Entity<Role>(entity =>
         {
-            entity.HasKey(e => e.RoleId).HasName("PK__Role__8AFACE1A76DBDF65");
+            entity.HasKey(e => e.RoleId).HasName("PK__Role__8AFACE1AF489698B");
 
             entity.ToTable("Role");
 
-            entity.HasIndex(e => e.RoleName, "UQ__Role__8A2B61602D65CA4A").IsUnique();
-
             entity.Property(e => e.RoleId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.RoleName)
                 .IsRequired()
                 .HasMaxLength(50);
@@ -125,7 +304,7 @@ public partial class SWP391RentEVContext : DbContext
 
         modelBuilder.Entity<Station>(entity =>
         {
-            entity.HasKey(e => e.StationId).HasName("PK__Station__E0D8A6BDB988F012");
+            entity.HasKey(e => e.StationId).HasName("PK__Station__E0D8A6BDE163D1A0");
 
             entity.ToTable("Station");
 
@@ -133,8 +312,9 @@ public partial class SWP391RentEVContext : DbContext
             entity.Property(e => e.Address)
                 .IsRequired()
                 .HasMaxLength(255);
-            entity.Property(e => e.Latitude).HasColumnType("decimal(9, 6)");
-            entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
             entity.Property(e => e.StationName)
                 .IsRequired()
                 .HasMaxLength(100);
@@ -142,11 +322,11 @@ public partial class SWP391RentEVContext : DbContext
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4CC44C381C");
+            entity.HasKey(e => e.UserId).HasName("PK__User__1788CC4CC600D509");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.Email, "UQ__User__A9D1053476B1B10E").IsUnique();
+            entity.HasIndex(e => e.Email, "UQ__User__A9D10534C6163B8C").IsUnique();
 
             entity.Property(e => e.UserId).HasDefaultValueSql("(newid())");
             entity.Property(e => e.CreatedAt)
@@ -168,29 +348,100 @@ public partial class SWP391RentEVContext : DbContext
             entity.HasOne(d => d.Role).WithMany(p => p.Users)
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__User__RoleId__5535A963");
+                .HasConstraintName("FK__User__RoleId__4F7CD00D");
         });
 
         modelBuilder.Entity<Vehicle>(entity =>
         {
-            entity.HasKey(e => e.VehicleId).HasName("PK__Vehicle__476B549238BA6CCA");
+            entity.HasKey(e => e.VehicleId).HasName("PK__Vehicle__476B54928E3106DE");
 
             entity.ToTable("Vehicle");
 
-            entity.HasIndex(e => e.LicensePlate, "UQ__Vehicle__026BC15C3389ECA9").IsUnique();
-
             entity.Property(e => e.VehicleId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Description)
+                .HasMaxLength(500)
+                .HasDefaultValueSql("(getdate())");
             entity.Property(e => e.LicensePlate).HasMaxLength(20);
             entity.Property(e => e.PricePerDay).HasColumnType("decimal(10, 2)");
-            entity.Property(e => e.Status).HasMaxLength(50);
-            entity.Property(e => e.Utilities).HasMaxLength(300);
-            entity.Property(e => e.VehicleName).HasMaxLength(50);
-            entity.Property(e => e.VehicleType).HasMaxLength(50);
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("Available");
+            entity.Property(e => e.Utilities).HasMaxLength(200);
+            entity.Property(e => e.VehicleName)
+                .IsRequired()
+                .HasMaxLength(100);
+            entity.Property(e => e.VehicleType)
+                .IsRequired()
+                .HasMaxLength(50);
 
             entity.HasOne(d => d.Station).WithMany(p => p.Vehicles)
                 .HasForeignKey(d => d.StationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Vehicle__Station__619B8048");
+                .HasConstraintName("FK__Vehicle__Station__59063A47");
+        });
+
+        modelBuilder.Entity<VehicleInspection>(entity =>
+        {
+            entity.HasKey(e => e.InspectionId).HasName("PK__VehicleI__30B2DC084984219F");
+
+            entity.ToTable("VehicleInspection");
+
+            entity.Property(e => e.InspectionId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.ConditionNote).HasMaxLength(255);
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ReportType).HasMaxLength(50);
+
+            entity.HasOne(d => d.Staff).WithMany(p => p.VehicleInspections)
+                .HasForeignKey(d => d.StaffId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__VehicleIn__Staff__2645B050");
+
+            entity.HasOne(d => d.Station).WithMany(p => p.VehicleInspections)
+                .HasForeignKey(d => d.StationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__VehicleIn__Stati__25518C17");
+
+            entity.HasOne(d => d.Vehicle).WithMany(p => p.VehicleInspections)
+                .HasForeignKey(d => d.VehicleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__VehicleIn__Vehic__245D67DE");
+        });
+
+        modelBuilder.Entity<VehicleTransfer>(entity =>
+        {
+            entity.HasKey(e => e.TransferId).HasName("PK__VehicleT__954900913BC30D2F");
+
+            entity.ToTable("VehicleTransfer");
+
+            entity.Property(e => e.TransferId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .HasDefaultValue("InTransit");
+            entity.Property(e => e.TransferDate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+
+            entity.HasOne(d => d.FromStation).WithMany(p => p.VehicleTransferFromStations)
+                .HasForeignKey(d => d.FromStationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__VehicleTr__FromS__3B40CD36");
+
+            entity.HasOne(d => d.Staff).WithMany(p => p.VehicleTransfers)
+                .HasForeignKey(d => d.StaffId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__VehicleTr__Staff__3D2915A8");
+
+            entity.HasOne(d => d.ToStation).WithMany(p => p.VehicleTransferToStations)
+                .HasForeignKey(d => d.ToStationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__VehicleTr__ToSta__3C34F16F");
+
+            entity.HasOne(d => d.Vehicle).WithMany(p => p.VehicleTransfers)
+                .HasForeignKey(d => d.VehicleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__VehicleTr__Vehic__3A4CA8FD");
         });
 
         OnModelCreatingPartial(modelBuilder);

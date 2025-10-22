@@ -3388,6 +3388,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Microsoft.AspNetCore.Authentication.JwtBearer >= 8.0.10",
+      "Microsoft.EntityFrameworkCore.SqlServer >= 9.0.9",
       "MySqlConnector >= 2.4.0",
       "Pomelo.EntityFrameworkCore.MySql >= 9.0.0",
       "Repository >= 1.0.0",
@@ -3452,6 +3453,10 @@
           "Microsoft.AspNetCore.Authentication.JwtBearer": {
             "target": "Package",
             "version": "[8.0.10, )"
+          },
+          "Microsoft.EntityFrameworkCore.SqlServer": {
+            "target": "Package",
+            "version": "[9.0.9, )"
           },
           "MySqlConnector": {
             "target": "Package",

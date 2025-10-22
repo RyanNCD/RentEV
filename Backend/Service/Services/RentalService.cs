@@ -37,9 +37,7 @@ namespace Service.Services
                 StartTime = dto.StartTime,
                 EndTime = null,                 // chưa kết thúc
                 PickupNote = dto.PickupNote,
-                PickupPhotoUrl = dto.PickupPhotoUrl,
                 ReturnNote = null,
-                ReturnPhotoUrl = null,
                 TotalCost = 0,                  // tính sau
                 Status = "Ongoing"              // trạng thái ban đầu
             };
@@ -67,9 +65,7 @@ namespace Service.Services
             rental.StartTime = dto.StartTime ?? rental.StartTime;
             rental.EndTime = dto.EndTime ?? rental.EndTime;
             rental.PickupNote = dto.PickupNote ?? rental.PickupNote;
-            rental.PickupPhotoUrl = dto.PickupPhotoUrl ?? rental.PickupPhotoUrl;
             rental.ReturnNote = dto.ReturnNote ?? rental.ReturnNote;
-            rental.ReturnPhotoUrl = dto.ReturnPhotoUrl ?? rental.ReturnPhotoUrl;
             rental.TotalCost = dto.TotalCost ?? rental.TotalCost;
             rental.Status = dto.Status ?? rental.Status;
 

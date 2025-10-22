@@ -32,9 +32,7 @@ namespace APIRentEV.Controllers
                     StartTime = (DateTime)rental.StartTime,
                     EndTime = rental.EndTime,
                     PickupNote = rental.PickupNote,
-                    PickupPhotoUrl = rental.PickupPhotoUrl,
                     ReturnNote = rental.ReturnNote,
-                    ReturnPhotoUrl = rental.ReturnPhotoUrl,
                     Status = rental.Status,
                     TotalCost = rental.TotalCost
                 };
@@ -64,9 +62,7 @@ namespace APIRentEV.Controllers
                 ReturnStationId = rental.ReturnStationId,
                 StaffId = rental.StaffId,
                 PickupNote = rental.PickupNote,
-                PickupPhotoUrl = rental.PickupPhotoUrl,
                 ReturnNote = rental.ReturnNote,
-                ReturnPhotoUrl = rental.ReturnPhotoUrl,
                 StartTime = (DateTime)rental.StartTime,
                 EndTime = rental.EndTime,
                 Status = rental.Status,
