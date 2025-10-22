@@ -25,9 +25,29 @@ public partial class User
 
     public DateTime? CreatedAt { get; set; }
 
+    public virtual ICollection<Blacklist> BlacklistCreatedByNavigations { get; set; } = new List<Blacklist>();
+
+    public virtual ICollection<Blacklist> BlacklistUsers { get; set; } = new List<Blacklist>();
+
+    public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
+
+    public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
+
+    public virtual ICollection<IncidentReport> IncidentReportStaffs { get; set; } = new List<IncidentReport>();
+
+    public virtual ICollection<IncidentReport> IncidentReportUsers { get; set; } = new List<IncidentReport>();
+
+    public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
     public virtual ICollection<Rental> RentalStaffs { get; set; } = new List<Rental>();
 
     public virtual ICollection<Rental> RentalUsers { get; set; } = new List<Rental>();
 
+    public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
+
     public virtual Role Role { get; set; }
+
+    public virtual ICollection<VehicleInspection> VehicleInspections { get; set; } = new List<VehicleInspection>();
+
+    public virtual ICollection<VehicleTransfer> VehicleTransfers { get; set; } = new List<VehicleTransfer>();
 }

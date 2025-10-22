@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Service.Interface
 {
-    public interface IVehivleService
+    public interface IVehicleService
     {
         Task<IEnumerable<Vehicle>> GetVehicleAllAsync();
         Task<Vehicle?> GetVehicleByIdAsync(Guid id);

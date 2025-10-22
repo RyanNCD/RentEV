@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Repository.Base;
 using Repository.DTO;
 using Repository.Models;
 using System;
@@ -14,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Repository.Repositories
 {
-    public class AuthenRepository : GenericRepository<User>
+    public class AuthenRepository 
     {
         private readonly SWP391RentEVContext _context;
         private readonly IConfiguration _config;
@@ -73,9 +72,9 @@ namespace Repository.Repositories
                 throw new ArgumentException("Email đã tồn tại.");
 
             // Kiểm tra role
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleId == roleId);
-            if (role == null)
-                throw new InvalidOperationException("Role không tồn tại.");
+            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Customer");
+            if (defaultRole == null)
+                throw new InvalidOperationException("Không tìm thấy role mặc định 'Customer'.");
 
             // Hash mật khẩu
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);

@@ -13,8 +13,8 @@ namespace APIRentEV.Controllers
     [ApiController]
     public class VehicleController : ControllerBase
     {
-        private readonly IVehivleService _vehivleService;
-        public VehicleController(IVehivleService vehivleService)
+        private readonly IVehicleService _vehivleService;
+        public VehicleController(IVehicleService vehivleService)
         {
             _vehivleService = vehivleService;
         }
@@ -26,7 +26,7 @@ namespace APIRentEV.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<VehicleDto>> GetVehicleVyId(Guid id)
+        public async Task<ActionResult<VehicleDto>> GetVehicleById(Guid id)
         {
             var vehicle = await _vehivleService.GetVehicleByIdAsync(id);
             if (vehicle == null) return NotFound();
@@ -50,9 +50,9 @@ namespace APIRentEV.Controllers
         [HttpPost]
         public async Task<ActionResult<VehicleDto>> CreateVehicle(VehicleCreateDto dto)
         {
-            var user = dto.ToEntity();
-            var created = await _vehivleService.CreateVehicleAsync(user);
-            return CreatedAtAction(nameof(GetVehicleVyId), new { id = created.VehicleId }, created.ToDto());
+            var vehicle = dto.ToEntity();
+            var created = await _vehivleService.CreateVehicleAsync(vehicle);
+            return CreatedAtAction(nameof(GetVehicleById), new { id = created.VehicleId }, created.ToDto());
         }
 
         [HttpPut("{id}")]
