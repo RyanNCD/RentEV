@@ -1,4 +1,5 @@
-﻿using Repository.Models;
+﻿using Repository.DTO;
+using Repository.Models;
 using Repository.Repositories;
 using Service.Interface;
 using System;
@@ -23,9 +24,10 @@ namespace Service.Services
             return await _authenRepository.LoginAsync(email, password);
         }
 
-        public Task<User> RegisterAsync(string fullName, string email, string password, Guid roleId, string phoneNumber, string identityCard, string driverLicense)
+        public Task<User> RegisterAsync(UserRegisterDto model)
         {
-           return _authenRepository.RegisterAsync(fullName, email, password, roleId, phoneNumber, identityCard, driverLicense);
+            return _authenRepository.RegisterAsync(model.FullName, model.Email, model.Password, model.Phone, model.IdentityCard, model.DriverLicense);
         }
+
     }
 }

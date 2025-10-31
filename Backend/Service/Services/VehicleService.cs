@@ -22,6 +22,7 @@ namespace Service.Services
         public async Task<Vehicle> CreateVehicleAsync(Vehicle vehicle)
         {
             vehicle.VehicleId = Guid.NewGuid();
+            vehicle.NumberOfRenters = 0;
             await _vehicleRepository.AddVehicelAsync(vehicle);
             return vehicle;
         }
@@ -70,5 +71,25 @@ namespace Service.Services
             // Cập nhật DB
             await _vehicleRepository.UpdateAsync(existingVehicle);
         }
+
+        public async Task<List<VehicleDto>> SearchVehiclesAsync(string keyword)
+        {
+            return await _vehicleRepository.SearchVehiclesAsync(keyword);
+        }
+
+        public async Task<List<VehicleDto>> FilterVehiclesAsync(Guid? stationId, string status, int? seatingCapacity)
+        {
+            return await _vehicleRepository.FilterVehiclesAsync(stationId, status, seatingCapacity);
+        }
+
+        public async Task<List<VehicleDto>> SortVehiclesAsync(string sortBy, bool isDescending)
+        {
+            return await _vehicleRepository.SortVehiclesAsync(sortBy, isDescending);
+        }
+        public async Task<List<Vehicle>> GetFeaturedVehiclesAsync(int topCount = 5)
+        {
+            return await _vehicleRepository.GetFeaturedVehiclesAsync(topCount);
+        }
+
     }
 }

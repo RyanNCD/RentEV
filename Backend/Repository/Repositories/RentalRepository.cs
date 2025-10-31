@@ -17,9 +17,15 @@ namespace Repository.Implementations
             _context = context;
         }
 
+        public async Task<IEnumerable<Rental>> GetAllAsync()
+        {
+            return await _context.Rentals.ToListAsync();
+        }
+
         public async Task<Rental> AddAsync(Rental rental)
         {
             await _context.Rentals.AddAsync(rental);
+            await _context.SaveChangesAsync();
             return rental;
         }
 
@@ -42,5 +48,19 @@ namespace Repository.Implementations
         {
             await _context.SaveChangesAsync();
         }
+
+        public async Task<bool> CancelRentalAsync(Guid rentalId)
+        {
+            var rental = await _context.Rentals.FindAsync(rentalId);
+            if (rental == null) return false;
+
+            rental.Status = "Cancelled";
+            rental.CreatedAt = DateTime.UtcNow;
+
+            _context.Rentals.Update(rental);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
     }
 }   

@@ -60,33 +60,28 @@ namespace Repository.Repositories
             return tokenHandler.WriteToken(token);
         }
 
-        public async Task<User> RegisterAsync(string fullName, string email, string password, Guid roleId, string phoneNumber, string identityCard, string driverLicense)
+        public async Task<User> RegisterAsync(string fullName, string email, string password, string phoneNumber, string identityCard, string driverLicense)
         {
-            // Normalize email
             email = email.Trim().ToLower();
 
-            // Kiểm tra email trùng
-            var existingUser = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email);
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (existingUser != null)
                 throw new ArgumentException("Email đã tồn tại.");
 
-            // Kiểm tra role
+            // Lấy role mặc định 'Customer'
             var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Customer");
             if (defaultRole == null)
                 throw new InvalidOperationException("Không tìm thấy role mặc định 'Customer'.");
 
-            // Hash mật khẩu
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
-            // Tạo user
             var user = new User
             {
                 UserId = Guid.NewGuid(),
                 FullName = fullName,
                 Email = email,
                 PasswordHash = passwordHash,
-                RoleId = roleId,
+                RoleId = defaultRole.RoleId, // Gán role mặc định
                 Phone = phoneNumber,
                 DriverLicense = driverLicense,
                 IdentityCard = identityCard,
@@ -98,6 +93,7 @@ namespace Repository.Repositories
 
             return user;
         }
+
 
     }
 }

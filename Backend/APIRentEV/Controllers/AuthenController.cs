@@ -32,20 +32,7 @@ namespace APIRentEV.Controllers
         {
             try
             {
-                var user = await _authenService.RegisterAsync(
-                    model.FullName,
-                    model.Email,
-                    model.Password,
-                    model.RoleId,
-                    model.Phone,
-                    model.IdentityCard,
-                    model.DriverLicense
-                );
-
-                if (user == null)
-                {
-                    return Conflict(new { message = "Email đã tồn tại." });
-                }
+                var user = await _authenService.RegisterAsync(model);
 
                 return Ok(new
                 {
@@ -55,12 +42,16 @@ namespace APIRentEV.Controllers
                         user.UserId,
                         user.FullName,
                         user.Email,
-                        user.RoleId,
                         user.Phone,
+                        user.IdentityCard,
                         user.DriverLicense,
-                        user.IdentityCard
+                        user.RoleId
                     }
                 });
+            }
+            catch (ArgumentException ex)
+            {
+                return Conflict(new { message = ex.Message });
             }
             catch (InvalidOperationException ex)
             {
@@ -71,6 +62,5 @@ namespace APIRentEV.Controllers
                 return StatusCode(500, new { message = "Lỗi hệ thống", detail = ex.Message });
             }
         }
-
     }
 }

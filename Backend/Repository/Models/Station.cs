@@ -25,11 +25,5 @@ public partial class Station
 
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
-    public virtual ICollection<VehicleInspection> VehicleInspections { get; set; } = new List<VehicleInspection>();
-
-    public virtual ICollection<VehicleTransfer> VehicleTransferFromStations { get; set; } = new List<VehicleTransfer>();
-
-    public virtual ICollection<VehicleTransfer> VehicleTransferToStations { get; set; } = new List<VehicleTransfer>();
-
     public virtual ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
 }

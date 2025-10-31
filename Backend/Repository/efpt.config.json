@@ -61,14 +61,6 @@
       {
          "Name": "[dbo].[Vehicle]",
          "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[VehicleInspection]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[VehicleTransfer]",
-         "ObjectType": 0
       }
    ],
    "UiHint": null,

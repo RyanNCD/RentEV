@@ -19,5 +19,7 @@ public partial class RentalImage
 
     public DateTime? CreatedAt { get; set; }
 
+    public string Note { get; set; }
+
     public virtual Rental Rental { get; set; }
 }

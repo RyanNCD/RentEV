@@ -41,10 +41,6 @@ public partial class SWP391RentEVContext : DbContext
 
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
-    public virtual DbSet<VehicleInspection> VehicleInspections { get; set; }
-
-    public virtual DbSet<VehicleTransfer> VehicleTransfers { get; set; }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Blacklist>(entity =>
@@ -87,7 +83,7 @@ public partial class SWP391RentEVContext : DbContext
                 .HasMaxLength(50)
                 .HasDefaultValue("Active");
             entity.Property(e => e.Terms).HasMaxLength(1000);
-            entity.Property(e => e.TotalAmount).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.TotalAmount).HasColumnType("decimal(20, 2)");
 
             entity.HasOne(d => d.User).WithMany(p => p.Contracts)
                 .HasForeignKey(d => d.UserId)
@@ -164,7 +160,7 @@ public partial class SWP391RentEVContext : DbContext
             entity.ToTable("Payment");
 
             entity.Property(e => e.PaymentId).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.Amount).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.Amount).HasColumnType("decimal(20, 2)");
             entity.Property(e => e.PaymentDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
@@ -196,18 +192,16 @@ public partial class SWP391RentEVContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.EndTime).HasColumnType("datetime");
-            entity.Property(e => e.PickupNote).HasMaxLength(255);
-            entity.Property(e => e.ReturnNote).HasMaxLength(255);
             entity.Property(e => e.StartTime).HasColumnType("datetime");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValue("Pending");
-            entity.Property(e => e.TotalCost).HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.TotalCost).HasColumnType("decimal(20, 2)");
 
             entity.HasOne(d => d.Contract).WithMany(p => p.Rentals)
                 .HasForeignKey(d => d.ContractId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__Rental__Contract__656C112C");
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_Rental_Contract");
 
             entity.HasOne(d => d.PickupStation).WithMany(p => p.RentalPickupStations)
                 .HasForeignKey(d => d.PickupStationId)
@@ -247,6 +241,7 @@ public partial class SWP391RentEVContext : DbContext
             entity.Property(e => e.ImageUrl)
                 .IsRequired()
                 .HasMaxLength(255);
+            entity.Property(e => e.Note).HasMaxLength(255);
             entity.Property(e => e.Type)
                 .IsRequired()
                 .HasMaxLength(50);
@@ -378,70 +373,6 @@ public partial class SWP391RentEVContext : DbContext
                 .HasForeignKey(d => d.StationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Vehicle__Station__59063A47");
-        });
-
-        modelBuilder.Entity<VehicleInspection>(entity =>
-        {
-            entity.HasKey(e => e.InspectionId).HasName("PK__VehicleI__30B2DC084984219F");
-
-            entity.ToTable("VehicleInspection");
-
-            entity.Property(e => e.InspectionId).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.ConditionNote).HasMaxLength(255);
-            entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-            entity.Property(e => e.ReportType).HasMaxLength(50);
-
-            entity.HasOne(d => d.Staff).WithMany(p => p.VehicleInspections)
-                .HasForeignKey(d => d.StaffId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__VehicleIn__Staff__2645B050");
-
-            entity.HasOne(d => d.Station).WithMany(p => p.VehicleInspections)
-                .HasForeignKey(d => d.StationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__VehicleIn__Stati__25518C17");
-
-            entity.HasOne(d => d.Vehicle).WithMany(p => p.VehicleInspections)
-                .HasForeignKey(d => d.VehicleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__VehicleIn__Vehic__245D67DE");
-        });
-
-        modelBuilder.Entity<VehicleTransfer>(entity =>
-        {
-            entity.HasKey(e => e.TransferId).HasName("PK__VehicleT__954900913BC30D2F");
-
-            entity.ToTable("VehicleTransfer");
-
-            entity.Property(e => e.TransferId).HasDefaultValueSql("(newid())");
-            entity.Property(e => e.Status)
-                .HasMaxLength(50)
-                .HasDefaultValue("InTransit");
-            entity.Property(e => e.TransferDate)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
-
-            entity.HasOne(d => d.FromStation).WithMany(p => p.VehicleTransferFromStations)
-                .HasForeignKey(d => d.FromStationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__VehicleTr__FromS__3B40CD36");
-
-            entity.HasOne(d => d.Staff).WithMany(p => p.VehicleTransfers)
-                .HasForeignKey(d => d.StaffId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__VehicleTr__Staff__3D2915A8");
-
-            entity.HasOne(d => d.ToStation).WithMany(p => p.VehicleTransferToStations)
-                .HasForeignKey(d => d.ToStationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__VehicleTr__ToSta__3C34F16F");
-
-            entity.HasOne(d => d.Vehicle).WithMany(p => p.VehicleTransfers)
-                .HasForeignKey(d => d.VehicleId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK__VehicleTr__Vehic__3A4CA8FD");
         });
 
         OnModelCreatingPartial(modelBuilder);

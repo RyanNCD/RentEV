@@ -18,16 +18,18 @@ namespace Repository.DTO
 
         public int? BatteryCapacity { get; set; }
 
+        public string LicensePlate { get; set; }
+
         public string Status { get; set; }
 
         public decimal? PricePerDay { get; set; }
-
-        public string LicensePlate { get; set; }
 
         public string Description { get; set; }
 
         public int? SeatingCapacity { get; set; }
 
         public string Utilities { get; set; }
+
+        public int? NumberOfRenters { get; set; }
     }
 }

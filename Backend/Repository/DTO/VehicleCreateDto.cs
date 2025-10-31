@@ -26,5 +26,7 @@ namespace Repository.DTO
         public int? SeatingCapacity { get; set; }
 
         public string Utilities { get; set; }
+
+        public int? NumberOfRenters { get; set; }
     }
 }

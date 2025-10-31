@@ -29,6 +29,8 @@ public partial class Vehicle
 
     public string Utilities { get; set; }
 
+    public int NumberOfRenters { get; set; }
+
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
 
     public virtual ICollection<IncidentReport> IncidentReports { get; set; } = new List<IncidentReport>();
@@ -38,8 +40,4 @@ public partial class Vehicle
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
     public virtual Station Station { get; set; }
-
-    public virtual ICollection<VehicleInspection> VehicleInspections { get; set; } = new List<VehicleInspection>();
-
-    public virtual ICollection<VehicleTransfer> VehicleTransfers { get; set; } = new List<VehicleTransfer>();
 }

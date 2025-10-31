@@ -12,10 +12,10 @@ namespace Repository.Implementations
             _context = context;
         }
 
-            public async Task<IEnumerable<User>> GetAllAsync()
-            {
-                return await _context.Users.ToListAsync();
-            }
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            return await _context.Users.ToListAsync();
+        }
 
         public async Task<User?> GetByIdAsync(Guid id)
         {

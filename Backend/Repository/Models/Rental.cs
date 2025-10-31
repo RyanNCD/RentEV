@@ -9,7 +9,7 @@ public partial class Rental
 {
     public Guid RentalId { get; set; }
 
-    public Guid ContractId { get; set; }
+    public Guid? ContractId { get; set; }
 
     public Guid UserId { get; set; }
 
@@ -24,10 +24,6 @@ public partial class Rental
     public DateTime? StartTime { get; set; }
 
     public DateTime? EndTime { get; set; }
-
-    public string PickupNote { get; set; }
-
-    public string ReturnNote { get; set; }
 
     public decimal? TotalCost { get; set; }
 

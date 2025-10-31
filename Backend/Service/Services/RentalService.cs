@@ -1,6 +1,7 @@
 ﻿using Repository.DTO;
 using Repository.Implementations;
 using Repository.Models;
+using Repository.Repositories;
 using Service.Interface;
 using System;
 using System.Collections.Generic;
@@ -13,63 +14,62 @@ namespace Service.Services
     public class RentalService : IRentalService
     {
         private readonly RentalRepository _rentalRepo;
+        private readonly VehicleRepository _vehicleRepo;
      
 
-        public RentalService(RentalRepository rentalRepo)
+        public RentalService(RentalRepository rentalRepo, VehicleRepository vehicleRepo)
         {
             _rentalRepo = rentalRepo;
-            
+            _vehicleRepo = vehicleRepo;
         }
 
-        public async Task<Rental> CreateRentalAsync(RentalCreateDto dto)
+        public async Task<IEnumerable<Rental>> GetAllRentalAsync()
         {
+            return await _rentalRepo.GetAllAsync();
+        }
+        public async Task<Rental> CreateRentalAsync(Rental rental)
+        {
+            rental.RentalId = Guid.NewGuid();
+            rental.CreatedAt = DateTime.UtcNow;
 
-
-            // Tạo rental mới theo DB
-            var rental = new Rental
-            {
-                RentalId = Guid.NewGuid(),
-                UserId = dto.UserId,
-                VehicleId = dto.VehicleId,
-                PickupStationId = dto.PickupStationId,
-                ReturnStationId = dto.ReturnStationId,
-                StaffId = dto.UserId,
-                StartTime = dto.StartTime,
-                EndTime = null,                 // chưa kết thúc
-                PickupNote = dto.PickupNote,
-                ReturnNote = null,
-                TotalCost = 0,                  // tính sau
-                Status = "Ongoing"              // trạng thái ban đầu
-            };
-
-            // Cập nhật xe
-            
-
-            // Lưu
             await _rentalRepo.AddAsync(rental);
-            await _rentalRepo.SaveChangesAsync();
-           
+
+            // Cập nhật số người đã thuê xe
+            var vehicle = await _vehicleRepo.GetVehicleByIdAsync(rental.VehicleId);
+            if (vehicle != null)
+            {
+                vehicle.NumberOfRenters += 1;
+                await _vehicleRepo.UpdateAsync(vehicle);
+            }
 
             return rental;
         }
-        public async Task<Rental?> UpdateRentalAsync(RentalUpdateDto dto)
+
+
+        public async Task<Rental?> UpdateRentalAsync(Guid id, Rental rental)
         {
-            var rental = await _rentalRepo.GetByIdAsync(dto.RentalId);
-            if (rental == null) return null;
+            if (rental == null)
+                throw new ArgumentNullException(nameof(rental));
 
-            rental.UserId = dto.UserId ?? rental.UserId;
-            rental.VehicleId = dto.VehicleId ?? rental.VehicleId;
-            rental.PickupStationId = dto.PickupStationId ?? rental.PickupStationId;
-            rental.ReturnStationId = dto.ReturnStationId ?? rental.ReturnStationId;
-            rental.StaffId = dto.StaffId ?? rental.StaffId;
-            rental.StartTime = dto.StartTime ?? rental.StartTime;
-            rental.EndTime = dto.EndTime ?? rental.EndTime;
-            rental.PickupNote = dto.PickupNote ?? rental.PickupNote;
-            rental.ReturnNote = dto.ReturnNote ?? rental.ReturnNote;
-            rental.TotalCost = dto.TotalCost ?? rental.TotalCost;
-            rental.Status = dto.Status ?? rental.Status;
+            // Lấy dữ liệu hiện có trong DB
+            var existingRental = await _rentalRepo.GetByIdAsync(id);
+            if (existingRental == null)
+                throw new KeyNotFoundException($"Rental with ID {id} not found");
 
-            return await _rentalRepo.UpdateAsync(rental);
+            // Cập nhật các trường cho phép sửa
+            existingRental.ContractId = rental.ContractId;
+            existingRental.UserId = rental.UserId;
+            existingRental.VehicleId = rental.VehicleId;
+            existingRental.PickupStationId = rental.PickupStationId;
+            existingRental.ReturnStationId = rental.ReturnStationId;
+            existingRental.StaffId = rental.StaffId;
+            existingRental.StartTime = rental.StartTime;
+            existingRental.EndTime = rental.EndTime;
+            existingRental.TotalCost = rental.TotalCost;
+            existingRental.Status = rental.Status;
+
+            await _rentalRepo.UpdateAsync(existingRental);
+            return existingRental;
         }
 
 
@@ -78,5 +78,32 @@ namespace Service.Services
         {
             return await _rentalRepo.GetByIdAsync(id);
         }
+
+        public async Task<bool> CancelRentalAsync(Guid rentalId)
+        {
+            var rental = await _rentalRepo.GetByIdAsync(rentalId);
+            if (rental == null)
+                throw new KeyNotFoundException($"Rental with ID {rentalId} not found.");
+
+            if (rental.Status == "Cancelled")
+                throw new InvalidOperationException("This rental has already been cancelled.");
+
+            // Cập nhật trạng thái thuê
+            var result = await _rentalRepo.CancelRentalAsync(rentalId);
+
+            // Cập nhật lại trạng thái xe (nếu xe đang bị giữ)
+            if (result)
+            {
+                var vehicle = await _vehicleRepo.GetVehicleByIdAsync(rental.VehicleId);
+                if (vehicle != null)
+                {
+                    vehicle.Status = "Available";
+                    await _vehicleRepo.UpdateAsync(vehicle);
+                }
+            }
+
+            return result;
+        }
+
     }
 }

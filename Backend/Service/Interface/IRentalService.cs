@@ -10,8 +10,11 @@ namespace Service.Interface
 {
     public interface IRentalService
     {
-        Task<Rental> CreateRentalAsync(RentalCreateDto dto);
+        Task<IEnumerable<Rental>> GetAllRentalAsync();
+        Task<Rental> CreateRentalAsync(Rental rental);
         Task<Rental?> GetRentalByIdAsync(Guid id);
-        Task<Rental?> UpdateRentalAsync(RentalUpdateDto dto);
+        Task<Rental?> UpdateRentalAsync(Guid id , Rental rental);
+        Task<bool> CancelRentalAsync(Guid rentalId);
+
     }
 }

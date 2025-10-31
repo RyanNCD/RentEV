@@ -8,6 +8,8 @@ namespace Repository.DTO
 {
     public class RentalCreateDto
     {
+        public Guid ContractId { get; set; }
+
         public Guid UserId { get; set; }
 
         public Guid VehicleId { get; set; }
@@ -21,14 +23,6 @@ namespace Repository.DTO
         public DateTime? StartTime { get; set; }
 
         public DateTime? EndTime { get; set; }
-
-        public string PickupNote { get; set; }
-
-        public string PickupPhotoUrl { get; set; }
-
-        public string ReturnNote { get; set; }
-
-        public string ReturnPhotoUrl { get; set; }
 
         public decimal? TotalCost { get; set; }
 

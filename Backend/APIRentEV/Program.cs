@@ -10,6 +10,8 @@ using Service.Services;
 using Services;
 using System.Text;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Service.Configs;
+using APIRentEV.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,9 +63,6 @@ builder.Services.AddDbContext<SWP391RentEVContext>(options =>
 builder.Services.AddScoped<RentalRepository>();
 builder.Services.AddScoped<IRentalService, RentalService>();
 
-builder.Services.AddScoped<RentalRepository>();
-builder.Services.AddScoped<IRentalService, RentalService>();
-
 builder.Services.AddScoped<AuthenRepository>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
 
@@ -75,6 +74,18 @@ builder.Services.AddScoped<IVehicleService,VehicleService>();
 
 builder.Services.AddScoped<StationRepository>();
 builder.Services.AddScoped<IStationService ,StationService>();
+
+builder.Services.AddScoped<ContractRepository>();
+builder.Services.AddScoped<IContractService ,ContractService>();
+
+builder.Services.AddScoped<FeedbackRepository>();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+
+builder.Services.Configure<VnPayConfig>(builder.Configuration.GetSection("VnPay"));
+builder.Services.AddScoped<PaymentRepository>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // JWT config
 var jwtKey = builder.Configuration["Jwt:Key"];

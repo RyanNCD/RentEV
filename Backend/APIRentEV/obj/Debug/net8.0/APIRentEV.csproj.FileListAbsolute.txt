@@ -506,3 +506,7 @@ C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\obj\Debug\net8.0\scopedcss\bundle
 C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\obj\Debug\net8.0\APIRentEV.csproj.CopyComplete
 C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\obj\Debug\net8.0\APIRentEV.genruntimeconfig.cache
 C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\obj\Debug\net8.0\ref\APIRentEV.dll
+C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\bin\Debug\net8.0\Microsoft.AspNetCore.WebUtilities.dll
+C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\bin\Debug\net8.0\Microsoft.Net.Http.Headers.dll
+C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\bin\Debug\net8.0\AutoMapper.dll
+C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll

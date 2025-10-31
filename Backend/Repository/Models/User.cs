@@ -46,8 +46,4 @@ public partial class User
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
     public virtual Role Role { get; set; }
-
-    public virtual ICollection<VehicleInspection> VehicleInspections { get; set; } = new List<VehicleInspection>();
-
-    public virtual ICollection<VehicleTransfer> VehicleTransfers { get; set; } = new List<VehicleTransfer>();
 }
