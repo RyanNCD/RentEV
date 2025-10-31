@@ -47,15 +47,15 @@ namespace APIRentEV.Mapper
             // ===============================
             // 📜 CONTRACT
             // ===============================
-            //CreateMap<Contract, ContractDto>().ReverseMap();
+            CreateMap<Contract, ContractDto>().ReverseMap();
 
-            //CreateMap<ContractCreateDto, Contract>()
-            //    .ForMember(dest => dest.ContractId, opt => opt.MapFrom(src => Guid.NewGuid()))
-            //    .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt ?? DateTime.UtcNow))
-            //    .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status ?? "Pending"));
+            CreateMap<ContractCreateDto, Contract>()
+                .ForMember(dest => dest.ContractId, opt => opt.MapFrom(src => Guid.NewGuid()))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt ?? DateTime.UtcNow))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status ?? "Pending"));
 
-            //CreateMap<ContractUpdateDto, Contract>()
-            //    .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<ContractUpdateDto, Contract>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
             // ===============================
             // 🚘 RENTAL
