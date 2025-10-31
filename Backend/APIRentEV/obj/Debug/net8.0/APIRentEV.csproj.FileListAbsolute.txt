@@ -510,3 +510,8 @@ C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\bin\Debug\net8.0\Microsoft.AspNet
 C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\bin\Debug\net8.0\Microsoft.Net.Http.Headers.dll
 C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\bin\Debug\net8.0\AutoMapper.dll
 C:\Users\Acer\Desktop\RentEV\Backend\APIRentEV\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\AutoMapper.dll
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\Microsoft.AspNetCore.WebUtilities.dll
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\bin\Debug\net8.0\Microsoft.Net.Http.Headers.dll
+D:\Semster 5\SWP391\New folder\RentEV\Backend\APIRentEV\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
