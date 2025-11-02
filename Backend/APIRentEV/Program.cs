@@ -17,6 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
 builder.Services.AddEndpointsApiExplorer();
 
 // Swagger + JWT Auth
@@ -54,6 +56,7 @@ builder.Services.AddSwaggerGen(c =>
 builder.Services.AddDbContext<SWP391RentEVContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    Console.WriteLine("==> Connection string thực tế: " + connectionString);
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
 
