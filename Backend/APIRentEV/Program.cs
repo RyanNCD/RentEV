@@ -52,10 +52,11 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddDbContext<SWP391RentEVContext>(options =>
-    options.UseMySql(
-        builder.Configuration.GetConnectionString("DefaultConnection"),
-        new MySqlServerVersion(new Version(8, 0, 36))
-    ));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+});
+
 
 
 
