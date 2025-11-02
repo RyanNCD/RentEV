@@ -51,11 +51,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-//builder.Services.AddDbContext<SWP391RentEVContext>(options =>
-//    options.UseMySql(
-//    builder.Configuration.GetConnectionString("DefaultConnection"),
-//    new MySqlServerVersion(new Version(8, 0, 36)) 
-//));
 builder.Services.AddDbContext<SWP391RentEVContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -107,6 +102,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowOrigins")
+    .Get<string[]>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -120,6 +130,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors("AllowSpecificOrigins");
 
 app.MapControllers();
 

@@ -21,6 +21,10 @@ namespace Services
         {
             return await _userRepository.GetByIdAsync(id);
         }
+        public async Task<List<User>> GetStaffStationUsersAsync()
+        {
+            return await _userRepository.GetUsersByRoleNameAsync("StaffStation");
+        }
 
         public async Task<User> CreateUserAsync(User user)
         {
@@ -53,6 +57,21 @@ namespace Services
             if (existing == null) return false;
 
             await _userRepository.DeleteAsync(id);
+            return true;
+        }
+
+        public async Task<bool> DeleteStaffStationUserAsync(Guid userId)
+        {
+            var user = await _userRepository.GetUseRoleByIdAsync(userId);
+            if (user == null) return false;
+
+            // Nếu User có RoleName trực tiếp
+            if (user.Role.RoleName != "StaffStation") return false;
+
+            // Nếu User liên kết bảng Role
+            // if (user.Role?.RoleName != "StaffStation") return false;
+
+            await _userRepository.DeleteUserAsync(user);
             return true;
         }
     }

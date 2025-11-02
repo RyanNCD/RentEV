@@ -23,6 +23,19 @@ namespace Repository.Implementations
                                  .Include(u => u.Role)
                                  .FirstOrDefaultAsync(u => u.UserId == id);
         }
+        public async Task<User?> GetUseRoleByIdAsync(Guid userId)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+        }
+        public async Task<List<User>> GetUsersByRoleNameAsync(string roleName)
+        {
+            return await _context.Users
+                .Include(u => u.Role)
+                .Where(u => u.Role.RoleName == roleName)
+                .ToListAsync();
+        }
 
         public async Task AddAsync(User user)
         {
@@ -44,6 +57,11 @@ namespace Repository.Implementations
                 _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
             }
+        }
+        public async Task DeleteUserAsync(User user)
+        {
+            _context.Users.Remove(user);
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -39,6 +39,14 @@ namespace Api.Controllers
             return Ok(_mapper.Map<UserDto>(user));
         }
 
+        [HttpGet("staffstation")]
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetStaffStationUsers()
+        {
+            var users = await _userService.GetStaffStationUsersAsync();
+            var dtos = _mapper.Map<List<UserDto>>(users);
+            return Ok(dtos);
+        }
+
         // POST: api/Users
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserCreateDto dto)
@@ -71,6 +79,16 @@ namespace Api.Controllers
         {
             var success = await _userService.DeleteUserAsync(id);
             if (!success) return NotFound();
+            return NoContent();
+        }
+
+        [HttpDelete("staffstation/{userId}")]
+        public async Task<IActionResult> DeleteStaffStationUser(Guid userId)
+        {
+            var result = await _userService.DeleteStaffStationUserAsync(userId);
+            if (!result)
+                return NotFound();
+
             return NoContent();
         }
     }
