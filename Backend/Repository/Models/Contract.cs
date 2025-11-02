@@ -2,12 +2,14 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Repository.Models;
 
 public partial class Contract
 {
-    public Guid ContractId { get; set; }
+    [Key]
+    public Guid ContractId { get; set; } = Guid.NewGuid();
 
     public Guid UserId { get; set; }
 

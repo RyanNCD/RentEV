@@ -2,12 +2,14 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Repository.Models;
 
 public partial class IncidentReport
 {
-    public Guid ReportId { get; set; }
+    [Key]
+    public Guid ReportId { get; set; } = Guid.NewGuid();
 
     public Guid? RentalId { get; set; }
 

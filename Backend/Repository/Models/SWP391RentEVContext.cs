@@ -49,9 +49,9 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.ToTable("Blacklist");
 
-            entity.Property(e => e.BlacklistId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.BlacklistId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.Reason)
                 .IsRequired()
@@ -73,9 +73,9 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.ToTable("Contract");
 
-            entity.Property(e => e.ContractId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.ContractId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.EndDate).HasColumnType("datetime");
             entity.Property(e => e.StartDate).HasColumnType("datetime");
@@ -102,10 +102,10 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.ToTable("Feedback");
 
-            entity.Property(e => e.FeedbackId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.FeedbackId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.Comment).HasMaxLength(500);
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
 
             entity.HasOne(d => d.Rental).WithMany(p => p.Feedbacks)
@@ -125,12 +125,12 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.ToTable("IncidentReport");
 
-            entity.Property(e => e.ReportId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.ReportId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.Description)
                 .IsRequired()
                 .HasMaxLength(500);
             entity.Property(e => e.ReportDate)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
@@ -159,10 +159,10 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.ToTable("Payment");
 
-            entity.Property(e => e.PaymentId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.PaymentId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.Amount).HasColumnType("decimal(20, 2)");
             entity.Property(e => e.PaymentDate)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.PaymentMethod).HasMaxLength(50);
             entity.Property(e => e.Status)
@@ -187,9 +187,9 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.ToTable("Rental");
 
-            entity.Property(e => e.RentalId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.RentalId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.EndTime).HasColumnType("datetime");
             entity.Property(e => e.StartTime).HasColumnType("datetime");
@@ -233,9 +233,9 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.ToTable("RentalImage");
 
-            entity.Property(e => e.ImageId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.ImageId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.ImageUrl)
@@ -258,10 +258,10 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.ToTable("Reservation");
 
-            entity.Property(e => e.ReservationId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.ReservationId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.EndDate).HasColumnType("datetime");
             entity.Property(e => e.ReservedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.StartDate).HasColumnType("datetime");
             entity.Property(e => e.Status)
@@ -290,7 +290,7 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.ToTable("Role");
 
-            entity.Property(e => e.RoleId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.RoleId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.RoleName)
                 .IsRequired()
@@ -303,12 +303,12 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.ToTable("Station");
 
-            entity.Property(e => e.StationId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.StationId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.Address)
                 .IsRequired()
                 .HasMaxLength(255);
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.StationName)
                 .IsRequired()
@@ -323,9 +323,9 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.HasIndex(e => e.Email, "UQ__User__A9D10534C6163B8C").IsUnique();
 
-            entity.Property(e => e.UserId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.UserId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.CreatedAt)
-                .HasDefaultValueSql("(getdate())")
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
                 .HasColumnType("datetime");
             entity.Property(e => e.DriverLicense).HasMaxLength(50);
             entity.Property(e => e.Email)
@@ -352,10 +352,9 @@ public partial class SWP391RentEVContext : DbContext
 
             entity.ToTable("Vehicle");
 
-            entity.Property(e => e.VehicleId).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.VehicleId).HasDefaultValueSql("(UUID())");
             entity.Property(e => e.Description)
-                .HasMaxLength(500)
-                .HasDefaultValueSql("(getdate())");
+                .HasMaxLength(500);
             entity.Property(e => e.LicensePlate).HasMaxLength(20);
             entity.Property(e => e.PricePerDay).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.Status)
