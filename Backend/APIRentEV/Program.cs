@@ -17,9 +17,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+
+// --- CORS: cho FE localhost:5173 truy cập ---
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFE", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // FE dev server
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 // Swagger + JWT Auth
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "RentEV API", Version = "v1" });
@@ -51,32 +63,28 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-//builder.Services.AddDbContext<SWP391RentEVContext>(options =>
-//    options.UseMySql(
-//    builder.Configuration.GetConnectionString("DefaultConnection"),
-//    new MySqlServerVersion(new Version(8, 0, 36)) 
-//));
+// DbContext
 builder.Services.AddDbContext<SWP391RentEVContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
+// --- Scoped services (Repository + Service) ---
 builder.Services.AddScoped<RentalRepository>();
 builder.Services.AddScoped<IRentalService, RentalService>();
 
 builder.Services.AddScoped<AuthenRepository>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
 
-builder.Services.AddScoped< UserRepository>();
+builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<VehicleRepository>();
-builder.Services.AddScoped<IVehicleService,VehicleService>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
 
 builder.Services.AddScoped<StationRepository>();
-builder.Services.AddScoped<IStationService ,StationService>();
+builder.Services.AddScoped<IStationService, StationService>();
 
 builder.Services.AddScoped<ContractRepository>();
-builder.Services.AddScoped<IContractService ,ContractService>();
+builder.Services.AddScoped<IContractService, ContractService>();
 
 builder.Services.AddScoped<FeedbackRepository>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
@@ -110,13 +118,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
 app.UseSwagger();
 app.UseSwaggerUI();
-//}
 
 app.UseHttpsRedirection();
+
+// --- Bật CORS trước Authentication & Authorization ---
+app.UseCors("AllowFE");
 
 app.UseAuthentication();
 app.UseAuthorization();
