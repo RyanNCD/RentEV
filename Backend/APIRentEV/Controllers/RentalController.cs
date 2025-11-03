@@ -1,5 +1,6 @@
 ﻿using APIRentEV.Mapper;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repository.DTO;
 using Repository.Models;
@@ -20,7 +21,7 @@ namespace APIRentEV.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Rental
+        [Authorize(Roles = "Admin,StaffStation")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RentalDto>>> GetAllRentals()
         {
@@ -29,7 +30,7 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
-        // GET: api/Rental/{id}
+        [Authorize(Roles = "Admin,StaffStation,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult<RentalDto>> GetRentalById(Guid id)
         {
@@ -39,7 +40,7 @@ namespace APIRentEV.Controllers
             return Ok(_mapper.Map<RentalDto>(rental));
         }
 
-        // POST: api/Rental
+        [Authorize(Roles = "Customer")]
         [HttpPost]
         public async Task<ActionResult<RentalDto>> CreateRental([FromBody] RentalCreateDto dto)
         {
@@ -53,19 +54,20 @@ namespace APIRentEV.Controllers
                                    _mapper.Map<RentalDto>(created));
         }
 
-        // PUT: api/Rental/{id}
+        [Authorize(Roles = "Admin,StaffStation")]
         [HttpPut("{id}")]
         public async Task<ActionResult<RentalDto>> UpdateRental(Guid id, [FromBody] RentalUpdateDto dto)
         {
             var existing = await _rentalService.GetRentalByIdAsync(id);
             if (existing == null) return NotFound();
 
-            _mapper.Map(dto, existing); // AutoMapper map các field không null
+            _mapper.Map(dto, existing);
             await _rentalService.UpdateRentalAsync(id, existing);
 
             return Ok(_mapper.Map<RentalDto>(existing));
         }
 
+        [Authorize(Roles = "Customer")]
         [HttpPut("cancel/{id}")]
         public async Task<IActionResult> CancelRental(Guid id)
         {

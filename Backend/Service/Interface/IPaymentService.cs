@@ -14,8 +14,8 @@ namespace Service.Interface
     {
         Task<List<Payment>> GetAllPaymentsAsync();
         Task<Payment> GetPaymentById(Guid id);
-        Task<string> CreatePaymentUrlAsync(decimal amount, Guid orderId, string ipAddress);
+        Task<string> CreatePaymentUrlAsync(Payment payment, string ipAddress);
+        Task<Payment> ProcessVnPayReturnAsync(Dictionary<string, string> queryParams);
         Task<bool> HandleVnPayReturnAsync(Dictionary<string, string> queryParams);
-
     }
 }
