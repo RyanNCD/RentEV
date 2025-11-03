@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace APIRentEV.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class StationController : ControllerBase

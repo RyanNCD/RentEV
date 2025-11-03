@@ -11,6 +11,7 @@ using Service.Services;
 
 namespace APIRentEV.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class VehicleController : ControllerBase

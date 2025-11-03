@@ -37,4 +37,4 @@ secrets.json
 
 # OS generated files
 .DS_Store
-Thumbs.db
+Thumbs.db".vs/" 

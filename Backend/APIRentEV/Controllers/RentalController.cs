@@ -8,6 +8,7 @@ using Service.Interface;
 
 namespace APIRentEV.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class RentalController : ControllerBase
