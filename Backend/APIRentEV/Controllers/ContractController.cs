@@ -9,6 +9,7 @@ using Service.Interface;
 
 namespace APIRentEV.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ContractController : ControllerBase
