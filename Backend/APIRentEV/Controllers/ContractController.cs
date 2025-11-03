@@ -1,5 +1,6 @@
 ﻿using APIRentEV.Mapper;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.DTO;
@@ -21,7 +22,7 @@ namespace APIRentEV.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Contract
+        [Authorize(Roles = "Admin,StaffStation")]
         [HttpGet]
         public async Task<IActionResult> GetAllContracts()
         {
@@ -41,7 +42,7 @@ namespace APIRentEV.Controllers
         }
 
 
-        // GET: api/Contract/{id}
+        [Authorize(Roles = "Admin,StaffStation,Customer")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetContractById(Guid id)
         {
@@ -58,7 +59,7 @@ namespace APIRentEV.Controllers
             });
         }
 
-        // POST: api/Contract
+        [Authorize(Roles = "Customer")]
         [HttpPost]
         public async Task<IActionResult> CreateContract([FromBody] ContractCreateDto dto)
         {
@@ -77,7 +78,7 @@ namespace APIRentEV.Controllers
                                    });
         }
 
-        // PUT: api/Contract/{id}
+        [Authorize(Roles = "Admin,StaffStation")]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateContract(Guid id, [FromBody] ContractUpdateDto dto)
         {
@@ -97,7 +98,7 @@ namespace APIRentEV.Controllers
             });
         }
 
-        // ✅ DELETE: api/contract/{id}
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteContract(Guid id)
         {

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.DTO;
@@ -21,7 +22,7 @@ namespace APIRentEV.Controllers
             _mapper = mapper;
         }
 
-        // Lấy tất cả payment
+        [Authorize(Roles = "Admin,StaffStation")]
         [HttpGet]
         public async Task<IActionResult> GetAllPayments()
         {
@@ -30,7 +31,7 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
-        // Lấy payment theo ID
+        [Authorize(Roles = "Admin,StaffStation,Customer")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPaymentById(Guid id)
         {
@@ -41,7 +42,7 @@ namespace APIRentEV.Controllers
             return Ok(dto);
         }
 
-        // Tạo payment mới và trả URL thanh toán VNPAY
+        [Authorize(Roles = "Customer")]
         [HttpPost("create")]
         public async Task<IActionResult> CreatePayment([FromBody] PaymentCreateDto dto)
         {
@@ -49,31 +50,46 @@ namespace APIRentEV.Controllers
 
             var payment = _mapper.Map<Payment>(dto);
 
-            // Lấy IP người dùng từ HttpContext
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
 
-            // Truyền đủ tham số
-            var paymentUrl = await _paymentService.CreatePaymentUrlAsync(payment.Amount, payment.PaymentId, ipAddress);
+            // CreatePaymentUrlAsync now saves the payment with "Pending" status
+            var paymentUrl = await _paymentService.CreatePaymentUrlAsync(payment, ipAddress);
 
-            return Ok(new { paymentUrl });
+            return Ok(new { paymentUrl, paymentId = payment.PaymentId });
         }
 
 
-        // Callback VNPAY
+        [AllowAnonymous]
         [HttpGet("vnpay-return")]
         public async Task<IActionResult> VnPayReturn()
         {
-            // Request.Query là IQueryCollection, convert sang Dictionary
-            var queryParams = new Dictionary<string, string>();
-            foreach (var key in Request.Query.Keys)
+            try
             {
-                queryParams[key] = Request.Query[key];
+                // Request.Query là IQueryCollection, convert sang Dictionary
+                var queryParams = new Dictionary<string, string>();
+                foreach (var key in Request.Query.Keys)
+                {
+                    queryParams[key] = Request.Query[key];
+                }
+
+                // Process the VnPay return and save/update payment
+                var payment = await _paymentService.ProcessVnPayReturnAsync(queryParams);
+
+                // Return success message with payment info
+                return Ok(new 
+                { 
+                    success = true,
+                    message = payment.Status == "Success" ? "Payment successful" : "Payment failed",
+                    paymentId = payment.PaymentId,
+                    status = payment.Status,
+                    amount = payment.Amount
+                });
             }
-
-            var result = await _paymentService.HandleVnPayReturnAsync(queryParams);
-
-            // Trả message cho frontend hoặc redirect nếu muốn
-            return Ok(new { message = result });
+            catch (Exception ex)
+            {
+                // Return error message if validation or processing fails
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repository.DTO;
 using Repository.Models;
@@ -20,7 +21,7 @@ namespace Api.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Users
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersAll()
         {
@@ -29,7 +30,7 @@ namespace Api.Controllers
             return Ok(dtos);
         }
 
-        // GET: api/Users/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetUserById(Guid id)
         {
@@ -39,6 +40,7 @@ namespace Api.Controllers
             return Ok(_mapper.Map<UserDto>(user));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet("staffstation")]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetStaffStationUsers()
         {
@@ -47,7 +49,7 @@ namespace Api.Controllers
             return Ok(dtos);
         }
 
-        // POST: api/Users
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserCreateDto dto)
         {
@@ -61,7 +63,7 @@ namespace Api.Controllers
                                    _mapper.Map<UserDto>(created));
         }
 
-        // PUT: api/Users/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<UserDto>> UpdateUser(Guid id, [FromBody] UserUpdateDto dto)
         {
@@ -74,6 +76,7 @@ namespace Api.Controllers
             return Ok(_mapper.Map<UserDto>(existing));
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
@@ -82,6 +85,7 @@ namespace Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("staffstation/{userId}")]
         public async Task<IActionResult> DeleteStaffStationUser(Guid userId)
         {
@@ -91,5 +95,6 @@ namespace Api.Controllers
 
             return NoContent();
         }
+
     }
 }

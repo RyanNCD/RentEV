@@ -1,6 +1,7 @@
 ﻿
 using APIRentEV.Mapper;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.DTO;
@@ -23,7 +24,7 @@ namespace APIRentEV.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Vehicle
+        [Authorize(Roles = "Admin,StaffStation,Customer")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<VehicleDto>>> GetAllVehicle()
         {
@@ -32,7 +33,7 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
-        // GET: api/Vehicle/{id}
+        [Authorize(Roles = "Admin,StaffStation,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult<VehicleDto>> GetVehicleById(Guid id)
         {
@@ -42,7 +43,7 @@ namespace APIRentEV.Controllers
             return Ok(_mapper.Map<VehicleDto>(vehicle));
         }
 
-        // POST: api/Vehicle
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<ActionResult<VehicleDto>> CreateVehicle([FromBody] VehicleCreateDto dto)
         {
@@ -56,7 +57,7 @@ namespace APIRentEV.Controllers
                                    _mapper.Map<VehicleDto>(created));
         }
 
-        // PUT: api/Vehicle/{id}
+        [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
         public async Task<ActionResult<VehicleDto>> UpdateVehicle(Guid id, [FromBody] VehicleUpdateDto dto)
         {
@@ -70,7 +71,7 @@ namespace APIRentEV.Controllers
         }
 
 
-        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteVehicle(Guid id)
         {
             var success = await _vehicleService.DeleteViheicleAsync(id);
@@ -78,6 +79,7 @@ namespace APIRentEV.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = "Admin,StaffStation,Customer")]
         [HttpGet("search")]
         public async Task<IActionResult> SearchVehicles([FromQuery] string keyword)
         {
@@ -85,6 +87,7 @@ namespace APIRentEV.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin,StaffStation,Customer")]
         [HttpGet("filter")]
         public async Task<IActionResult> FilterVehicles([FromQuery] Guid? stationId, [FromQuery] string status, [FromQuery] int? seatingCapacity)
         {
@@ -92,13 +95,14 @@ namespace APIRentEV.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = "Admin,StaffStation,Customer")]
         [HttpGet("sort")]
         public async Task<IActionResult> SortVehicles([FromQuery] string sortBy, [FromQuery] bool isDescending = false)
         {
             var result = await _vehicleService.SortVehiclesAsync(sortBy, isDescending);
             return Ok(result);
         }
-
+        [AllowAnonymous]
         [HttpGet("featured")]
         public async Task<IActionResult> GetFeaturedVehicles([FromQuery] int top = 5)
         {

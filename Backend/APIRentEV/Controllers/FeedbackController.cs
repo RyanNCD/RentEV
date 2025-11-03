@@ -1,5 +1,6 @@
 ﻿using APIRentEV.Mapper;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.DTO;
@@ -21,7 +22,7 @@ namespace APIRentEV.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Feedback
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FeedbackDto>>> GetAllFeedback()
         {
@@ -29,7 +30,7 @@ namespace APIRentEV.Controllers
             return Ok(_mapper.Map<List<FeedbackDto>>(feedbacks));
         }
 
-        // GET: api/Feedback/{id}
+        [Authorize(Roles = "Admin")]
         [HttpGet("{id}")]
         public async Task<ActionResult<FeedbackDto>> GetFeedbackById(Guid id)
         {
@@ -39,7 +40,7 @@ namespace APIRentEV.Controllers
             return Ok(_mapper.Map<FeedbackDto>(feedback));
         }
 
-        // GET: api/Feedback/rental/{rentalId}
+        [Authorize(Roles = "Admin")]
         [HttpGet("rental/{rentalId}")]
         public async Task<ActionResult<IEnumerable<FeedbackDto>>> GetByRentalId(Guid rentalId)
         {
@@ -47,7 +48,7 @@ namespace APIRentEV.Controllers
             return Ok(_mapper.Map<List<FeedbackDto>>(feedbacks));
         }
 
-        // GET: api/Feedback/user/{userId}
+        [Authorize(Roles = "Admin")]
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<FeedbackDto>>> GetByUserId(Guid userId)
         {
@@ -55,7 +56,7 @@ namespace APIRentEV.Controllers
             return Ok(_mapper.Map<List<FeedbackDto>>(feedbacks));
         }
 
-        // POST: api/Feedback
+        [Authorize(Roles = "Customer")]
         [HttpPost]
         public async Task<ActionResult<FeedbackDto>> CreateFeedback([FromBody] FeedbackCreateDto dto)
         {
@@ -69,7 +70,7 @@ namespace APIRentEV.Controllers
                                    _mapper.Map<FeedbackDto>(created));
         }
 
-        // Xóa feedback
+        [Authorize(Roles = "Customer, Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFeedback(Guid id)
         {
@@ -78,7 +79,7 @@ namespace APIRentEV.Controllers
 
             return NoContent();
         }
-
+        [Authorize(Roles = "Customer")]
         [HttpGet("rental/{rentalId}/average")]
         public async Task<IActionResult> GetAverage(Guid rentalId)
         {
