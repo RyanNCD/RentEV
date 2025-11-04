@@ -27,7 +27,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "RentEV API", Version = "v1" });
 
-    // Add JWT Bearer Auth to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -37,6 +36,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Nhập token theo dạng: Bearer {your JWT token}"
     });
+
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -158,9 +158,7 @@ app.UseSwaggerUI();
 //}
 
 app.UseHttpsRedirection();
-
 app.UseCors("AllowSpecificOrigins");
-
 app.UseAuthentication();
 app.UseAuthorization();
 
