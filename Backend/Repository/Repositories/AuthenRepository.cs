@@ -26,39 +26,40 @@ namespace Repository.Repositories
 
         public async Task<string?> LoginAsync(string email, string password)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
+            var user = await _context.Users
+                .Include(u => u.Role) // ✅ load role
+                .FirstOrDefaultAsync(u => u.Email == email);
+
             if (user == null) return null;
 
-            // Kiểm tra mật khẩu
             if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
                 return null;
 
-            // Tạo JWT token
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
 
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.RoleId.ToString())
-        };
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+        new Claim(ClaimTypes.Email, user.Email),
+        new Claim(ClaimTypes.Role, user.Role.RoleName)
+    };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(4),
+                Expires = DateTime.UtcNow.AddHours(3),
+                Issuer = _config["Jwt:Issuer"],
+                Audience = _config["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
-                ),
-                Issuer = _config["Jwt:Issuer"],
-                Audience = _config["Jwt:Audience"]
+                    SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
 
         public async Task<User> RegisterAsync(string fullName, string email, string password, string phoneNumber, string identityCard, string driverLicense)
         {
