@@ -12,6 +12,7 @@ using System.Text;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Service.Configs;
 using APIRentEV.Mapper;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
