@@ -29,7 +29,7 @@ public partial class Rental
 
     public decimal? TotalCost { get; set; }
 
-    public string Status { get; set; }
+    public string Status { get; set; } = "Pending"
 
     public DateTime? CreatedAt { get; set; }
 
