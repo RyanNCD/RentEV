@@ -1,15 +1,33 @@
-import axios from "axios";
+// File: src/lib/http.ts
+
+import axios, { type InternalAxiosRequestConfig } from "axios";
 
 const http = axios.create({
-  baseURL: import.meta.env.VITE_API, // https://rentev-b7ee.onrender.com
-  timeout: 30000,
-  headers: { "Content-Type": "application/json" },
+  baseURL: "http://localhost:5248", // CHUẨN TỪ SWAGGER
+  timeout: 10000, // 10 giây
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-http.interceptors.request.use((config) => {
-  const token = localStorage.getItem("gg_access_token");
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
-});
+// Request Interceptor: Tự động gắn AccessToken vào header
+http.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    // Lấy token từ localStorage
+    const accessToken = localStorage.getItem("accessToken");
+    
+    if (accessToken) {
+      config.headers["Authorization"] = `Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// (Optional) Response Interceptor: Xử lý lỗi 401 (Token hết hạn)
+// Sau này mình làm thêm, ví dụ tự động gọi API refresh token
+// http.interceptors.response.use(...)
 
 export default http;
