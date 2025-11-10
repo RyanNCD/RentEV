@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Repository.DTO;
 using Repository.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -23,7 +23,10 @@ namespace APIRentEV.Mapper
             // ===============================
             // 🧑‍🤝‍🧑 USER
             // ===============================
-            CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<User, UserDto>()
+                .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.RoleName : null))
+                .ForMember(dest => dest.IsBlacklisted, opt => opt.Ignore()) // Will be set in controller
+                .ReverseMap();
 
             CreateMap<UserCreateDto, User>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => Guid.NewGuid()))
@@ -31,6 +34,7 @@ namespace APIRentEV.Mapper
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
             CreateMap<UserUpdateDto, User>()
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()) // Sẽ xử lý trong service
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
             // ===============================
@@ -60,7 +64,9 @@ namespace APIRentEV.Mapper
             // ===============================
             // 🚘 RENTAL
             // ===============================
-            CreateMap<Rental, RentalDto>().ReverseMap();
+            CreateMap<Rental, RentalDto>()
+                .ForMember(dest => dest.VehicleName, opt => opt.MapFrom(src => src.Vehicle != null ? src.Vehicle.VehicleName : null))
+                .ReverseMap();
 
             CreateMap<RentalCreateDto, Rental>()
                 .ForMember(dest => dest.RentalId, opt => opt.MapFrom(src => Guid.NewGuid()))

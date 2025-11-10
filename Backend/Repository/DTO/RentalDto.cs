@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +15,9 @@ namespace Repository.DTO
         public Guid UserId { get; set; }
 
         public Guid VehicleId { get; set; }
+
+        // Thêm tên xe để hiển thị lịch sử có ý nghĩa hơn
+        public string? VehicleName { get; set; }
 
         public Guid PickupStationId { get; set; }
 

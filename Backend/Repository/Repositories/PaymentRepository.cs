@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Repository.Models;
 using System;
 using System.Collections.Generic;
@@ -43,6 +43,31 @@ namespace Repository.Repositories
         {
             _context.Payments.Update(payment);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<Payment?> GetByTransactionIdAsync(string transactionId)
+        {
+            return await _context.Payments
+                .Include(p => p.Rental)
+                .FirstOrDefaultAsync(p => p.TransactionId == transactionId);
+        }
+
+        // Return all payments associated with a rental
+        public async Task<List<Payment>> GetByRentalIdAsync(Guid rentalId)
+        {
+            return await _context.Payments
+                .Where(p => p.RentalId == rentalId)
+                .Include(p => p.User)
+                .Include(p => p.Rental)
+                .OrderByDescending(p => p.PaymentDate)
+                .ToListAsync();
+        }
+
+        // Efficient existence check for successful payment of a rental
+        public async Task<bool> HasSuccessfulPaymentAsync(Guid rentalId)
+        {
+            return await _context.Payments
+                .AnyAsync(p => p.RentalId == rentalId && p.Status != null && p.Status.ToUpper() == "SUCCESS");
         }
     }
 }

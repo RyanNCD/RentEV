@@ -367,6 +367,8 @@ public partial class SWP391RentEVContext : DbContext
             entity.Property(e => e.VehicleType)
                 .IsRequired()
                 .HasMaxLength(50);
+            entity.Property(e => e.ImageUrl)
+                .HasMaxLength(500);
 
             entity.HasOne(d => d.Station).WithMany(p => p.Vehicles)
                 .HasForeignKey(d => d.StationId)

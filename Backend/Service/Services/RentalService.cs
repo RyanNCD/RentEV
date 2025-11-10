@@ -1,4 +1,4 @@
-﻿using Repository.DTO;
+using Repository.DTO;
 using Repository.Implementations;
 using Repository.Models;
 using Repository.Repositories;
@@ -28,6 +28,14 @@ namespace Service.Services
         public async Task<IEnumerable<Rental>> GetAllRentalAsync()
         {
             return await _rentalRepo.GetAllAsync();
+        }
+        public async Task<IEnumerable<Rental>> GetPaidRentalsAsync()
+        {
+            return await _rentalRepo.GetAllPaidAsync();
+        }
+        public async Task<IEnumerable<Rental>> GetReadyForHandoverAsync()
+        {
+            return await _rentalRepo.GetAllReadyForHandoverAsync();
         }
         public async Task<Rental> CreateRentalAsync(Rental rental)
         {
@@ -74,6 +82,10 @@ namespace Service.Services
         {
             return await _rentalRepo.GetByIdAsync(id);
         }
+        public async Task<Rental?> GetPaidRentalByIdAsync(Guid id)
+        {
+            return await _rentalRepo.GetPaidByIdAsync(id);
+        }
 
         public async Task<bool> CancelRentalAsync(Guid rentalId)
         {
@@ -101,91 +113,45 @@ namespace Service.Services
             return result;
         }
 
-        public async Task<Rental?> CheckinRentalAsync(Guid rentalId, Guid staffId, VehicleConditionCheckDto conditionCheck)
+        public async Task<IEnumerable<Rental>> GetRentalsByUserAsync(Guid userId)
+        {
+            return await _rentalRepo.GetByUserIdAsync(userId);
+        }
+        public async Task<IEnumerable<Rental>> GetPaidRentalsByUserAsync(Guid userId)
+        {
+            return await _rentalRepo.GetPaidByUserIdAsync(userId);
+        }
+
+        public async Task<Rental?> CheckInAsync(Guid rentalId, Guid staffId, DateTime deliveredAt, string? deliveryCondition)
         {
             var rental = await _rentalRepo.GetByIdAsync(rentalId);
-            if (rental == null)
-                throw new KeyNotFoundException($"Rental with ID {rentalId} not found.");
+            if (rental == null) return null;
+  
 
-            if (rental.Status != "Pending" && rental.Status != "Confirmed")
-                throw new InvalidOperationException($"Cannot checkin rental with status: {rental.Status}");
-
-            // Cập nhật thông tin checkin
-            rental.Status = "Active";
-            rental.StartTime = DateTime.UtcNow;
-            rental.StaffId = staffId;
-
-            // Lưu hình ảnh và ghi chú tình trạng xe khi giao
-            if (conditionCheck != null && conditionCheck.ImageUrls != null && conditionCheck.ImageUrls.Any())
-            {
-                foreach (var imageUrl in conditionCheck.ImageUrls)
-                {
-                    var rentalImage = new RentalImage
-                    {
-                        RentalId = rentalId,
-                        ImageUrl = imageUrl,
-                        Type = "Pickup",
-                        Description = conditionCheck.Description ?? "Vehicle condition at pickup",
-                        Note = conditionCheck.Note ?? ""
-                    };
-                    await _imageService.AddRentalImageAsync(rentalImage);
-                }
-            }
-
-            // Cập nhật trạng thái xe
-            var vehicle = await _vehicleRepo.GetVehicleByIdAsync(rental.VehicleId);
-            if (vehicle != null)
-            {
-                vehicle.Status = "Rented";
-                await _vehicleRepo.UpdateAsync(vehicle);
-            }
+            rental.DeliveredAt = deliveredAt;
+            rental.DeliveredByStaffId = staffId;
+            rental.DeliveryCondition = deliveryCondition;
+            rental.Status = "IN_PROGRESS";
 
             await _rentalRepo.UpdateAsync(rental);
             return rental;
         }
 
-        public async Task<Rental?> ReturnRentalAsync(Guid rentalId, Guid staffId, VehicleConditionCheckDto conditionCheck)
+        public async Task<Rental?> CheckOutAsync(Guid rentalId, Guid staffId, DateTime receivedAt, string? returnCondition)
         {
             var rental = await _rentalRepo.GetByIdAsync(rentalId);
-            if (rental == null)
-                throw new KeyNotFoundException($"Rental with ID {rentalId} not found.");
+            if (rental == null) return null;
 
-            if (rental.Status != "Active")
-                throw new InvalidOperationException($"Cannot return rental with status: {rental.Status}. Rental must be Active.");
-
-            // Bắt buộc phải có kiểm tra tình trạng xe khi trả
-            if (conditionCheck == null || conditionCheck.ImageUrls == null || !conditionCheck.ImageUrls.Any())
-                throw new InvalidOperationException("Vehicle condition check is required before accepting return. Please provide images and notes.");
-
-            // Cập nhật thông tin return
-            rental.Status = "Completed";
-            rental.EndTime = DateTime.UtcNow;
-            if (rental.StaffId == null)
+            // Only allow check-out when rental is in progress
+            if (!string.Equals(rental.Status, "IN_PROGRESS", StringComparison.OrdinalIgnoreCase))
             {
-                rental.StaffId = staffId;
+                throw new InvalidOperationException("Rental không ở trạng thái đang thuê, không thể nhận xe.");
             }
 
-            // Lưu hình ảnh và ghi chú tình trạng xe khi trả
-            foreach (var imageUrl in conditionCheck.ImageUrls)
-            {
-                var rentalImage = new RentalImage
-                {
-                    RentalId = rentalId,
-                    ImageUrl = imageUrl,
-                    Type = "Return",
-                    Description = conditionCheck.Description ?? "Vehicle condition at return",
-                    Note = conditionCheck.Note ?? ""
-                };
-                await _imageService.AddRentalImageAsync(rentalImage);
-            }
-
-            // Cập nhật trạng thái xe
-            var vehicle = await _vehicleRepo.GetVehicleByIdAsync(rental.VehicleId);
-            if (vehicle != null)
-            {
-                vehicle.Status = "Available";
-                await _vehicleRepo.UpdateAsync(vehicle);
-            }
+            rental.ReceivedAt = receivedAt;
+            rental.ReceivedByStaffId = staffId;
+            rental.ReturnCondition = returnCondition;
+            rental.Status = "COMPLETED";
 
             await _rentalRepo.UpdateAsync(rental);
             return rental;

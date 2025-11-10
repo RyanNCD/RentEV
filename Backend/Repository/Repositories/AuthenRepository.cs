@@ -31,8 +31,27 @@ namespace Repository.Repositories
                 .FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null) return null;
+            var storedHash = user.PasswordHash?.Trim();
+            if (string.IsNullOrEmpty(storedHash))
+                return null;
 
-            if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            // Normalize PHP-style bcrypt prefixes to a supported version
+            if (storedHash.StartsWith("$2y$"))
+                storedHash = "$2a$" + storedHash.Substring(4);
+            else if (storedHash.StartsWith("$2x$"))
+                storedHash = "$2a$" + storedHash.Substring(4);
+
+            bool verified;
+            try
+            {
+                verified = BCrypt.Net.BCrypt.Verify(password, storedHash);
+            }
+            catch
+            {
+                return null;
+            }
+
+            if (!verified)
                 return null;
 
             var tokenHandler = new JwtSecurityTokenHandler();
@@ -42,7 +61,8 @@ namespace Repository.Repositories
     {
         new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
         new Claim(ClaimTypes.Email, user.Email),
-        new Claim(ClaimTypes.Role, user.Role.RoleName)
+        // Trim role name to avoid whitespace causing [Authorize(Roles=...)] mismatches
+        new Claim(ClaimTypes.Role, (user.Role?.RoleName ?? string.Empty).Trim())
     };
 
             var tokenDescriptor = new SecurityTokenDescriptor

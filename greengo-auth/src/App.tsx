@@ -1,119 +1,86 @@
-import { Routes, Route, Navigate, Link } from "react-router-dom";
-import Navbar from "./components/Navbar";
-import AuthForm from "./components/AuthForm";
-import SearchResults from "./pages/SearchResults";
-import CheckinPage from "./pages/CheckinPage";
-import ReturnPage from "./pages/ReturnPage";
-import HomePage from "./pages/HomePage";
-import { useAuth } from "./context/AuthContext";
+// File: src/App.tsx (Bản full)
 
-function AboutPage() {
-  return <div className="container" style={{ paddingTop: 24 }}><h1>Giới thiệu</h1></div>;
-}
+import { Routes, Route } from "react-router-dom";
 
-function PricingPage() {
-  return <div className="container" style={{ paddingTop: 24 }}><h1>Bảng giá</h1></div>;
-}
+// Layouts
+import UserLayout from "./components/layouts/UserLayout";
+import AdminLayout from "./components/layouts/AdminLayout";
+import ProtectedRoutes from "./components/ProtectedRoutes";
 
-function ProfilePage() {
-  return <div className="container" style={{ paddingTop: 24 }}><h1>Hồ sơ</h1></div>;
-}
+// Pages (Auth)
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
 
-function DashboardPage() {
-  const { user } = useAuth();
-  
-  if (!user || (user.role !== "ADMIN" && user.role !== "STAFF")) {
-    return <Navigate to="/home" />;
-  }
+// Pages (Public/Renter)
+// (Sửa lại import cho đúng)
+import HomePage from "./pages/public/HomePage";
+import AboutPage from "./pages/public/AboutPage";
+import PricingPage from "./pages/public/PricingPage";
+import VehicleManagement from "./pages/dashboard/VehicleManagement";
+import CarDetailPage from "./pages/public/CarDetailPage"; // <-- IMPORT MỚI
 
-  return (
-    <div className="container" style={{ paddingTop: 24 }}>
-      <h1>Dashboard - Quản lý</h1>
-      <div style={{ display: "flex", gap: "16px", marginTop: "24px" }}>
-        <Link to="/checkin" className="btn btn--primary" style={{ padding: "16px 24px", textDecoration: "none", display: "inline-block" }}>
-          Quản lý giao xe
-        </Link>
-        <Link to="/return" className="btn btn--primary" style={{ padding: "16px 24px", textDecoration: "none", display: "inline-block" }}>
-          Quản lý trả xe
-        </Link>
-      </div>
-    </div>
-  );
-}
+// Pages (Private Renter)
+import ProfilePage from "./pages/public/ProfilePage"; 
+import CheckoutPage from "./pages/public/CheckoutPage"; 
+import PaymentCallbackPage from "./pages/public/PaymentCallbackPage";
+import PaymentSuccessPage from "./pages/public/PaymentSuccessPage";
+// Pages (Dashboard Admin/Staff)
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  
-  if (loading) {
-    return <div>Đang tải...</div>;
-  }
-  
-  if (!user) {
-    return <Navigate to="/login" />;
-  }
-  
-  return <>{children}</>;
-}
-
-function StaffRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
-  
-  if (loading) {
-    return <div>Đang tải...</div>;
-  }
-  
-  if (!user || (user.role !== "ADMIN" && user.role !== "STAFF")) {
-    return <Navigate to="/home" />;
-  }
-  
-  return <>{children}</>;
-}
-
+import UserManagement from "./pages/dashboard/UserManagement";
+import StaffManagement from "./pages/dashboard/StaffManagement";
+import StationManagement from "./pages/dashboard/StationManagement"
+import AdminDashboard from "./pages/dashboard/AdminDashboard";
+import CheckinManagement from "./pages/dashboard/CheckinManagement";
+import RevenueDashboard from "./pages/dashboard/RevenueDashboard";
 export default function App() {
   return (
-    <div>
-      <Navbar />
-      <Routes>
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/pricing" element={<PricingPage />} />
-        <Route path="/search" element={<SearchResults />} />
-        <Route path="/login" element={<AuthForm mode="login" />} />
-        <Route path="/register" element={<AuthForm mode="register" />} />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/checkin"
-          element={
-            <StaffRoute>
-              <CheckinPage />
-            </StaffRoute>
-          }
-        />
-        <Route
-          path="/return"
-          element={
-            <StaffRoute>
-              <ReturnPage />
-            </StaffRoute>
-          }
-        />
-        <Route path="/" element={<Navigate to="/home" />} />
-      </Routes>
-    </div>
+    <Routes>
+      {/* 1. Layout cho Renter (Public/User) */}
+      <Route path="/" element={<UserLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="home" element={<HomePage />} />
+        
+        <Route path="about" element={<AboutPage />} />
+        <Route path="pricing" element={<PricingPage />} />
+        
+        {/* === THÊM ROUTE NÀY VÀO === */}
+        <Route path="vehicles/:id" element={<CarDetailPage />} />
+        <Route path="payment-callback" element={<PaymentCallbackPage />} />
+        <Route path="payment-success" element={<PaymentSuccessPage />} />
+
+        {/* --- Trang Profile/Thanh toán (Cần login RENTER) --- */}
+        <Route element={<ProtectedRoutes allowedRoles={["RENTER"]} />}>
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="checkout" element={<CheckoutPage />} /> 
+        </Route>
+      </Route>
+
+      {/* 2. Layout cho Auth (Login/Register) */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+
+      {/* 4. Layout cho Dashboard (Admin/Staff) */}
+      <Route element={<ProtectedRoutes allowedRoles={["ADMIN", "STAFF"]} />}>
+        <Route path="/dashboard" element={<AdminLayout />}>
+          
+          {/* Route cho Staff: Giao/Nhận xe */}
+          <Route element={<ProtectedRoutes allowedRoles={["STAFF"]} />}> 
+            <Route path="checkin" element={<CheckinManagement />} />
+          </Route>
+
+          <Route element={<ProtectedRoutes allowedRoles={["ADMIN"]} />}> 
+             <Route index element={<AdminDashboard />} />
+             <Route path="users" element={<UserManagement />} />
+             <Route path="staffs" element={<StaffManagement />} />
+             <Route path="vehicles" element={<VehicleManagement />} />
+             <Route path="stations" element={<StationManagement />} />
+             <Route path="revenue" element={<RevenueDashboard />} />
+          </Route>
+        </Route>
+      </Route>
+      
+      {/* 5. Trang 404 */}
+      
+    </Routes>
   );
 }

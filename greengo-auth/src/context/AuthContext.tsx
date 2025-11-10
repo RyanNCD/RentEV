@@ -1,86 +1,156 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
-import { login as loginApi } from "../services/auth";
-import { getMe, type User } from "../services/user";
-import { jwtDecode } from "jwt-decode";
+// File: src/context/AuthContext.tsx (Bản "Lách" V4 - Fix "Customer")
 
-interface AuthContextType {
-  user: User & { role?: string } | null;
-  login: (email: string, password: string, redirectTo?: string) => Promise<void>;
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  type ReactNode,
+  useMemo,
+  useCallback,
+} from "react";
+import { useNavigate } from "react-router-dom";
+// (loginService giờ trả về { token: "..." })
+import { login as loginService } from "../services/auth";
+import { type IUser } from "../types";
+import {
+  decodeToken,
+  mapServerRoleToAppRole,
+  getRedirectPathForRole,
+  isTokenExpired,
+  type AppRole,
+} from "../services/authRole";
+
+// === 1. ĐỊNH NGHĨA KHUÔN CONTEXT ===
+interface IAuthContext {
+  user: IUser | null;
+  isLoading: boolean;
+  login: (email: string, pass: string, redirectTo?: string) => Promise<void>;
   logout: () => void;
-  loading: boolean;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// === 2. ĐỊNH NGHĨA KHUÔN PROPS ===
+interface AuthProviderProps {
+  readonly children: ReactNode;
+}
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User & { role?: string } | null>(null);
-  const [loading, setLoading] = useState(true);
+// (Removed unused IDecodedToken interface)
+
+// === 4. HÀM "THÔNG DỊCH" (Fix theo "Customer" - image_8f2aad.png) ===
+const appRoleToUserRole = (appRole: AppRole): IUser["role"] => {
+  switch (appRole) {
+    case "ADMIN":
+      return "ADMIN";
+    case "STAFF_STATION":
+      return "STAFF";
+    case "CUSTOMER":
+      return "RENTER";
+  }
+};
+
+
+// === 5. TẠO CONTEXT ===
+const AuthContext = createContext<IAuthContext | null>(null);
+
+// (Provider component)
+export function AuthProvider({ children }: AuthProviderProps) {
+  const [user, setUser] = useState<IUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true); 
   const navigate = useNavigate();
 
+  // (useEffect "Lách" - Dùng khi F5)
   useEffect(() => {
-    // Check if user is logged in on mount
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      loadUser();
-    } else {
-      setLoading(false);
-    }
-  }, []);
-
-  const loadUser = async () => {
-    try {
-      const userData = await getMe();
-      // Decode token to get role
-      const token = localStorage.getItem("accessToken");
-      if (token) {
-        try {
-          const decoded: any = jwtDecode(token);
-          // Map backend role names to frontend role names
-          const backendRole = decoded.role || decoded.Role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || "Customer";
-          // Normalize role names: Admin -> ADMIN, StaffStation -> STAFF, Customer -> CUSTOMER
-          userData.role = backendRole.toUpperCase() === "ADMIN" ? "ADMIN" : 
-                         backendRole.toUpperCase().includes("STAFF") ? "STAFF" : 
-                         "CUSTOMER";
-        } catch (e) {
-          console.error("Error decoding token:", e);
-          userData.role = "CUSTOMER";
+    const checkLoginStatus = async () => {
+      const accessToken = localStorage.getItem("accessToken");
+      if (accessToken) {
+        const decoded = decodeToken(accessToken);
+        if (!decoded.role || isTokenExpired(decoded)) {
+          localStorage.removeItem("accessToken");
+        } else {
+          const appRole = mapServerRoleToAppRole(decoded.role);
+          if (!appRole) {
+            console.error("Invalid role in token:", decoded.role);
+            localStorage.removeItem("accessToken");
+          } else {
+            const userFromToken: IUser = {
+              id: decoded.nameid || "",
+              email: decoded.email || "",
+              fullName: decoded.email || "",
+              role: appRoleToUserRole(appRole),
+            };
+            setUser(userFromToken);
+          }
         }
       }
-      setUser(userData as User & { role?: string });
-    } catch (error) {
-      console.error("Error loading user:", error);
-      localStorage.removeItem("accessToken");
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
+      setIsLoading(false); 
+    };
+    checkLoginStatus();
+  }, []); 
 
-  const login = async (email: string, password: string, redirectTo?: string) => {
-    const response = await loginApi({ email, password });
-    localStorage.setItem("accessToken", response.token);
-    await loadUser();
-    navigate(redirectTo || "/home");
-  };
+  // (Hàm login "Lách")
+  const login = useCallback(
+    async (email: string, pass: string, redirectTo?: string) => {
+      try {
+        const response = await loginService({ email, password: pass });
+        if (!response.token) {
+          throw new Error("BE không trả về token");
+        }
+        
+        const decoded = decodeToken(response.token);
+        const appRole = mapServerRoleToAppRole(decoded.role);
+        if (!appRole) {
+          throw new Error("Missing or invalid role in token");
+        }
+        const userFromToken: IUser = {
+          id: decoded.nameid || "",
+          email: decoded.email || "",
+          fullName: decoded.email || "",
+          role: appRoleToUserRole(appRole),
+        };
+        setUser(userFromToken);
+        localStorage.setItem("accessToken", response.token);
+        // Redirect to intended page if provided, else role-based dashboard
+        if (redirectTo) {
+          navigate(redirectTo, { replace: true });
+        } else {
+          navigate(getRedirectPathForRole(appRole));
+        }
+      } catch (error) {
+        console.error("Login failed:", error);
+        throw error;
+      }
+    },
+    [navigate]
+  );
 
-  const logout = () => {
+  // (logout, useMemo, if(isLoading), Provider... giữ nguyên)
+  const logout = useCallback(() => {
     localStorage.removeItem("accessToken");
     setUser(null);
-    navigate("/home");
-  };
+    navigate("/login");
+  }, [navigate]);
+
+  const contextValue = useMemo(
+    () => ({ user, isLoading, login, logout }),
+    [user, isLoading, login, logout]
+  );
+  
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
+// (useAuth() giữ nguyên)
+export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
-}
+};

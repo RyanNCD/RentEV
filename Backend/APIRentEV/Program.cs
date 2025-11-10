@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -84,12 +84,9 @@ builder.Services.AddScoped<IContractService ,ContractService>();
 builder.Services.AddScoped<FeedbackRepository>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 
-builder.Services.Configure<VnPayConfig>(builder.Configuration.GetSection("VnPay"));
+builder.Services.Configure<PayOSConfig>(builder.Configuration.GetSection("PayOS"));
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
-
-builder.Services.AddScoped<ReservationRepository>();
-builder.Services.AddScoped<IReservationService, ReservationService>();
 
 builder.Services.AddScoped<RentalImageRepository>();
 builder.Services.AddScoped<IRentalImageService, RentalImageService>();
@@ -164,6 +161,8 @@ app.UseSwaggerUI();
 //}
 
 app.UseHttpsRedirection();
+// Serve static files for uploaded images (e.g., /uploads/...)
+app.UseStaticFiles();
 app.UseCors("AllowSpecificOrigins");
 app.UseAuthentication();
 app.UseAuthorization();

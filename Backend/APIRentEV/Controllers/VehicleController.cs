@@ -72,7 +72,7 @@ namespace APIRentEV.Controllers
 
 
         [Authorize(Roles = "Admin")]
-        [HttpDelete("delete")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVehicle(Guid id)
         {
             var success = await _vehicleService.DeleteViheicleAsync(id);

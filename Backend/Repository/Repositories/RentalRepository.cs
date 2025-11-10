@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Repository.Models;
 using System;
 using System.Collections.Generic;
@@ -27,6 +27,17 @@ namespace Repository.Implementations
                 .ToListAsync();
         }
 
+        // Rentals that have at least one successful payment (Status = "Success")
+        public async Task<IEnumerable<Rental>> GetAllPaidAsync()
+        {
+            return await _context.Rentals
+                                 .Where(r => r.Payments.Any(p => p.Status != null && p.Status.ToUpper() == "SUCCESS"))
+                                 .Include(r => r.Vehicle)
+                                 .Include(r => r.User)
+                                 .OrderByDescending(r => r.CreatedAt)
+                                 .ToListAsync();
+        }
+
         public async Task<Rental> AddAsync(Rental rental)
         {
             await _context.Rentals.AddAsync(rental);
@@ -43,6 +54,15 @@ namespace Repository.Implementations
                                  .Include(r => r.ReturnStation)
                                  .Include(r => r.RentalImages)
                                  .FirstOrDefaultAsync(r => r.RentalId == id);
+        }
+
+        public async Task<Rental?> GetPaidByIdAsync(Guid id)
+        {
+            return await _context.Rentals
+                                 .Where(r => r.RentalId == id && r.Payments.Any(p => p.Status != null && p.Status.ToUpper() == "SUCCESS"))
+                                 .Include(r => r.Vehicle)
+                                 .Include(r => r.User)
+                                 .FirstOrDefaultAsync();
         }
 
         public async Task<Rental> UpdateAsync(Rental rental)
@@ -68,6 +88,38 @@ namespace Repository.Implementations
             _context.Rentals.Update(rental);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<IEnumerable<Rental>> GetByUserIdAsync(Guid userId)
+        {
+            return await _context.Rentals
+                                 .Where(r => r.UserId == userId)
+                                 .Include(r => r.Vehicle)
+                                 .Include(r => r.User)
+                                 .OrderByDescending(r => r.CreatedAt)
+                                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Rental>> GetPaidByUserIdAsync(Guid userId)
+        {
+            return await _context.Rentals
+                                 .Where(r => r.UserId == userId && r.Payments.Any(p => p.Status != null && p.Status.ToUpper() == "SUCCESS"))
+                                 .Include(r => r.Vehicle)
+                                 .Include(r => r.User)
+                                 .OrderByDescending(r => r.CreatedAt)
+                                 .ToListAsync();
+        }
+
+        // Rentals ready for handover: have successful payment and current status is PAID
+        public async Task<IEnumerable<Rental>> GetAllReadyForHandoverAsync()
+        {
+            return await _context.Rentals
+                                 .Where(r => r.Status != null && r.Status.ToUpper() == "PAID"
+                                          && r.Payments.Any(p => p.Status != null && p.Status.ToUpper() == "SUCCESS"))
+                                 .Include(r => r.Vehicle)
+                                 .Include(r => r.User)
+                                 .OrderByDescending(r => r.CreatedAt)
+                                 .ToListAsync();
         }
 
     }

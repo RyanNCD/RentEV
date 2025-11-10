@@ -11,6 +11,8 @@ namespace Repository.DTO
         public string IdentityCard { get; set; }
         public string DriverLicense { get; set; }
         public Guid RoleId { get; set; }
+        public string RoleName { get; set; }
         public DateTime? CreatedAt { get; set; }
+        public bool IsBlacklisted { get; set; }
     }
 }

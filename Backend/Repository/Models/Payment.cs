@@ -25,6 +25,10 @@ public partial class Payment
 
     public string Status { get; set; }
 
+    // Mã giao dịch từ PayOS để phục vụ xác thực
+    [MaxLength(100)]
+    public string TransactionId { get; set; }
+
     public virtual Rental Rental { get; set; }
 
     public virtual User User { get; set; }

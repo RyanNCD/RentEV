@@ -1,5 +1,5 @@
+using Repository.Implementations;
 using Repository.Models;
-using Repository.Repositories;
 using Service.Interface;
 using System;
 using System.Collections.Generic;
@@ -9,36 +9,15 @@ namespace Service.Services
 {
     public class RentalImageService : IRentalImageService
     {
-        private readonly RentalImageRepository _imageRepo;
+        private readonly RentalImageRepository _repo;
 
-        public RentalImageService(RentalImageRepository imageRepo)
+        public RentalImageService(RentalImageRepository repo)
         {
-            _imageRepo = imageRepo;
+            _repo = repo;
         }
 
-        public async Task<RentalImage> AddRentalImageAsync(RentalImage image)
-        {
-            return await _imageRepo.AddAsync(image);
-        }
-
-        public async Task<List<RentalImage>> GetImagesByRentalIdAsync(Guid rentalId)
-        {
-            return await _imageRepo.GetByRentalIdAsync(rentalId);
-        }
-
-        public async Task<List<RentalImage>> GetImagesByRentalIdAndTypeAsync(Guid rentalId, string type)
-        {
-            return await _imageRepo.GetByRentalIdAndTypeAsync(rentalId, type);
-        }
-
-        public async Task<RentalImage?> GetImageByIdAsync(Guid id)
-        {
-            return await _imageRepo.GetByIdAsync(id);
-        }
-
-        public async Task DeleteImageAsync(Guid id)
-        {
-            await _imageRepo.DeleteAsync(id);
-        }
+        public Task<RentalImage> AddAsync(RentalImage image) => _repo.AddAsync(image);
+        public Task AddRangeAsync(IEnumerable<RentalImage> images) => _repo.AddRangeAsync(images);
+        public Task<List<RentalImage>> GetByRentalIdAsync(Guid rentalId) => _repo.GetByRentalIdAsync(rentalId);
     }
 }

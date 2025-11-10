@@ -1,70 +1,44 @@
+// File: src/services/rental.ts (Bản V8 - 5 món)
+
 import http from "../lib/http";
+import { type IContract, type IRentalRequest, type IRentalHistoryItem } from "../types"; 
 
-export type Rental = {
-  rentalId: string;
-  contractId?: string;
-  userId: string;
-  vehicleId: string;
-  pickupStationId: string;
-  returnStationId?: string;
-  staffId?: string;
-  startTime?: string;
-  endTime?: string;
-  totalCost?: number;
-  status: string;
-  createdAt?: string;
+// === SỬA LẠI HÀM NÀY (BƯỚC 1) ===
+// (Hàm này gọi POST /api/rental)
+export const createRental = async (data: IRentalRequest): Promise<IContract> => {
+  // (Gửi data "chuẩn" 5 món)
+  const response = await http.post<IContract>("/api/rental", data);
+  return response.data; 
+};
+// === HẾT SỬA ===
+
+
+// (Hàm này cho Renter - ProfilePage, giữ nguyên)
+export const getRentalHistory = async (): Promise<IRentalHistoryItem[]> => {
+  const response = await http.get<IRentalHistoryItem[]>("/api/rental/my-history");
+  return response.data;
 };
 
-export type VehicleConditionCheck = {
-  imageUrls: string[];
-  note?: string;
-  description?: string;
+// Lấy tất cả đơn thuê (dành cho Staff/Admin)
+export const getAllRentals = async (): Promise<IRentalHistoryItem[]> => {
+  const response = await http.get<IRentalHistoryItem[]>("/api/rental");
+  return response.data;
 };
 
-// Lấy tất cả rentals (cho admin/staff)
-export async function getAllRentals() {
-  const res = await http.get<Rental[]>("/api/rental");
-  return res.data;
-}
-
-// Lấy rental theo ID
-export async function getRentalById(id: string) {
-  const res = await http.get<Rental>(`/api/rental/${id}`);
-  return res.data;
-}
-
-// Lấy các rental cần checkin
-export async function getCheckinRentals() {
-  const res = await http.get<Rental[]>("/api/rental/checkin");
-  return res.data;
-}
-
-// Checkin rental
-export async function checkinRental(rentalId: string, conditionCheck: VehicleConditionCheck) {
-  const res = await http.post<Rental>(`/api/rental/checkin/${rentalId}`, conditionCheck);
-  return res.data;
-}
-
-// Lấy các rental cần trả
-export async function getReturnRentals() {
-  const res = await http.get<Rental[]>("/api/rental/return");
-  return res.data;
-}
-
-// Trả xe
-export async function returnRental(rentalId: string, conditionCheck: VehicleConditionCheck) {
-  const res = await http.post<Rental>(`/api/rental/return/${rentalId}`, conditionCheck);
-  return res.data;
-}
-
-// Tạo rental mới
-export async function createRental(rental: Partial<Rental>) {
-  const res = await http.post<Rental>("/api/rental", rental);
-  return res.data;
-}
-
-// Hủy rental
-export async function cancelRental(rentalId: string) {
-  const res = await http.put(`/api/rental/cancel/${rentalId}`, {});
-  return res.data;
-}
+// (Các hàm của Staff, giữ nguyên)
+export const findBookingByCode = async (code: string): Promise<IContract> => {
+  const response = await http.get<IContract>(`/api/rental/find-by-code/${code}`);
+  return response.data;
+};
+export const checkInRental = async (bookingId: string, deliveryCondition?: string): Promise<IContract> => {
+  const payload: Record<string, any> = { bookingId };
+  if (deliveryCondition && deliveryCondition.trim().length > 0) {
+    payload.deliveryCondition = deliveryCondition.trim();
+  }
+  const response = await http.post<IContract>(`/api/rental/check-in`, payload);
+  return response.data; 
+};
+export const checkOutRental = async (bookingId: string): Promise<IContract> => {
+  const response = await http.post<IContract>(`/api/rental/check-out`, { bookingId });
+  return response.data;
+};

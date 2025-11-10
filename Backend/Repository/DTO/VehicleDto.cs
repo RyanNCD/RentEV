@@ -31,5 +31,7 @@ namespace Repository.DTO
         public string Utilities { get; set; }
 
         public int? NumberOfRenters { get; set; }
+
+        public string ImageUrl { get; set; }
     }
 }
