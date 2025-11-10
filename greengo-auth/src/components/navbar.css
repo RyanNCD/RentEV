@@ -1,0 +1,42 @@
+.nav { position: sticky; top:0; background:#fff; border-bottom:1px solid #e5e7eb; z-index:50; }
+.nav__inner { max-width:1200px; margin:0 auto; padding:10px 16px; display:flex; align-items:center; gap:16px; }
+.nav__brand { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.nav__logo { height:28px; width:auto; display:block; }
+.nav__brand-text { font-weight:800; color:#16a34a; }
+
+.nav__links { margin-left:auto; margin-right:auto; display:flex; gap:24px; }
+.nav__link { color:#374151; text-decoration:none; font-weight:600; padding:8px 10px; border-radius:10px; }
+.nav__link:hover { background:#f3f4f6; }
+.nav__link.active { color:#16a34a; background:rgba(22,163,74,.12); }
+
+.nav__actions { display:flex; gap:10px; }
+.btn { display:inline-flex; align-items:center; justify-content:center; height:34px; padding:0 12px; border-radius:10px; font-weight:700; text-decoration:none; }
+.btn--ghost { border:1px solid #16a34a; color:#16a34a; background:#fff; }
+.btn--ghost:hover { background:#e6f7ee; }
+.btn--primary { background:#16a34a; color:#fff; }
+.btn--primary:hover { opacity:.95; }
+
+/* nhỏ hơn 768px */
+@media (max-width:768px){
+  .nav__links { gap:12px; }
+  .nav__actions { gap:8px; }
+  .nav__logo { height: 12px; }
+}
+.bold {
+  font-weight: 700;
+}
+
+.text-green {
+  color: #16a34a;
+}
+
+.btn-green {
+  background: #16a34a;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 8px;
+  text-decoration: none;
+}
+.btn-green:hover {
+  background: #15803d;
+}
