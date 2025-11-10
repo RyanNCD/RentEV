@@ -5,6 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Repository.DTO;
 using Repository.Models;
 using Service.Interface;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace APIRentEV.Controllers
 {
@@ -94,6 +99,105 @@ namespace APIRentEV.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,StaffStation")]
+        [HttpGet("checkin")]
+        public async Task<ActionResult<IEnumerable<RentalDto>>> GetCheckinRentals()
+        {
+            // Lấy các rental đang chờ checkin (Pending hoặc Confirmed)
+            var allRentals = await _rentalService.GetAllRentalAsync();
+            var checkinRentals = allRentals.Where(r => r.Status == "Pending" || r.Status == "Confirmed");
+            var dtos = _mapper.Map<List<RentalDto>>(checkinRentals);
+            return Ok(dtos);
+        }
+
+        [Authorize(Roles = "Admin,StaffStation")]
+        [HttpPost("checkin/{id}")]
+        public async Task<ActionResult<RentalDto>> CheckinRental(Guid id, [FromBody] VehicleConditionCheckDto conditionCheck)
+        {
+            try
+            {
+                // Lấy StaffId từ token
+                var staffIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(staffIdClaim) || !Guid.TryParse(staffIdClaim, out Guid staffId))
+                {
+                    return Unauthorized("Staff ID not found in token.");
+                }
+
+                var rental = await _rentalService.CheckinRentalAsync(id, staffId, conditionCheck);
+                if (rental == null)
+                    return NotFound();
+
+                return Ok(_mapper.Map<RentalDto>(rental));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [Authorize(Roles = "Admin,StaffStation")]
+        [HttpGet("return")]
+        public async Task<ActionResult<IEnumerable<RentalDto>>> GetReturnRentals()
+        {
+            // Lấy các rental đang active (cần trả xe)
+            var allRentals = await _rentalService.GetAllRentalAsync();
+            var returnRentals = allRentals.Where(r => r.Status == "Active");
+            var dtos = _mapper.Map<List<RentalDto>>(returnRentals);
+            return Ok(dtos);
+        }
+
+        [Authorize(Roles = "Admin,StaffStation")]
+        [HttpPost("return/{id}")]
+        public async Task<ActionResult<RentalDto>> ReturnRental(Guid id, [FromBody] VehicleConditionCheckDto conditionCheck)
+        {
+            try
+            {
+                // Lấy StaffId từ token
+                var staffIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (string.IsNullOrEmpty(staffIdClaim) || !Guid.TryParse(staffIdClaim, out Guid staffId))
+                {
+                    return Unauthorized("Staff ID not found in token.");
+                }
+
+                var rental = await _rentalService.ReturnRentalAsync(id, staffId, conditionCheck);
+                if (rental == null)
+                    return NotFound();
+
+                return Ok(_mapper.Map<RentalDto>(rental));
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [Authorize(Roles = "Admin,StaffStation,Customer")]
+        [HttpGet("{id}/images")]
+        public async Task<ActionResult<IEnumerable<RentalImageDto>>> GetRentalImages(Guid id, [FromQuery] string type = null)
+        {
+            var rental = await _rentalService.GetRentalByIdAsync(id);
+            if (rental == null) return NotFound();
+
+            // This will be handled by a separate endpoint in RentalImageController or we can add it here
+            // For now, return the images from the rental object if loaded
+            return Ok(new List<RentalImageDto>());
+        }
 
     }
 }   

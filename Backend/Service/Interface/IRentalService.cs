@@ -15,6 +15,8 @@ namespace Service.Interface
         Task<Rental?> GetRentalByIdAsync(Guid id);
         Task<Rental?> UpdateRentalAsync(Guid id , Rental rental);
         Task<bool> CancelRentalAsync(Guid rentalId);
+        Task<Rental?> CheckinRentalAsync(Guid rentalId, Guid staffId, VehicleConditionCheckDto conditionCheck);
+        Task<Rental?> ReturnRentalAsync(Guid rentalId, Guid staffId, VehicleConditionCheckDto conditionCheck);
 
     }
 }

@@ -88,6 +88,12 @@ builder.Services.Configure<VnPayConfig>(builder.Configuration.GetSection("VnPay"
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+builder.Services.AddScoped<ReservationRepository>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
+
+builder.Services.AddScoped<RentalImageRepository>();
+builder.Services.AddScoped<IRentalImageService, RentalImageService>();
+
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // JWT config

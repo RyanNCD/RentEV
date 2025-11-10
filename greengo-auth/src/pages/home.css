@@ -1,0 +1,53 @@
+.home-container {
+  min-height: calc(100vh - 200px);
+}
+
+.home-hero {
+  text-align: center;
+  padding: 48px 0;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 16px;
+  margin-bottom: 48px;
+}
+
+.grid-cars {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 32px;
+}
+
+@media (max-width: 768px) {
+  .grid-cars {
+    grid-template-columns: 1fr;
+  }
+  
+  .home-hero h1 {
+    font-size: 32px !important;
+  }
+  
+  .home-hero p {
+    font-size: 16px !important;
+  }
+}
+
+.btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s;
+}
+
+.btn--primary {
+  background-color: #166534;
+  color: white;
+}
+
+.btn--primary:hover {
+  background-color: #14532d;
+}
