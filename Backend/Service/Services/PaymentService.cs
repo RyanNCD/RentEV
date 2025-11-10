@@ -148,28 +148,28 @@ namespace Service.Services
         {
             // VNPay integration removed. No processing available.
             throw new NotSupportedException("VNPay return processing is no longer supported.");
-        }
+            }
 
         // Implement HandleVnPayReturnAsync (kept for backward compatibility, but ProcessVnPayReturnAsync should be used)
         public async Task<bool> HandleVnPayReturnAsync(Dictionary<string, string> queryParams)
-        {
+            {
             // VNPay integration removed.
             return await Task.FromResult(false);
-        }
+            }
 
         public async Task<WebhookData> VerifyPayOSWebhookAsync(string rawBody)
-        {
+            {
             // Deserialize raw JSON body into SDK's WebhookType then verify using SDK
             var webhookBody = JsonSerializer.Deserialize<WebhookType>(rawBody);
             var verified = _payOS.verifyPaymentWebhookData(webhookBody);
             return await Task.FromResult(verified);
-        }
+            }
 
         public async Task<Payment?> ConfirmPaymentAsync(Guid paymentId)
-        {
+            {
             var payment = await _repo.GetByIdAsync(paymentId);
             if (payment == null) return null;
-            payment.Status = "Success";
+                payment.Status = "Success";
             payment.PaymentDate = DateTime.UtcNow;
             await _repo.UpdateAsync(payment);
 
@@ -179,14 +179,14 @@ namespace Service.Services
             {
                 // If rental total cost is not set, use paid amount
                 if (!rental.TotalCost.HasValue || rental.TotalCost.Value <= 0)
-                {
+            {
                     rental.TotalCost = payment.Amount;
-                }
+            }
                 // Mark rental as paid (use upper-case to match FE checks)
                 rental.Status = "PAID"; // [Inference] FE expects "PAID" to show check-in button
 
                 await _rentalRepo.UpdateAsync(rental);
-            }
+        }
 
             return payment;
         }

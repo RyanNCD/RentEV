@@ -63,6 +63,7 @@ namespace APIRentEV.Controllers
             return Ok(new { checkoutUrl, paymentId = payment.PaymentId, transactionId = payment.TransactionId });
         }
 
+
         [AllowAnonymous]
         [HttpPost("payos/webhook")]
         public async Task<IActionResult> PayOSWebhook()
@@ -78,16 +79,16 @@ namespace APIRentEV.Controllers
                 return Ok(new { success = true });
             }
             catch (Exception ex)
-            {
+                {
                 _logger.LogError(ex, "[PayOS] Webhook verification error");
                 return BadRequest(new { success = false, message = ex.Message });
             }
-        }
+                }
 
         [Authorize(Roles = "Customer")]
         [HttpPost("{id}/confirm")]
         public async Task<IActionResult> ConfirmPayment(Guid id)
-        {
+                { 
             _logger.LogInformation("[ConfirmPayment] Request received for paymentId={PaymentId}", id);
             var payment = await _paymentService.ConfirmPaymentAsync(id);
             if (payment == null)
