@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { getAvailableVehicles, type Vehicle } from "../services/vehicle";
+import { getAvailableVehicles } from "../services/vehicle";
+import { type IVehicle } from "../types";
 import "../components/carcard.css";
 import "./home.css";
 
 export default function HomePage() {
-  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehicles, setVehicles] = useState<IVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

@@ -18,7 +18,10 @@ export default function AdminLayout() {
         
         <nav className="admin-sidebar__nav">
           <NavLink to="/dashboard" end>Tổng quan</NavLink>
-          <NavLink to="/dashboard/checkin">Giao nhận xe (Staff)</NavLink>
+          
+          {(user?.role === "STAFF" || user?.role === "ADMIN") && (
+            <NavLink to="/dashboard/checkin">Giao nhận xe</NavLink>
+          )}
           
           {user?.role === "ADMIN" && (
             <>

@@ -21,6 +21,12 @@ namespace Service.Services
 
         public async Task<Contract> CreateAsync(Contract contract)
         {
+            contract.ContractId = Guid.NewGuid();
+            contract.CreatedAt = DateTime.UtcNow;
+            if (string.IsNullOrWhiteSpace(contract.Status))
+            {
+                contract.Status = "Active";
+            }
             await _contractRepository.AddContractlAsync(contract);
             return contract;
         }

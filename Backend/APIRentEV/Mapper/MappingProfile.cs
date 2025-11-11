@@ -66,6 +66,10 @@ namespace APIRentEV.Mapper
             // ===============================
             CreateMap<Rental, RentalDto>()
                 .ForMember(dest => dest.VehicleName, opt => opt.MapFrom(src => src.Vehicle != null ? src.Vehicle.VehicleName : null))
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.FullName : null))
+                .ForMember(dest => dest.PickupStationName, opt => opt.MapFrom(src => src.PickupStation != null ? src.PickupStation.StationName : null))
+                .ForMember(dest => dest.ReturnStationName, opt => opt.MapFrom(src => src.ReturnStation != null ? src.ReturnStation.StationName : null))
+                .ForMember(dest => dest.Contract, opt => opt.MapFrom(src => src.Contract))
                 .ReverseMap();
 
             CreateMap<RentalCreateDto, Rental>()
@@ -79,7 +83,9 @@ namespace APIRentEV.Mapper
             // ===============================
             // 💬 FEEDBACK
             // ===============================
-            CreateMap<Feedback, FeedbackDto>().ReverseMap();
+            CreateMap<Feedback, FeedbackDto>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User != null ? src.User.FullName : null))
+                .ReverseMap();
 
             CreateMap<FeedbackCreateDto, Feedback>()
                 .ForMember(dest => dest.FeedbackId, opt => opt.MapFrom(src => Guid.NewGuid()))

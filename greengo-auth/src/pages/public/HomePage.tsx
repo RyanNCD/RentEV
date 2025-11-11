@@ -2,29 +2,84 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-// === SỬA LẠI IMPORT (Bỏ featured, Lấy lại getAll) ===
-import { getAllVehicles, searchVehicles } from "../../services/vehicle"; 
+// === SỬA LẠI IMPORT - Dùng API available (public, không cần auth) ===
+import { getAvailableVehicles, searchVehicles } from "../../services/vehicle"; 
 import { type IVehicle } from "../../types"; 
 
-// (CarCard component giữ nguyên, đã fix JSON thật)
+// CarCard component hiển thị thông tin xe
 const CarCard = ({ car }: { car: IVehicle }) => {
   const tags = car.utilities ? car.utilities.split(',').map(tag => tag.trim()) : [];
+  
+  // Map vehicle name to image (fallback if imageUrl is not provided)
+  const getVehicleImage = (vehicle: IVehicle) => {
+    // Nếu có imageUrl từ API (đã được map với domain API), dùng luôn
+    if (vehicle.imageUrl) {
+      return vehicle.imageUrl;
+    }
+    
+    // Fallback: map theo tên xe nếu không có imageUrl
+    const name = vehicle.vehicleName.toLowerCase();
+    if (name.includes("vf7")) return "/images/car-vf7.jpg";
+    if (name.includes("vf3")) return "/images/car-vf3.jpg";
+    if (name.includes("vf6")) return "/images/car-vf6.jpg";
+    if (name.includes("vf e34") || name.includes("vf34")) return "/images/car-vf34.jpg";
+    if (name.includes("ioniq")) return "/images/car-ioniq5.jpg";
+    if (name.includes("ev6")) return "/images/car-ev6.jpg";
+    if (name.includes("vf5")) return "/images/car-vf5.jpg";
+    if (name.includes("vf9")) return "/images/car-vf9.jpg";
+    if (name.includes("vf8")) return "/images/car-vf8.jpg";
+    return "/images/car-vf7.jpg"; // Default image
+  };
+
+  const formatPrice = (price?: number) => {
+    if (!price) return "Liên hệ";
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
+  };
+
   return (
-    <div style={{ border: "1px solid #eee", padding: "1rem", borderRadius: "8px" }}>
+    <div style={{ border: "1px solid #eee", padding: "1rem", borderRadius: "8px", 
+      background: "#fff", transition: "transform 0.2s", cursor: "pointer", height: "90%" }}
+         onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-4px)"}
+         onMouseLeave={(e) => e.currentTarget.style.transform = "translateY(0)"}>
       <img 
-        src={"/images/car-vf7.jpg"} // (DÙNG TẠM)
+        src={getVehicleImage(car)}
         alt={car.vehicleName}
-        style={{ width: "100%", height: "150px", objectFit: "cover" }} 
+        style={{ width: "100%", height: "150px", objectFit: "cover", borderRadius: "8px" }}
+        onError={(e) => {
+          (e.target as HTMLImageElement).src = "/images/car-vf7.jpg";
+        }}
       />
-      <h4>{car.vehicleName}</h4>
-      <p>{car.pricePerDay.toLocaleString("vi-VN")} VNĐ/ngày</p>
-      <div>
-        {tags.map(tag => (
-          <span key={tag} style={{ background: "#f0f0f0", padding: "2px 6px", fontSize: "12px", marginRight: "4px" }}>
-            {tag}
-          </span>
-        ))}
-      </div>
+      <h4 style={{ margin: "12px 0 8px", fontSize: "18px", fontWeight: "bold" }}>{car.vehicleName}</h4>
+      {car.vehicleType && (
+        <p style={{ fontSize: "14px", color: "#666", margin: "4px 0" }}>{car.vehicleType}</p>
+      )}
+      {car.batteryCapacity && (
+        <p style={{ fontSize: "14px", color: "#666", margin: "4px 0" }}>Pin: {car.batteryCapacity} kWh</p>
+      )}
+      <p style={{ fontSize: "16px", fontWeight: "bold", color: "#166534", margin: "8px 0" }}>
+        {formatPrice(car.pricePerDay)}
+        {car.pricePerDay && <small style={{ fontSize: "12px" }}>/ngày</small>}
+      </p>
+      {tags.length > 0 && (
+        <div style={{ marginTop: "8px" }}>
+          {tags.map(tag => (
+            <span key={tag} style={{ 
+              background: "#f0f0f0", 
+              padding: "4px 8px", 
+              fontSize: "12px", 
+              marginRight: "4px",
+              borderRadius: "4px",
+              display: "inline-block",
+              marginTop: "4px"
+            }}>
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -38,25 +93,23 @@ export default function HomePage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  // === SỬA LẠI CHỖ NÀY (Quay về API cũ) ===
+  // === Dùng API /api/vehicle/available (Public API - không cần auth) ===
   useEffect(() => {
     const fetchInitialVehicles = async () => {
       try {
         setLoading(true);
-        // Bỏ: const data = await getFeaturedVehicles();
-        // Sửa thành: Gọi API "/api/Vehicle" (API này 100% có)
-        const data = await getAllVehicles(); 
+        // Gọi API available để lấy danh sách xe có sẵn để thuê
+        const data = await getAvailableVehicles(); 
         setVehicles(data);
-      } catch (err) {
-        // (Sửa lại câu báo lỗi)
-        setError("Không thể tải danh sách xe."); 
+      } catch (err: any) {
+        console.error("Error loading vehicles:", err);
+        setError("Không thể tải danh sách xe. Vui lòng thử lại sau."); 
       } finally {
         setLoading(false);
       }
     };
     fetchInitialVehicles();
-  }, []); 
-  // === HẾT SỬA ===
+  }, []);
 
 
   // (Hàm handleSearch giữ nguyên, vẫn dùng /api/Vehicle/search)
@@ -91,7 +144,7 @@ export default function HomePage() {
     if (error && vehicles.length === 0) return <div style={{ padding: "2rem", color: "red" }}>Lỗi: {error}</div>;
     if (vehicles.length === 0) return <div style={{ padding: "2rem" }}>Không tìm thấy xe nào.</div>;
     return (
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", padding: "2rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", padding: "2rem", alignItems: "stretch" }}>
         {vehicles.map((car) => (
           <Link to={`/vehicles/${car.vehicleId}`} key={car.vehicleId} style={{ textDecoration: "none", color: "inherit" }}>
             <CarCard car={car} />

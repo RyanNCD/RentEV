@@ -7,7 +7,6 @@ using Repository.Models;
 using Repository.Repositories;
 using Service.Interface;
 using Service.Services;
-using Services;
 using System.Text;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Service.Configs;
@@ -160,7 +159,14 @@ app.UseSwagger();
 app.UseSwaggerUI();
 //}
 
-app.UseHttpsRedirection();
+// Chỉ bật HTTPS redirection khi không phải Development
+// Trong Development, tắt để tránh lỗi 307 redirect khi chạy HTTP (port 5248)
+// Trong Production, HTTPS redirection sẽ được bật
+if (app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
+
 // Serve static files for uploaded images (e.g., /uploads/...)
 app.UseStaticFiles();
 app.UseCors("AllowSpecificOrigins");

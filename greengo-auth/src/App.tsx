@@ -62,12 +62,10 @@ export default function App() {
       {/* 4. Layout cho Dashboard (Admin/Staff) */}
       <Route element={<ProtectedRoutes allowedRoles={["ADMIN", "STAFF"]} />}>
         <Route path="/dashboard" element={<AdminLayout />}>
-          
-          {/* Route cho Staff: Giao/Nhận xe */}
-          <Route element={<ProtectedRoutes allowedRoles={["STAFF"]} />}> 
-            <Route path="checkin" element={<CheckinManagement />} />
-          </Route>
+          {/* Route chung cho cả Admin và Staff: Giao/Nhận xe (Admin chỉ xem, Staff có thể thao tác) */}
+          <Route path="checkin" element={<CheckinManagement />} />
 
+          {/* Route chỉ dành cho Admin */}
           <Route element={<ProtectedRoutes allowedRoles={["ADMIN"]} />}> 
              <Route index element={<AdminDashboard />} />
              <Route path="users" element={<UserManagement />} />

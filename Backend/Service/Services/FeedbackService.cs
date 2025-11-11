@@ -52,5 +52,15 @@ namespace Service.Services
         {
             return await _feedbackRepository.GetAverageRatingByRentalAsync(rentalId);
         }
+
+        public async Task<IEnumerable<Feedback>> GetByVehicleIdAsync(Guid vehicleId)
+        {
+            return await _feedbackRepository.GetByVehicleIdAsync(vehicleId);
+        }
+
+        public async Task<double> GetAverageRatingByVehicleIdAsync(Guid vehicleId)
+        {
+            return await _feedbackRepository.GetAverageRatingByVehicleIdAsync(vehicleId);
+        }
     }
 }

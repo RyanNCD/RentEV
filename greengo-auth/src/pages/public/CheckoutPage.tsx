@@ -10,6 +10,15 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function CheckoutPage() {
+  const formatPrice = (price?: number | null) => {
+    if (price == null || Number.isNaN(price)) return "Liên hệ";
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+      maximumFractionDigits: 0,
+    }).format(price);
+  };
+
   const location = useLocation();
   const navigate = useNavigate();
   // (Biến "car" CÓ THỂ BỊ NULL)
@@ -51,7 +60,7 @@ export default function CheckoutPage() {
     const end = new Date(endDate).getTime();
     if (end <= start) return 0;
     const days = (end - start) / (1000 * 60 * 60 * 24);
-    return Math.ceil(days) * car.pricePerDay;
+    return Math.ceil(days) * (car.pricePerDay ?? 0);
   };
   
   const totalCostForUI = calculateTotal();
@@ -227,7 +236,10 @@ export default function CheckoutPage() {
             style={{ width: "150px", height: "100px", objectFit: "cover" }} />
         <div>
           <h3>{car.vehicleName}</h3> {/* (Hết đỏ) */}
-          <p>{car.pricePerDay.toLocaleString("vi-VN")} VNĐ/ngày</p> {/* (Hết đỏ) */}
+          <p>
+            {formatPrice(car.pricePerDay)}
+            {car.pricePerDay != null ? " /ngày" : ""}
+          </p>
         </div>
       </div>
       
