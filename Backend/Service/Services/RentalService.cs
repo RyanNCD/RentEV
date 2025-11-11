@@ -15,12 +15,14 @@ namespace Service.Services
     {
         private readonly RentalRepository _rentalRepo;
         private readonly VehicleRepository _vehicleRepo;
+        private readonly IRentalImageService _imageService;
      
 
-        public RentalService(RentalRepository rentalRepo, VehicleRepository vehicleRepo)
+        public RentalService(RentalRepository rentalRepo, VehicleRepository vehicleRepo, IRentalImageService imageService)
         {
             _rentalRepo = rentalRepo;
             _vehicleRepo = vehicleRepo;
+            _imageService = imageService;
         }
 
         public async Task<IEnumerable<Rental>> GetAllRentalAsync()
@@ -42,13 +44,7 @@ namespace Service.Services
 
             await _rentalRepo.AddAsync(rental);
 
-            // Cập nhật số người đã thuê xe
-            var vehicle = await _vehicleRepo.GetVehicleByIdAsync(rental.VehicleId);
-            if (vehicle != null)
-            {
-                vehicle.NumberOfRenters += 1;
-                await _vehicleRepo.UpdateAsync(vehicle);
-            }
+            // Số người đã thuê xe sẽ được tăng khi tạo reservation, không tăng ở đây
 
             return rental;
         }

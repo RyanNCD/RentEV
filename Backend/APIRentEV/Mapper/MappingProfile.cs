@@ -94,6 +94,21 @@ namespace APIRentEV.Mapper
                 .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => Guid.NewGuid()))
                 .ForMember(dest => dest.PaymentDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status ?? "Pending"));
+
+            // ===============================
+            // 📅 RESERVATION
+            // ===============================
+            CreateMap<Reservation, ReservationDto>().ReverseMap();
+
+            CreateMap<ReservationCreateDto, Reservation>()
+                .ForMember(dest => dest.ReservationId, opt => opt.MapFrom(src => Guid.NewGuid()))
+                .ForMember(dest => dest.ReservedAt, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status ?? "Pending"));
+
+            // ===============================
+            // 📸 RENTAL IMAGE
+            // ===============================
+            CreateMap<RentalImage, RentalImageDto>().ReverseMap();
         }
     }
 }

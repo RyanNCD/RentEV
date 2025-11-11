@@ -19,7 +19,12 @@ namespace Repository.Implementations
 
         public async Task<IEnumerable<Rental>> GetAllAsync()
         {
-            return await _context.Rentals.ToListAsync();
+            return await _context.Rentals
+                .Include(r => r.Vehicle)
+                .Include(r => r.User)
+                .Include(r => r.PickupStation)
+                .Include(r => r.ReturnStation)
+                .ToListAsync();
         }
 
         // Rentals that have at least one successful payment (Status = "Success")
@@ -45,6 +50,9 @@ namespace Repository.Implementations
             return await _context.Rentals
                                  .Include(r => r.Vehicle)
                                  .Include(r => r.User)
+                                 .Include(r => r.PickupStation)
+                                 .Include(r => r.ReturnStation)
+                                 .Include(r => r.RentalImages)
                                  .FirstOrDefaultAsync(r => r.RentalId == id);
         }
 

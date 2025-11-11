@@ -155,5 +155,27 @@ namespace Repository.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<VehicleDto>> GetAvailableVehiclesAsync()
+        {
+            return await _context.Vehicles
+                .Where(v => v.Status != null && v.Status.ToLower() == "available")
+                .Select(v => new VehicleDto
+                {
+                    VehicleId = v.VehicleId,
+                    StationId = v.StationId,
+                    VehicleName = v.VehicleName,
+                    VehicleType = v.VehicleType,
+                    BatteryCapacity = v.BatteryCapacity,
+                    LicensePlate = v.LicensePlate,
+                    Status = v.Status,
+                    PricePerDay = v.PricePerDay,
+                    Description = v.Description,
+                    SeatingCapacity = v.SeatingCapacity,
+                    Utilities = v.Utilities,
+                    NumberOfRenters = v.NumberOfRenters
+                })
+                .ToListAsync();
+        }
+
     }
 }

@@ -19,6 +19,7 @@ namespace Service.Interface
         Task<List<VehicleDto>> FilterVehiclesAsync(Guid? stationId, string status, int? seatingCapacity);
         Task<List<VehicleDto>> SortVehiclesAsync(string sortBy, bool isDescending);
         Task<List<Vehicle>> GetFeaturedVehiclesAsync(int topCount = 5);
+        Task<List<VehicleDto>> GetAvailableVehiclesAsync();
 
     }
 }

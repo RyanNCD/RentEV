@@ -91,5 +91,10 @@ namespace Service.Services
             return await _vehicleRepository.GetFeaturedVehiclesAsync(topCount);
         }
 
+        public async Task<List<VehicleDto>> GetAvailableVehiclesAsync()
+        {
+            return await _vehicleRepository.GetAvailableVehiclesAsync();
+        }
+
     }
 }
