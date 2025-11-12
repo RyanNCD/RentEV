@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.DTO;
@@ -8,20 +9,23 @@ using Service.Services;
 
 namespace APIRentEV.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PaymentController : ControllerBase
     {
         private readonly IPaymentService _paymentService; // dùng interface thay vì class cụ thể
         private readonly IMapper _mapper;
+        private readonly ILogger<PaymentController> _logger;
 
-        public PaymentController(IPaymentService paymentService, IMapper mapper)
+        public PaymentController(IPaymentService paymentService, IMapper mapper, ILogger<PaymentController> logger)
         {
             _paymentService = paymentService;
             _mapper = mapper;
+            _logger = logger;
         }
 
-        // Lấy tất cả payment
+        [Authorize(Roles = "Admin,StaffStation")]
         [HttpGet]
         public async Task<IActionResult> GetAllPayments()
         {
@@ -30,7 +34,7 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
-        // Lấy payment theo ID
+        [Authorize(Roles = "Admin,StaffStation,Customer")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPaymentById(Guid id)
         {
@@ -41,39 +45,60 @@ namespace APIRentEV.Controllers
             return Ok(dto);
         }
 
-        // Tạo payment mới và trả URL thanh toán VNPAY
+        [Authorize(Roles = "Customer")]
         [HttpPost("create")]
         public async Task<IActionResult> CreatePayment([FromBody] PaymentCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var payment = _mapper.Map<Payment>(dto);
+            _logger.LogInformation("[PayOS] CreatePayment requested for RentalId={RentalId}, UserId={UserId}, Amount={Amount}", payment.RentalId, payment.UserId, payment.Amount);
 
-            // Lấy IP người dùng từ HttpContext
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
 
-            // Truyền đủ tham số
-            var paymentUrl = await _paymentService.CreatePaymentUrlAsync(payment.Amount, payment.PaymentId, ipAddress);
+            // CreatePaymentUrlAsync now saves the payment with "Pending" status
+            var checkoutUrl = await _paymentService.CreatePaymentUrlAsync(payment, ipAddress);
+            _logger.LogInformation("[PayOS] CheckoutUrl created for PaymentId={PaymentId}", payment.PaymentId);
 
-            return Ok(new { paymentUrl });
+            return Ok(new { checkoutUrl, paymentId = payment.PaymentId, transactionId = payment.TransactionId });
         }
 
 
-        // Callback VNPAY
-        [HttpGet("vnpay-return")]
-        public async Task<IActionResult> VnPayReturn()
+        [AllowAnonymous]
+        [HttpPost("payos/webhook")]
+        public async Task<IActionResult> PayOSWebhook()
         {
-            // Request.Query là IQueryCollection, convert sang Dictionary
-            var queryParams = new Dictionary<string, string>();
-            foreach (var key in Request.Query.Keys)
+            // Đọc body thô và xác minh bằng SDK PayOS qua service
+            try
             {
-                queryParams[key] = Request.Query[key];
+                using var reader = new StreamReader(Request.Body);
+                var rawBody = await reader.ReadToEndAsync();
+                var webhookData = await _paymentService.VerifyPayOSWebhookAsync(rawBody);
+                _logger.LogInformation("[PayOS] Webhook verified: orderCode={OrderCode}, paymentLinkId={PaymentLinkId}, code={Code}, desc={Desc}",
+                    webhookData.orderCode, webhookData.paymentLinkId, webhookData.code, webhookData.desc);
+                return Ok(new { success = true });
             }
+            catch (Exception ex)
+                {
+                _logger.LogError(ex, "[PayOS] Webhook verification error");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+                }
 
-            var result = await _paymentService.HandleVnPayReturnAsync(queryParams);
-
-            // Trả message cho frontend hoặc redirect nếu muốn
-            return Ok(new { message = result });
+        [Authorize(Roles = "Customer")]
+        [HttpPost("{id}/confirm")]
+        public async Task<IActionResult> ConfirmPayment(Guid id)
+                { 
+            _logger.LogInformation("[ConfirmPayment] Request received for paymentId={PaymentId}", id);
+            var payment = await _paymentService.ConfirmPaymentAsync(id);
+            if (payment == null)
+            {
+                _logger.LogWarning("[ConfirmPayment] Payment not found or cannot confirm. paymentId={PaymentId}", id);
+                return NotFound(new { message = "Payment not found." });
+            }
+            _logger.LogInformation("[ConfirmPayment] Payment confirmed. paymentId={PaymentId}, transactionId={TransactionId}", payment.PaymentId, payment.TransactionId);
+            var dto = _mapper.Map<PaymentDto>(payment);
+            return Ok(dto);
         }
     }
 }

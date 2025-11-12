@@ -1,5 +1,6 @@
 ﻿using APIRentEV.Mapper;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Repository.DTO;
 using Repository.Models;
@@ -25,7 +26,7 @@ namespace APIRentEV.Controllers
             _mapper = mapper;
         }
 
-        // GET: api/Station
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<StationDto>>> GetAllStations()
         {
@@ -34,7 +35,7 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
-        // GET: api/Station/{id}
+        [Authorize(Roles = "Admin,StaffStation,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult<StationDto>> GetStationById(Guid id)
         {
@@ -44,7 +45,7 @@ namespace APIRentEV.Controllers
             return Ok(_mapper.Map<StationDto>(station));
         }
 
-        // POST: api/Station
+        [Authorize(Roles = "Admim")]
         [HttpPost]
         public async Task<ActionResult<StationDto>> CreateStation([FromBody] StationCreateDto dto)
         {
@@ -58,7 +59,7 @@ namespace APIRentEV.Controllers
                                    _mapper.Map<StationDto>(created));
         }
 
-        // PUT: api/Station/{id}
+        [Authorize(Roles = "Admim")]
         [HttpPut("{id}")]
         public async Task<ActionResult<StationDto>> UpdateStation(Guid id, [FromBody] StationUpdateDto dto)
         {
@@ -71,6 +72,7 @@ namespace APIRentEV.Controllers
             return Ok(_mapper.Map<StationDto>(existing));
         }
 
+        [Authorize(Roles = "Admim")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStation(Guid id)
         {

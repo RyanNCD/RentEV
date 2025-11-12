@@ -8,7 +8,7 @@ namespace Repository.DTO
 {
     public class RentalCreateDto
     {
-        public Guid ContractId { get; set; }
+        public Guid? ContractId { get; set; }
 
         public Guid UserId { get; set; }
 

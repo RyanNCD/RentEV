@@ -13,8 +13,10 @@ namespace Service.Interface
         Task<Feedback> GetByIdAsync(Guid id);
         Task<IEnumerable<Feedback>> GetByRentalIdAsync(Guid rentalId);
         Task<IEnumerable<Feedback>> GetByUserIdAsync(Guid userId);
+        Task<IEnumerable<Feedback>> GetByVehicleIdAsync(Guid vehicleId);
         Task<Feedback> AddAsync(Feedback feedback);
         Task<bool> DeleteAsync(Guid id);
         Task<double> GetAverageRatingByRentalAsync(Guid rentalId);
+        Task<double> GetAverageRatingByVehicleIdAsync(Guid vehicleId);
     }
 }

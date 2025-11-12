@@ -11,8 +11,8 @@ namespace Service.Interface
     {
         Task<IEnumerable<Contract>> GetAllAsync();
         Task<Contract?> GetByIdAsync(Guid id);
-        Task<Contract?> CreateAsync(Contract contract);
-        Task<Contract?> UpdateAsync(Guid id, Contract contract);
+        Task<Contract> CreateAsync(Contract contract);
+        Task<Contract> UpdateAsync(Guid id, Contract contract);
         Task DeleteAsync(Guid id);
     }
 }

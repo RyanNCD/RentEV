@@ -1,21 +1,30 @@
+// File: src/services/auth.ts (Bản "Lách" - V10)
+
 import http from "../lib/http";
+// Removed unused IUser import
 
+// (Interface ILoginData giữ nguyên)
+interface ILoginData { email: string; password: string; }
 
-export type LoginReq = { email: string; password: string };
-
-export async function login(payload: LoginReq) {
-  const res = await http.post("/api/Authen/login", payload);
-  const data: any = res.data;
-  const accessToken = data?.token ?? data?.accessToken ?? data?.result?.token;
-  if (accessToken) localStorage.setItem("gg_access_token", accessToken);
-  return data;
+// === "GÓI HÀNG" (BE "Lười" trả về) ===
+interface ILoginResponseFromBE {
+  token: string; // (Chỉ cần token)
 }
 
-export async function register(payload: LoginReq) {
-  const res = await http.post("/api/Authen/register", payload);
-  return res.data;
-}
+// === HÀM LOGIN (Code Lách) ===
+export const login = async (data: ILoginData): Promise<ILoginResponseFromBE> => {
+  const response = await http.post<ILoginResponseFromBE>("/api/Authen/login", data);
+  return response.data; // (Trả về { token: "..." })
+};
 
-export function logout() {
-  localStorage.removeItem("gg_access_token");
-}
+// (Hàm Register giữ nguyên)
+export const register = async (data: any /* IRegisterData */) => {
+  const response = await http.post("/api/Authen/register", data);
+  return response.data;
+};
+
+// === HÀM PROFILE (Code Lách - Vô hiệu hóa) ===
+// (Hàm này SẼ 401, nên mình không gọi nó)
+export const getProfile = async (): Promise<any> => {
+  return Promise.reject("Không dùng /profile ở code lách");
+};

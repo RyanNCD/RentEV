@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -7,28 +7,19 @@ using Repository.Models;
 using Repository.Repositories;
 using Service.Interface;
 using Service.Services;
-using Services;
 using System.Text;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Service.Configs;
 using APIRentEV.Mapper;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
-// --- CORS: cho FE localhost:5173 truy cập ---
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFE", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173") // FE dev server
-              .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials();
-    });
-});
+builder.Services.AddEndpointsApiExplorer();
 
 // Swagger + JWT Auth
 builder.Services.AddEndpointsApiExplorer();
@@ -36,7 +27,6 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "RentEV API", Version = "v1" });
 
-    // Add JWT Bearer Auth to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -46,6 +36,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Nhập token theo dạng: Bearer {your JWT token}"
     });
+
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -63,9 +54,13 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// DbContext
 builder.Services.AddDbContext<SWP391RentEVContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+});
+
+
 
 // --- Scoped services (Repository + Service) ---
 builder.Services.AddScoped<RentalRepository>();
@@ -89,9 +84,12 @@ builder.Services.AddScoped<IContractService, ContractService>();
 builder.Services.AddScoped<FeedbackRepository>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 
-builder.Services.Configure<VnPayConfig>(builder.Configuration.GetSection("VnPay"));
+builder.Services.Configure<PayOSConfig>(builder.Configuration.GetSection("PayOS"));
 builder.Services.AddScoped<PaymentRepository>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+builder.Services.AddScoped<RentalImageRepository>();
+builder.Services.AddScoped<IRentalImageService, RentalImageService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -111,9 +109,47 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            RoleClaimType = ClaimTypes.Role
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(authHeader))
+                {
+                    if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        context.Token = authHeader.Substring("Bearer ".Length).Trim();
+                    }
+                    else
+                    {
+                        context.Token = authHeader;
+                    }
+                }
+
+                return Task.CompletedTask;
+            }
         };
     });
+
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowOrigins")
+    .Get<string[]>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
@@ -121,13 +157,20 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+// Chỉ bật HTTPS redirection khi không phải Development
+// Trong Development, tắt để tránh lỗi 307 redirect khi chạy HTTP (port 5248)
+// Trong Production, HTTPS redirection sẽ được bật
+if (app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
 
-// --- Bật CORS trước Authentication & Authorization ---
-app.UseCors("AllowFE");
-
+// Serve static files for uploaded images (e.g., /uploads/...)
+app.UseStaticFiles();
+app.UseCors("AllowSpecificOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

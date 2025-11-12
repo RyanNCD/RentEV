@@ -12,7 +12,7 @@ namespace Repository.DTO
 
         public Guid StationId { get; set; }
 
-        public string VehicleName { get; set; }
+        public string? VehicleName { get; set; }
 
         public string VehicleType { get; set; }
 
@@ -31,5 +31,7 @@ namespace Repository.DTO
         public string Utilities { get; set; }
 
         public int? NumberOfRenters { get; set; }
+
+        public string ImageUrl { get; set; }
     }
 }

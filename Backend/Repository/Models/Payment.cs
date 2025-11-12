@@ -2,12 +2,14 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Repository.Models;
 
 public partial class Payment
 {
-    public Guid PaymentId { get; set; }
+    [Key]
+    public Guid PaymentId { get; set; } = Guid.NewGuid();
 
     public Guid RentalId { get; set; }
 
@@ -22,6 +24,10 @@ public partial class Payment
     public string Type { get; set; }
 
     public string Status { get; set; }
+
+    // Mã giao dịch từ PayOS để phục vụ xác thực
+    [MaxLength(100)]
+    public string TransactionId { get; set; }
 
     public virtual Rental Rental { get; set; }
 

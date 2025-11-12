@@ -2,12 +2,14 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Repository.Models;
 
 public partial class Reservation
 {
-    public Guid ReservationId { get; set; }
+    [Key]
+    public Guid ReservationId { get; set; } = Guid.NewGuid();
 
     public Guid UserId { get; set; }
 

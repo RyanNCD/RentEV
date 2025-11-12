@@ -1,4 +1,4 @@
-﻿using Repository.Models;
+using Repository.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +14,13 @@ namespace Service.Interface
     {
         Task<List<Payment>> GetAllPaymentsAsync();
         Task<Payment> GetPaymentById(Guid id);
-        Task<string> CreatePaymentUrlAsync(decimal amount, Guid orderId, string ipAddress);
+        Task<Payment?> GetPaymentByTransactionIdAsync(string transactionId);
+        Task<string> CreatePaymentUrlAsync(Payment payment, string ipAddress);
+        Task<Payment> ProcessVnPayReturnAsync(Dictionary<string, string> queryParams);
         Task<bool> HandleVnPayReturnAsync(Dictionary<string, string> queryParams);
-
+        Task<Net.payOS.Types.WebhookData> VerifyPayOSWebhookAsync(string rawBody);
+        Task<Payment?> ConfirmPaymentAsync(Guid paymentId);
+        Task<List<Payment>> GetPaymentsByRentalIdAsync(Guid rentalId);
+        Task<bool> IsRentalPaidAsync(Guid rentalId);
     }
 }

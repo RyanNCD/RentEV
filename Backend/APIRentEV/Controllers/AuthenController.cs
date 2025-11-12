@@ -36,7 +36,7 @@ namespace APIRentEV.Controllers
 
                 return Ok(new
                 {
-                    message = "Đăng ký thành công",
+                    message = "Register successfully",
                     data = new
                     {
                         user.UserId,
