@@ -36,6 +36,7 @@ export interface IVehicle {
   utilities?: string; // Sửa 'tags: string[]' -> 'utilities: string'
   numberOfRenters?: number;
   imageUrl?: string;
+  createdAt?: string; // Ngày tạo (optional, nếu backend có trả về)
 }
 
 // (Ông có thể thêm các interface khác như IStation, IRental... ở đây)

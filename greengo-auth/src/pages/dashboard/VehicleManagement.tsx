@@ -234,6 +234,7 @@ export default function VehicleManagement() {
             <input
               type="text"
               placeholder="Tên xe, loại, biển số..."
+              style={{ width: "80%", height: "30px" }}
               value={searchFilter}
               onChange={(e) => {
                 setSearchFilter(e.target.value);
