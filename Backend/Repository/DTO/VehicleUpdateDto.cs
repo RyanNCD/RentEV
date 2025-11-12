@@ -38,8 +38,8 @@ namespace Repository.DTO
         [MaxLength(200)]
         public string? Utilities { get; set; }
 
-        [Required]
-        public int NumberOfRenters { get; set; }
+        // NumberOfRenters is calculated from Reservations, not updated manually
+        // public int NumberOfRenters { get; set; }
 
         [MaxLength(500)]
         public string? ImageUrl { get; set; }

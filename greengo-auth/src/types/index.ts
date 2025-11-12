@@ -97,6 +97,30 @@ export interface IPaymentResponse {
   paymentLinkId?: string;
 }
 
+// === FEEDBACK ===
+export interface IFeedback {
+  feedbackId: string;
+  userId: string;
+  rentalId: string;
+  rating?: number | null;
+  comment?: string | null;
+  createdAt?: string | null;
+  userName?: string | null;
+}
+
+// === CONTRACT ===
+export interface IContract {
+  contractId: string;
+  userId: string;
+  vehicleId: string;
+  startDate: string;
+  endDate?: string | null;
+  terms?: string | null;
+  totalAmount?: number | null;
+  status?: string | null;
+  createdAt?: string | null;
+}
+
 // === LỊCH SỬ THUÊ XE (phù hợp với RentalDto từ BE) ===
 export interface IRentalHistoryItem {
   rentalId: string;
@@ -104,11 +128,15 @@ export interface IRentalHistoryItem {
   userId: string;
   vehicleId: string;
   vehicleName?: string | null;
+  userName?: string | null;
   pickupStationId: string;
+  pickupStationName?: string | null;
   returnStationId?: string | null;
+  returnStationName?: string | null;
   staffId?: string | null;
   startTime?: string | null;
   endTime?: string | null;
   totalCost?: number | null;
   status: string;
+  contract?: IContract | null;
 }

@@ -20,6 +20,15 @@ namespace Service.Interface
         Task<List<VehicleDto>> SortVehiclesAsync(string sortBy, bool isDescending);
         Task<List<Vehicle>> GetFeaturedVehiclesAsync(int topCount = 5);
         Task<List<VehicleDto>> GetAvailableVehiclesAsync();
+        Task<VehicleDto?> GetAvailableVehicleByIdAsync(Guid id);
+        Task<(IEnumerable<VehicleDto> Items, int TotalCount)> GetVehiclesPagedAsync(
+            int pageNumber = 1,
+            int pageSize = 10,
+            Guid? stationId = null,
+            string? status = null,
+            string? search = null);
+        Task<bool> HasActiveRentalsAsync(Guid vehicleId);
+        Task UpdateVehicleStatusBasedOnRentalsAsync(Guid vehicleId);
 
     }
 }

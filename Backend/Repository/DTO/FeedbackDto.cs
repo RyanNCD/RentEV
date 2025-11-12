@@ -19,5 +19,8 @@ namespace Repository.DTO
         public string Comment { get; set; }
 
         public DateTime? CreatedAt { get; set; }
+
+        // User information for display
+        public string? UserName { get; set; }
     }
 }

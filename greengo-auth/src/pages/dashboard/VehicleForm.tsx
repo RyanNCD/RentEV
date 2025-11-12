@@ -177,11 +177,7 @@ export default function VehicleForm({ initialData, onSave, onClose, loading }: P
       newErrors.utilities = "Tiện ích không được vượt quá 200 ký tự";
     }
 
-    // NumberOfRenters: Required, must be non-negative integer
-    const renters = parseInt(formData.numberOfRenters);
-    if (isNaN(renters) || renters < 0) {
-      newErrors.numberOfRenters = "Số người đã thuê phải là số nguyên không âm";
-    }
+    // NumberOfRenters is calculated automatically from reservations, no validation needed
 
     // ImageUrl: Optional, MaxLength(500)
     if (formData.imageUrl && formData.imageUrl.length > 500) {
@@ -238,7 +234,7 @@ export default function VehicleForm({ initialData, onSave, onClose, loading }: P
       description: formData.description.trim() || null,
       seatingCapacity: formData.seatingCapacity ? parseInt(formData.seatingCapacity) : null,
       utilities: formData.utilities.trim() || null,
-      numberOfRenters: parseInt(formData.numberOfRenters) || 0,
+      // numberOfRenters is calculated automatically from reservations, not sent to backend
       imageUrl: formData.imageUrl.trim() || null,
     };
     onSave(dataToSave);
@@ -391,12 +387,41 @@ export default function VehicleForm({ initialData, onSave, onClose, loading }: P
                   value={formData.status} 
                   onChange={handleChange} 
                   className={errors.status ? "error" : ""}
+                  disabled={initialData && initialData.status?.toUpperCase() === "RENTED"}
                 >
-                  <option value="Available">Có sẵn</option>
-                  <option value="Rented">Đang thuê</option>
-                  <option value="Maintenance">Bảo trì</option>
-                  <option value="Unavailable">Không khả dụng</option>
+                  {!initialData ? (
+                    // When creating new vehicle, default to Available
+                    <>
+                      <option value="Available">Có sẵn</option>
+                    </>
+                  ) : initialData.status?.toUpperCase() === "AVAILABLE" ? (
+                    // When updating Available vehicle, only allow Maintenance or Unavailable
+                    <>
+                      <option value="Available">Có sẵn</option>
+                      <option value="Maintenance">Bảo trì</option>
+                      <option value="Unavailable">Không khả dụng</option>
+                    </>
+                  ) : (
+                    // For other statuses, show all options
+                    <>
+                      <option value="Available">Có sẵn</option>
+                      <option value="Rented">Đang thuê</option>
+                      <option value="Reserved">Đã đặt</option>
+                      <option value="Maintenance">Bảo trì</option>
+                      <option value="Unavailable">Không khả dụng</option>
+                    </>
+                  )}
                 </select>
+                {initialData && initialData.status?.toUpperCase() === "RENTED" && (
+                  <p style={{ marginTop: "4px", fontSize: "12px", color: "#ff9800" }}>
+                    ⚠️ Không thể thay đổi trạng thái xe đang được thuê
+                  </p>
+                )}
+                {initialData && initialData.status?.toUpperCase() === "AVAILABLE" && (
+                  <p style={{ marginTop: "4px", fontSize: "12px", color: "#666" }}>
+                    Xe có sẵn chỉ có thể chuyển sang Bảo trì hoặc Không khả dụng
+                  </p>
+                )}
                 {errors.status && (
                   <span className="error-message">
                     {errors.status}
@@ -422,23 +447,26 @@ export default function VehicleForm({ initialData, onSave, onClose, loading }: P
                 )}
               </div>
 
-              <div className="form-group">
-                <label>Số người đã thuê</label>
-                <input 
-                  name="numberOfRenters" 
-                  type="number" 
-                  value={formData.numberOfRenters} 
-                  onChange={handleChange} 
-                  min="0"
-                  step="1"
-                  className={errors.numberOfRenters ? "error" : ""}
-                />
-                {errors.numberOfRenters && (
-                  <span className="error-message">
-                    {errors.numberOfRenters}
-                  </span>
-                )}
-              </div>
+              {/* NumberOfRenters is calculated automatically from reservations, not editable */}
+              {initialData && (
+                <div className="form-group">
+                  <label>Số người đã thuê</label>
+                  <input 
+                    type="number" 
+                    value={initialData.numberOfRenters || 0} 
+                    readOnly
+                    disabled
+                    style={{ 
+                      backgroundColor: "#f5f5f5", 
+                      cursor: "not-allowed",
+                      color: "#666"
+                    }}
+                  />
+                  <p style={{ marginTop: "4px", fontSize: "12px", color: "#666" }}>
+                    (Tự động tính từ số lượng booking)
+                  </p>
+                </div>
+              )}
 
               {/* Full width fields */}
               <div className="form-group full-width">

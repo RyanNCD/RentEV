@@ -13,7 +13,6 @@ using System.Threading.Tasks;
 
 namespace APIRentEV.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class StationController : ControllerBase
@@ -27,7 +26,7 @@ namespace APIRentEV.Controllers
             _mapper = mapper;
         }
 
-        [Authorize(Roles = "Admin,StaffStation,Customer")]
+        [AllowAnonymous]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<StationDto>>> GetAllStations()
         {

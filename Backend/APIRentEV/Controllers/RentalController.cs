@@ -29,11 +29,41 @@ namespace APIRentEV.Controllers
 
         [Authorize(Roles = "Admin,StaffStation")]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<RentalDto>>> GetAllRentals()
+        public async Task<ActionResult> GetAllRentals(
+            [FromQuery] int? page = null,
+            [FromQuery] int? pageSize = null,
+            [FromQuery] string? status = null,
+            [FromQuery] string? search = null,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null,
+            [FromQuery] Guid? stationId = null)
         {
-            var rentals = await _rentalService.GetPaidRentalsAsync();
-            var dtos = _mapper.Map<List<RentalDto>>(rentals);
-            return Ok(dtos);
+            // If no pagination parameters provided, return all (backward compatibility)
+            if (!page.HasValue && !pageSize.HasValue && string.IsNullOrEmpty(status) && string.IsNullOrEmpty(search) && !startDate.HasValue && !endDate.HasValue && !stationId.HasValue)
+            {
+                var rentals = await _rentalService.GetPaidRentalsAsync();
+                var dtos = _mapper.Map<List<RentalDto>>(rentals);
+                return Ok(dtos);
+            }
+
+            // Use paginated endpoint (always return paged result when pagination params are provided)
+            var currentPage = page ?? 1;
+            var currentPageSize = pageSize ?? 10;
+            var (items, totalCount) = await _rentalService.GetPaidRentalsPagedAsync(currentPage, currentPageSize, status, search, startDate, endDate, stationId);
+            var pagedDtos = _mapper.Map<List<RentalDto>>(items);
+            
+            var result = new
+            {
+                items = pagedDtos,
+                totalCount,
+                page = currentPage,
+                pageSize = currentPageSize,
+                totalPages = (int)Math.Ceiling(totalCount / (double)currentPageSize),
+                hasPreviousPage = currentPage > 1,
+                hasNextPage = currentPage < Math.Ceiling(totalCount / (double)currentPageSize)
+            };
+
+            return Ok(result);
         }
 
         // === FIND BY CODE (use RentalId GUID as the code) ===
@@ -118,7 +148,8 @@ namespace APIRentEV.Controllers
         }
 
         // === CHECK-IN ===
-        [Authorize(Roles = "Admin,StaffStation")]
+        // Chỉ StaffStation được phép bàn giao xe, Admin chỉ được xem
+        [Authorize(Roles = "StaffStation")]
         [HttpPost("check-in")]
         public async Task<IActionResult> CheckIn([FromBody] CheckInDto dto)
         {
@@ -160,7 +191,8 @@ namespace APIRentEV.Controllers
         }
 
         // === CHECK-OUT ===
-        [Authorize(Roles = "Admin,StaffStation")]
+        // Chỉ StaffStation được phép nhận xe, Admin chỉ được xem
+        [Authorize(Roles = "StaffStation")]
         [HttpPost("check-out")]
         public async Task<IActionResult> CheckOut([FromBody] CheckOutDto dto)
         {
@@ -275,6 +307,37 @@ namespace APIRentEV.Controllers
             var rentals = await _rentalService.GetPaidRentalsByUserAsync(userId);
             var dtos = _mapper.Map<List<RentalDto>>(rentals);
             return Ok(dtos);
+        }
+
+        // Check if user has completed rental for a vehicle (for feedback eligibility)
+        [Authorize(Roles = "Customer")]
+        [HttpGet("check-feedback-eligibility/{vehicleId}")]
+        public async Task<ActionResult> CheckFeedbackEligibility(Guid vehicleId)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                           ?? User.FindFirstValue("sub")
+                           ?? User.FindFirstValue("userId");
+
+            if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            {
+                return BadRequest(new { message = "Invalid or missing userId in token." });
+            }
+
+            var rental = await _rentalService.GetCompletedRentalByUserAndVehicleAsync(userId, vehicleId);
+            
+            if (rental == null)
+            {
+                return Ok(new { 
+                    canReview = false, 
+                    message = "Bạn chưa hoàn thành thuê xe này." 
+                });
+            }
+
+            return Ok(new { 
+                canReview = true, 
+                rentalId = rental.RentalId,
+                message = "Bạn có thể đánh giá xe này." 
+            });
         }
 
 

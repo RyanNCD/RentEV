@@ -77,6 +77,26 @@ namespace Repository.Repositories
             return ratings.Count > 0 ? ratings.Average() : 0.0;
         }
 
+        public async Task<IEnumerable<Feedback>> GetByVehicleIdAsync(Guid vehicleId)
+        {
+            return await _context.Feedbacks
+                .Where(f => f.Rental != null && f.Rental.VehicleId == vehicleId)
+                .Include(f => f.User)
+                .Include(f => f.Rental)
+                .OrderByDescending(f => f.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<double> GetAverageRatingByVehicleIdAsync(Guid vehicleId)
+        {
+            var ratings = await _context.Feedbacks
+                .Where(f => f.Rental != null && f.Rental.VehicleId == vehicleId && f.Rating.HasValue)
+                .Select(f => f.Rating.Value)
+                .ToListAsync();
+
+            return ratings.Count > 0 ? ratings.Average() : 0.0;
+        }
+
         public async Task SaveChangesAsync()
         {
             await _context.SaveChangesAsync();

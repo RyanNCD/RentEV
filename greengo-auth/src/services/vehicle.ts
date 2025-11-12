@@ -46,9 +46,21 @@ export const getFeaturedVehicles = async (): Promise<IVehicle[]> => {
   return response.data;
 };
 
-// 3. Lấy 1 xe (Dùng cho CarDetailPage)
+// 2b. Lấy xe CÓ SẴN để thuê (Public API - không cần auth)
+export const getAvailableVehicles = async (): Promise<IVehicle[]> => {
+  const response = await http.get<IVehicle[]>("/api/vehicle/available");
+  return response.data;
+};
+
+// 3. Lấy 1 xe (Dùng cho CarDetailPage) - Public API, không cần auth
 export const getVehicleById = async (id: string): Promise<IVehicle> => {
   const response = await http.get<IVehicle>(`/api/vehicle/${id}`);
+  return response.data;
+};
+
+// 3b. Lấy 1 xe available (Chỉ trả về nếu xe có status = "Available") - Public API
+export const getAvailableVehicleById = async (id: string): Promise<IVehicle> => {
+  const response = await http.get<IVehicle>(`/api/vehicle/available/${id}`);
   return response.data;
 };
 
@@ -88,4 +100,33 @@ export const updateVehicle = async (id: string, data: VehicleUpdateDto): Promise
 // 9. XÓA (Admin)
 export const deleteVehicle = async (id: string): Promise<void> => {
   await http.delete(`/api/vehicle/${id}`);
+};
+
+// 10. Get vehicles with pagination and filtering (Admin)
+export interface VehicleListParams {
+  page?: number;
+  pageSize?: number;
+  stationId?: string;
+  status?: string;
+  search?: string;
+}
+
+export interface PagedVehicleResult {
+  items: IVehicle[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
+export const getVehiclesPaged = async (params: VehicleListParams): Promise<PagedVehicleResult> => {
+  const queryParams: VehicleListParams = {
+    page: params.page || 1,
+    pageSize: params.pageSize || 10,
+    ...params,
+  };
+  const response = await http.get<PagedVehicleResult>("/api/vehicle", { params: queryParams });
+  return response.data;
 };

@@ -7,7 +7,6 @@ using Repository.Models;
 using Repository.Repositories;
 using Service.Interface;
 using Service.Services;
-using Services;
 using System.Text;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Service.Configs;
@@ -23,6 +22,7 @@ builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddEndpointsApiExplorer();
 
 // Swagger + JWT Auth
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "RentEV API", Version = "v1" });
@@ -62,24 +62,24 @@ builder.Services.AddDbContext<SWP391RentEVContext>(options =>
 
 
 
-
+// --- Scoped services (Repository + Service) ---
 builder.Services.AddScoped<RentalRepository>();
 builder.Services.AddScoped<IRentalService, RentalService>();
 
 builder.Services.AddScoped<AuthenRepository>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
 
-builder.Services.AddScoped< UserRepository>();
+builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<VehicleRepository>();
-builder.Services.AddScoped<IVehicleService,VehicleService>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
 
 builder.Services.AddScoped<StationRepository>();
-builder.Services.AddScoped<IStationService ,StationService>();
+builder.Services.AddScoped<IStationService, StationService>();
 
 builder.Services.AddScoped<ContractRepository>();
-builder.Services.AddScoped<IContractService ,ContractService>();
+builder.Services.AddScoped<IContractService, ContractService>();
 
 builder.Services.AddScoped<FeedbackRepository>();
 builder.Services.AddScoped<IFeedbackService, FeedbackService>();
@@ -154,13 +154,17 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
 app.UseSwagger();
 app.UseSwaggerUI();
-//}
 
-app.UseHttpsRedirection();
+// Chỉ bật HTTPS redirection khi không phải Development
+// Trong Development, tắt để tránh lỗi 307 redirect khi chạy HTTP (port 5248)
+// Trong Production, HTTPS redirection sẽ được bật
+if (app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
+
 // Serve static files for uploaded images (e.g., /uploads/...)
 app.UseStaticFiles();
 app.UseCors("AllowSpecificOrigins");

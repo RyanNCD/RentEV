@@ -29,5 +29,18 @@ namespace Service.Interface
         Task<Rental?> CheckInAsync(Guid rentalId, Guid staffId, DateTime deliveredAt, string? deliveryCondition);
         Task<Rental?> CheckOutAsync(Guid rentalId, Guid staffId, DateTime receivedAt, string? returnCondition);
 
+        // Pagination and filtering
+        Task<(IEnumerable<Rental> Items, int TotalCount)> GetPaidRentalsPagedAsync(
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? status = null,
+            string? search = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null,
+            Guid? stationId = null);
+
+        // Get completed rental by user and vehicle (for feedback eligibility)
+        Task<Rental?> GetCompletedRentalByUserAndVehicleAsync(Guid userId, Guid vehicleId);
+
     }
 }
