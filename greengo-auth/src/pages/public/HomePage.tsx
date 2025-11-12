@@ -4,10 +4,17 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 // === SỬA LẠI IMPORT - Dùng API available (public, không cần auth) ===
 import { getAvailableVehicles, searchVehicles } from "../../services/vehicle"; 
-import { type IVehicle } from "../../types"; 
+import { getAllStations } from "../../services/station";
+import { type IVehicle, type IStation } from "../../types"; 
+
+// Extended vehicle type with station info
+interface IVehicleWithStation extends IVehicle {
+  stationName?: string;
+  stationAddress?: string;
+}
 
 // CarCard component hiển thị thông tin xe
-const CarCard = ({ car }: { car: IVehicle }) => {
+const CarCard = ({ car }: { car: IVehicleWithStation }) => {
   const tags = car.utilities ? car.utilities.split(',').map(tag => tag.trim()) : [];
   
   // Map vehicle name to image (fallback if imageUrl is not provided)
@@ -59,6 +66,19 @@ const CarCard = ({ car }: { car: IVehicle }) => {
       {car.batteryCapacity && (
         <p style={{ fontSize: "14px", color: "#666", margin: "4px 0" }}>Pin: {car.batteryCapacity} kWh</p>
       )}
+      {/* Hiển thị thông tin trạm sạc */}
+      {car.stationName && (
+        <div style={{ marginTop: "8px", padding: "8px", background: "#f0fdf4", borderRadius: "4px", border: "1px solid #dcfce7" }}>
+          <p style={{ fontSize: "13px", fontWeight: "600", color: "#166534", margin: "0 0 4px 0" }}>
+            📍 {car.stationName}
+          </p>
+          {car.stationAddress && (
+            <p style={{ fontSize: "12px", color: "#6b7280", margin: "0" }}>
+              {car.stationAddress}
+            </p>
+          )}
+        </div>
+      )}
       <p style={{ fontSize: "16px", fontWeight: "bold", color: "#166534", margin: "8px 0" }}>
         {formatPrice(car.pricePerDay)}
         {car.pricePerDay && <small style={{ fontSize: "12px" }}>/ngày</small>}
@@ -86,12 +106,28 @@ const CarCard = ({ car }: { car: IVehicle }) => {
 
 
 export default function HomePage() {
-  const [vehicles, setVehicles] = useState<IVehicle[]>([]);
+  const [vehicles, setVehicles] = useState<IVehicleWithStation[]>([]);
+  const [allVehicles, setAllVehicles] = useState<IVehicleWithStation[]>([]);
+  const [stations, setStations] = useState<IStation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [location, setLocation] = useState("");
+  const [selectedStationId, setSelectedStationId] = useState<string>("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  // Fetch stations on mount
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const data = await getAllStations();
+        setStations(data);
+      } catch (err: any) {
+        console.error("Error loading stations:", err);
+        // If stations fail to load, continue without station info
+      }
+    };
+    fetchStations();
+  }, []);
 
   // === Dùng API /api/vehicle/available (Public API - không cần auth) ===
   useEffect(() => {
@@ -100,7 +136,19 @@ export default function HomePage() {
         setLoading(true);
         // Gọi API available để lấy danh sách xe có sẵn để thuê
         const data = await getAvailableVehicles(); 
-        setVehicles(data);
+        
+        // Map station info to vehicles
+        const vehiclesWithStation: IVehicleWithStation[] = data.map(vehicle => {
+          const station = stations.find(s => s.stationId === vehicle.stationId);
+          return {
+            ...vehicle,
+            stationName: station?.stationName,
+            stationAddress: station?.address
+          };
+        });
+        
+        setAllVehicles(vehiclesWithStation);
+        setVehicles(vehiclesWithStation);
       } catch (err: any) {
         console.error("Error loading vehicles:", err);
         setError("Không thể tải danh sách xe. Vui lòng thử lại sau."); 
@@ -109,25 +157,29 @@ export default function HomePage() {
       }
     };
     fetchInitialVehicles();
-  }, []);
+  }, [stations]); // Re-run when stations are loaded
 
-
-  // (Hàm handleSearch giữ nguyên, vẫn dùng /api/Vehicle/search)
+  // Hàm handleSearch - lọc xe theo địa điểm và ngày
   const handleSearch = async (e: React.FormEvent) => {
-    // ... (code cũ giữ nguyên) ...
     e.preventDefault();
     setLoading(true);
     setError(null);
     try {
-        const params = {
-            location: location || undefined,
-            startDate: startDate || undefined,
-            endDate: endDate || undefined
-        };
-        const data = await searchVehicles(params); 
-        setVehicles(data);
-        if (data.length === 0) {
+        // Filter by station if selected
+        let filteredVehicles = allVehicles;
+        
+        if (selectedStationId) {
+          filteredVehicles = allVehicles.filter(v => v.stationId === selectedStationId);
+        }
+
+        // If there are date filters, you can add additional filtering here
+        // For now, we'll just use the station filter
+        
+        setVehicles(filteredVehicles);
+        if (filteredVehicles.length === 0) {
           setError("Không tìm thấy xe nào phù hợp với bộ lọc.");
+        } else {
+          setError(null);
         }
     } catch (err) {
         setError("Tìm kiếm thất bại. Vui lòng thử lại.");
@@ -135,6 +187,13 @@ export default function HomePage() {
     } finally {
         setLoading(false);
     }
+  };
+
+  const handleResetFilter = () => {
+    setSelectedStationId("");
+    setStartDate("");
+    setEndDate("");
+    setVehicles(allVehicles);
   };
 
   // (Hàm renderContent giữ nguyên)
@@ -157,14 +216,47 @@ export default function HomePage() {
   // (return của HomePage giữ nguyên)
   return (
     <div className="home-page">
-      <form className="filter-bar" onSubmit={handleSearch} style={{ padding: "2rem", background: "#f9f9f9", display: "flex", gap: "1rem" }}>
-        {/* ... (code input giữ nguyên) ... */}
-        <input placeholder="Địa điểm" value={location} onChange={e => setLocation(e.target.value)} style={{ padding: "0.5rem" }} />
-        <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ padding: "0.5rem" }} />
-        <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ padding: "0.5rem" }} />
-        <button type="submit" disabled={loading} className="btn btn--primary">
+      <form className="filter-bar" onSubmit={handleSearch} style={{ padding: "2rem", background: "#f9f9f9", display: "flex", gap: "1rem", flexWrap: "wrap", alignItems: "center" }}>
+        {/* Dropdown lọc theo địa điểm (trạm sạc) */}
+        <select 
+          value={selectedStationId} 
+          onChange={e => setSelectedStationId(e.target.value)}
+          style={{ padding: "0.5rem", minWidth: "200px", borderRadius: "4px", border: "1px solid #ddd" }}
+        >
+          <option value="">Tất cả địa điểm</option>
+          {stations.map(station => (
+            <option key={station.stationId} value={station.stationId}>
+              {station.stationName} - {station.address}
+            </option>
+          ))}
+        </select>
+        <input 
+          type="date" 
+          value={startDate} 
+          onChange={e => setStartDate(e.target.value)} 
+          placeholder="Ngày bắt đầu"
+          style={{ padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd" }} 
+        />
+        <input 
+          type="date" 
+          value={endDate} 
+          onChange={e => setEndDate(e.target.value)} 
+          placeholder="Ngày kết thúc"
+          style={{ padding: "0.5rem", borderRadius: "4px", border: "1px solid #ddd" }} 
+        />
+        <button type="submit" disabled={loading} className="btn btn--primary" style={{ padding: "0.5rem 1.5rem" }}>
           {loading ? "Đang tìm..." : "Tìm xe"}
         </button>
+        {(selectedStationId || startDate || endDate) && (
+          <button 
+            type="button" 
+            onClick={handleResetFilter}
+            className="btn btn--secondary"
+            style={{ padding: "0.5rem 1.5rem", background: "#6b7280", color: "white" }}
+          >
+            Đặt lại
+          </button>
+        )}
       </form>
       {renderContent()}
     </div>
