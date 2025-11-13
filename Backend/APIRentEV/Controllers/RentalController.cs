@@ -18,12 +18,14 @@ namespace APIRentEV.Controllers
     {
         private readonly IRentalService _rentalService;
         private readonly IPaymentService _paymentService;
+        private readonly IRentalImageService _imageService;
         private readonly IMapper _mapper;
 
-        public RentalController(IRentalService rentalService, IPaymentService paymentService, IMapper mapper)
+        public RentalController(IRentalService rentalService, IPaymentService paymentService, IRentalImageService imageService, IMapper mapper)
         {
             _rentalService = rentalService;
             _paymentService = paymentService;
+            _imageService = imageService;
             _mapper = mapper;
         }
 
@@ -309,6 +311,46 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
+        [Authorize(Roles = "Customer")]
+        [HttpGet("my-history-paged")]
+        public async Task<ActionResult> GetMyHistoryPaged(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] DateTime? startDate = null,
+            [FromQuery] DateTime? endDate = null)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                           ?? User.FindFirstValue("sub")
+                           ?? User.FindFirstValue("userId");
+
+            if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            {
+                return BadRequest(new { message = "Invalid or missing userId in token." });
+            }
+
+            var currentPage = Math.Max(1, page);
+            var currentPageSize = Math.Max(1, Math.Min(100, pageSize)); // Limit to 100 per page
+
+            var (items, totalCount) = await _rentalService.GetPaidRentalsByUserPagedAsync(
+                userId, currentPage, currentPageSize, search, startDate, endDate);
+
+            var dtos = _mapper.Map<List<RentalDto>>(items);
+
+            var result = new
+            {
+                items = dtos,
+                totalCount,
+                page = currentPage,
+                pageSize = currentPageSize,
+                totalPages = (int)Math.Ceiling(totalCount / (double)currentPageSize),
+                hasPreviousPage = currentPage > 1,
+                hasNextPage = currentPage < Math.Ceiling(totalCount / (double)currentPageSize)
+            };
+
+            return Ok(result);
+        }
+
         // Check if user has completed rental for a vehicle (for feedback eligibility)
         [Authorize(Roles = "Customer")]
         [HttpGet("check-feedback-eligibility/{vehicleId}")]
@@ -338,6 +380,47 @@ namespace APIRentEV.Controllers
                 rentalId = rental.RentalId,
                 message = "Bạn có thể đánh giá xe này." 
             });
+        }
+
+        // Get rental images - Public endpoint for customers to view their rental images
+        [Authorize(Roles = "Customer")]
+        [HttpGet("{rentalId}/images")]
+        public async Task<ActionResult> GetRentalImagesForCustomer(Guid rentalId)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                           ?? User.FindFirstValue("sub")
+                           ?? User.FindFirstValue("userId");
+
+            if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            {
+                return BadRequest(new { message = "Invalid or missing userId in token." });
+            }
+
+            // Verify that the rental belongs to the user
+            var rental = await _rentalService.GetRentalByIdAsync(rentalId);
+            if (rental == null)
+            {
+                return NotFound(new { message = "Rental not found." });
+            }
+
+            if (rental.UserId != userId)
+            {
+                return Forbid("You can only view images of your own rentals.");
+            }
+
+            // Get images
+            var images = await _imageService.GetByRentalIdAsync(rentalId);
+            var baseUrl = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
+            var result = images.Select(i => new {
+                imageId = i.ImageId,
+                rentalId = i.RentalId,
+                imageUrl = string.IsNullOrWhiteSpace(i.ImageUrl) ? null : $"{baseUrl}{i.ImageUrl}",
+                type = i.Type,
+                description = i.Description,
+                note = i.Note,
+                createdAt = i.CreatedAt
+            });
+            return Ok(result);
         }
 
 

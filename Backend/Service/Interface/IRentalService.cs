@@ -42,5 +42,14 @@ namespace Service.Interface
         // Get completed rental by user and vehicle (for feedback eligibility)
         Task<Rental?> GetCompletedRentalByUserAndVehicleAsync(Guid userId, Guid vehicleId);
 
+        // Get paid rentals by user with pagination and filtering (for user profile)
+        Task<(IEnumerable<Rental> Items, int TotalCount)> GetPaidRentalsByUserPagedAsync(
+            Guid userId,
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? search = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null);
+
     }
 }

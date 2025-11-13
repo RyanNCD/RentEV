@@ -389,13 +389,13 @@ export default function HomePage() {
           display: "grid", 
           gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", 
           gap: "20px", 
-          alignItems: "end",
+          alignItems: "stretch",
           marginBottom: "20px"
         }}
         className="filter-grid"
         >
           {/* Dropdown lọc theo địa điểm (trạm sạc) */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", height: "100%" }}>
             <label style={{ 
               fontSize: "13px", 
               fontWeight: "600", 
@@ -431,7 +431,14 @@ export default function HomePage() {
           </div>
           
           {/* Range Slider cho khoảng giá */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", gridColumn: "span 2" }} className="price-range-container">
+          <div style={{ 
+            display: "flex", 
+            flexDirection: "column", 
+            gap: "8px", 
+            gridColumn: "span 2",
+            height: "100%",
+            minHeight: "100px"
+          }} className="price-range-container">
             <label style={{ 
               fontSize: "13px", 
               fontWeight: "600", 
@@ -444,37 +451,17 @@ export default function HomePage() {
               background: "#f9fafb", 
               padding: "20px", 
               borderRadius: "12px", 
-              border: "1px solid #e5e7eb"
+              border: "1px solid #e5e7eb",
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center"
             }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px", alignItems: "center" }}>
-                <div style={{ 
-                  background: "white", 
-                  padding: "8px 12px", 
-                  borderRadius: "8px", 
-                  border: "1px solid #e5e7eb",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#166534"
-                }}>
-                  Từ: {formatPrice(Number(minPrice) || priceRange.min)}
-                </div>
-                <div style={{ 
-                  background: "white", 
-                  padding: "8px 12px", 
-                  borderRadius: "8px", 
-                  border: "1px solid #e5e7eb",
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#166534"
-                }}>
-                  Đến: {formatPrice(Number(maxPrice) || priceRange.max)}
-                </div>
-              </div>
-              <div style={{ position: "relative", height: "24px", padding: "8px 0" }}>
+              <div style={{ position: "relative", }}>
                 {/* Background track */}
                 <div style={{ 
                   position: "absolute", 
-                  top: "50%", 
+                  top: "100%", 
                   left: 0, 
                   right: 0, 
                   height: "8px", 
@@ -562,60 +549,103 @@ export default function HomePage() {
                     cursor: "pointer"
                   }}
                 />
-                
-                <style>{`
-                  input[type="range"]::-webkit-slider-thumb {
-                    -webkit-appearance: none;
-                    appearance: none;
-                    width: 22px;
-                    height: 22px;
-                    background: white;
-                    border: 3px solid #16a34a;
-                    cursor: pointer;
-                    border-radius: 50%;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.15), 0 0 0 4px rgba(22, 163, 74, 0.1);
-                    transition: all 0.2s;
-                  }
-                  input[type="range"]::-webkit-slider-thumb:hover {
-                    transform: scale(1.1);
-                    box-shadow: 0 3px 8px rgba(0,0,0,0.2), 0 0 0 5px rgba(22, 163, 74, 0.15);
-                  }
-                  input[type="range"]::-moz-range-thumb {
-                    width: 22px;
-                    height: 22px;
-                    background: white;
-                    border: 3px solid #16a34a;
-                    cursor: pointer;
-                    border-radius: 50%;
-                    border: none;
-                    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-                    transition: all 0.2s;
-                  }
-                  input[type="range"]::-moz-range-thumb:hover {
-                    transform: scale(1.1);
-                    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-                  }
-                  input[type="range"]::-webkit-slider-runnable-track {
-                    height: 8px;
-                    background: transparent;
-                  }
-                  input[type="range"]::-moz-range-track {
-                    height: 8px;
-                    background: transparent;
-                  }
-                  input[type="range"]:focus {
-                    outline: none;
-                  }
-                  input[type="range"]:focus::-webkit-slider-thumb {
-                    box-shadow: 0 0 0 5px rgba(22, 163, 74, 0.2), 0 2px 6px rgba(0,0,0,0.15);
-                  }
-                `}</style>
               </div>
+              
+              {/* Giá trị hiển thị dưới slider */}
+              <div style={{ 
+                position: "relative", 
+                width: "100%", 
+                height: "24px",
+                marginTop: "24px"
+              }}>
+                <div style={{ 
+                  position: "absolute",
+                  left: `${((Number(minPrice) || priceRange.min) - priceRange.min) / (priceRange.max - priceRange.min) * 100}%`,
+                  transform: "translateX(-50%)",
+                  background: "white", 
+                  padding: "6px 10px", 
+                  borderRadius: "6px", 
+                  border: "1.5px solid #16a34a",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#166534",
+                  whiteSpace: "nowrap",
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                  zIndex: 10
+                }}>
+                  {formatPrice(Number(minPrice) || priceRange.min)}
+                </div>
+                <div style={{ 
+                  position: "absolute",
+                  left: `${((Number(maxPrice) || priceRange.max) - priceRange.min) / (priceRange.max - priceRange.min) * 100}%`,
+                  transform: "translateX(-50%)",
+                  background: "white", 
+                  padding: "6px 10px", 
+                  borderRadius: "6px", 
+                  border: "1.5px solid #16a34a",
+                  fontSize: "13px",
+                  fontWeight: "600",
+                  color: "#166534",
+                  whiteSpace: "nowrap",
+                  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+                  zIndex: 10
+                }}>
+                  {formatPrice(Number(maxPrice) || priceRange.max)}
+                </div>
+              </div>
+              
+              <style>{`
+                input[type="range"]::-webkit-slider-thumb {
+                  -webkit-appearance: none;
+                  appearance: none;
+                  width: 22px;
+                  height: 22px;
+                  background: white;
+                  border: 3px solid #16a34a;
+                  cursor: pointer;
+                  border-radius: 50%;
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.15), 0 0 0 4px rgba(22, 163, 74, 0.1);
+                  transition: all 0.2s;
+                }
+                input[type="range"]::-webkit-slider-thumb:hover {
+                  transform: scale(1.1);
+                  box-shadow: 0 3px 8px rgba(0,0,0,0.2), 0 0 0 5px rgba(22, 163, 74, 0.15);
+                }
+                input[type="range"]::-moz-range-thumb {
+                  width: 22px;
+                  height: 22px;
+                  background: white;
+                  border: 3px solid #16a34a;
+                  cursor: pointer;
+                  border-radius: 50%;
+                  border: none;
+                  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+                  transition: all 0.2s;
+                }
+                input[type="range"]::-moz-range-thumb:hover {
+                  transform: scale(1.1);
+                  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+                }
+                input[type="range"]::-webkit-slider-runnable-track {
+                  height: 8px;
+                  background: transparent;
+                }
+                input[type="range"]::-moz-range-track {
+                  height: 8px;
+                  background: transparent;
+                }
+                input[type="range"]:focus {
+                  outline: none;
+                }
+                input[type="range"]:focus::-webkit-slider-thumb {
+                  box-shadow: 0 0 0 5px rgba(22, 163, 74, 0.2), 0 2px 6px rgba(0,0,0,0.15);
+                }
+              `}</style>
             </div>
           </div>
           
           {/* Sắp xếp */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px", height: "100%" }}>
             <label style={{ 
               fontSize: "13px", 
               fontWeight: "600", 

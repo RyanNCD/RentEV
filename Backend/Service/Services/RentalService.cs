@@ -273,5 +273,16 @@ namespace Service.Services
             return await _rentalRepo.GetCompletedRentalByUserAndVehicleAsync(userId, vehicleId);
         }
 
+        public async Task<(IEnumerable<Rental> Items, int TotalCount)> GetPaidRentalsByUserPagedAsync(
+            Guid userId,
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? search = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null)
+        {
+            return await _rentalRepo.GetPaidRentalsByUserPagedAsync(userId, pageNumber, pageSize, search, startDate, endDate);
+        }
+
     }
 }

@@ -210,5 +210,57 @@ namespace Repository.Implementations
             return (items, totalCount);
         }
 
+        // Get paid rentals by user with pagination and filtering
+        public async Task<(IEnumerable<Rental> Items, int TotalCount)> GetPaidRentalsByUserPagedAsync(
+            Guid userId,
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? search = null,
+            DateTime? startDate = null,
+            DateTime? endDate = null)
+        {
+            var query = _context.Rentals
+                .Where(r => r.UserId == userId 
+                         && r.Payments.Any(p => p.Status != null && p.Status.ToUpper() == "SUCCESS"))
+                .Include(r => r.Vehicle)
+                .Include(r => r.User)
+                .Include(r => r.PickupStation)
+                .Include(r => r.ReturnStation)
+                .Include(r => r.Contract)
+                .AsQueryable();
+
+            // Search by vehicle name or rental ID
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                query = query.Where(r =>
+                    (r.Vehicle != null && r.Vehicle.VehicleName != null && r.Vehicle.VehicleName.ToLower().Contains(searchLower)) ||
+                    r.RentalId.ToString().ToLower().Contains(searchLower));
+            }
+
+            // Filter by date range (start time)
+            if (startDate.HasValue)
+            {
+                query = query.Where(r => r.StartTime >= startDate.Value);
+            }
+
+            if (endDate.HasValue)
+            {
+                query = query.Where(r => r.StartTime <= endDate.Value);
+            }
+
+            // Get total count before pagination
+            var totalCount = await query.CountAsync();
+
+            // Apply pagination
+            var items = await query
+                .OrderByDescending(r => r.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
     }
 }   

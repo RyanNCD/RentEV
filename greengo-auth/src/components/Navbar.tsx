@@ -70,9 +70,20 @@ export default function Navbar(props: Props): JSX.Element {
           {user ? (
             // === ĐÃ ĐĂNG NHẬP ===
             <>
-              <span style={{ color: "black", marginRight: "16px" }}>
-                Chào, {user.fullName}
-              </span>
+              <div className="nav__user-info">
+                <div className="nav__user-avatar">
+                  {user.avatar ? (
+                    <img src={user.avatar} alt={user.fullName || user.email} />
+                  ) : (
+                    <span className="nav__user-initial">
+                      {(user.fullName || user.email || "U")[0].toUpperCase()}
+                    </span>
+                  )}
+                </div>
+                <span className="nav__user-name">
+                  {user.fullName || user.email}
+                </span>
+              </div>
               <button onClick={logout} className="btn btn--ghost">
                 Đăng xuất
               </button>

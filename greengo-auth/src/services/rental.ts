@@ -19,6 +19,26 @@ export const getRentalHistory = async (): Promise<IRentalHistoryItem[]> => {
   return response.data;
 };
 
+// Get user rental history with pagination and filtering
+export interface UserRentalListParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export const getUserRentalHistoryPaged = async (params: UserRentalListParams): Promise<PagedRentalResult> => {
+  const queryParams: UserRentalListParams = {
+    page: params.page || 1,
+    pageSize: params.pageSize || 10,
+    ...params,
+  };
+  
+  const response = await http.get<PagedRentalResult>("/api/rental/my-history-paged", { params: queryParams });
+  return response.data;
+};
+
 // Lấy tất cả đơn thuê (dành cho Staff/Admin) - với phân trang và lọc
 export interface RentalListParams {
   page?: number;

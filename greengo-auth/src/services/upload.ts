@@ -34,8 +34,15 @@ export interface RentalImageItem {
   createdAt?: string | null;
 }
 
+// Get rental images - For Admin/Staff (original endpoint)
 export const getRentalImages = async (rentalId: string): Promise<RentalImageItem[]> => {
   const response = await http.get<RentalImageItem[]>(`/api/upload/rental-image/${rentalId}`);
+  return response.data;
+};
+
+// Get rental images - For Customer (new public endpoint)
+export const getRentalImagesForCustomer = async (rentalId: string): Promise<RentalImageItem[]> => {
+  const response = await http.get<RentalImageItem[]>(`/api/rental/${rentalId}/images`);
   return response.data;
 };
 
