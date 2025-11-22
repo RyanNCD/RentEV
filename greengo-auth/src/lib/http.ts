@@ -3,7 +3,8 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 
 const http = axios.create({
-  baseURL: "https://rentev-b7ee.onrender.com", // CHUẨN TỪ SWAGGER
+
+  baseURL: "https://rentev-b7ee.onrender.com", 
   timeout: 10000, // 10 giây
   headers: {
     "Content-Type": "application/json",
@@ -15,7 +16,7 @@ http.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // Lấy token từ localStorage
     const accessToken = localStorage.getItem("accessToken");
-    
+
     if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
