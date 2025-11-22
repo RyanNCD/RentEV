@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getStaffList, revokeStaffRole } from "../../services/admin";
 import { type IUser } from "../../types";
 import { translateRole } from "../../utils/roleTranslations";
+import "./StaffManagement.css";
 
 export default function StaffManagement() {
   const [staffList, setStaffList] = useState<IUser[]>([]);
@@ -37,48 +38,57 @@ export default function StaffManagement() {
     }
   };
 
-  if (loading) return <div>Đang tải danh sách...</div>;
-  if (error) return <div style={{ color: "red" }}>{error}</div>;
+  if (loading) {
+    return <div className="staff-management-loading">Đang tải danh sách...</div>;
+  }
+
+  if (error) {
+    return <div className="staff-management-error">{error}</div>;
+  }
 
   return (
-    <div>
-      <h1>Quản lý Nhân viên (Staff)</h1>
-      {/* (Ông thêm cái nút "Thêm mới" ở đây sau nhé) */}
+    <div className="staff-management-container">
+      <div className="staff-management-header">
+        <h1>Quản lý Nhân viên (Staff)</h1>
+      </div>
       
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ background: "#eee" }}>
-            <th style={{ padding: "8px", border: "1px solid #ddd" }}>Họ tên</th>
-            <th style={{ padding: "8px", border: "1px solid #ddd" }}>Email</th>
-            <th style={{ padding: "8px", border: "1px solid #ddd" }}>Role</th>
-            <th style={{ padding: "8px", border: "1px solid #ddd" }}>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {staffList.map((staff) => (
-            <tr key={staff.userId}>
-              <td style={{ padding: "8px", border: "1px solid #ddd" }}>{staff.fullName}</td>
-              <td style={{ padding: "8px", border: "1px solid #ddd" }}>{staff.email}</td>
-              <td style={{ padding: "8px", border: "1px solid #ddd" }}>{translateRole(staff.roleName || staff.role)}</td>
-              <td style={{ padding: "8px", border: "1px solid #ddd" }}>
-                <button 
-                  onClick={() => handleRevokeRole(staff.userId)} 
-                  style={{ 
-                    padding: "6px 12px",
-                    backgroundColor: "#ff9800",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer"
-                  }}
-                >
-                  Thu hồi quyền Staff
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {staffList.length === 0 ? (
+        <div className="staff-management-empty">
+          Chưa có nhân viên nào.
+        </div>
+      ) : (
+        <div className="staff-management-table-container">
+          <table className="staff-management-table">
+            <thead>
+              <tr>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              {staffList.map((staff) => (
+                <tr key={staff.userId}>
+                  <td>{staff.fullName}</td>
+                  <td>{staff.email}</td>
+                  <td>{translateRole(staff.roleName || staff.role)}</td>
+                  <td>
+                    <div className="action-buttons">
+                      <button 
+                        onClick={() => handleRevokeRole(staff.userId)} 
+                        className="btn btn--sm btn--warning"
+                      >
+                        Thu hồi quyền Staff
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

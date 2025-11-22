@@ -4,7 +4,7 @@ import axios, { type InternalAxiosRequestConfig } from "axios";
 
 const http = axios.create({
 
-  baseURL: "https://rentev-b7ee.onrender.com", 
+  baseURL: "https://rentev-b7ee.onrender.com" || "http://localhost:7049", 
   timeout: 10000, // 10 giây
   headers: {
     "Content-Type": "application/json",

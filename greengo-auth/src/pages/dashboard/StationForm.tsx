@@ -53,38 +53,43 @@ export default function StationForm({ initialData, onSave, onClose, loading }: P
   return (
     <div className="modal-backdrop">
       <div className="modal-content">
-        <h2>{initialData ? "Cập nhật Trạm" : "Thêm Trạm mới"}</h2>
-        <form onSubmit={handleSubmit}>
-          {/* === SỬA LẠI INPUT === */}
-          <div className="form-group">
-            <label>Tên trạm</label>
-            <input name="stationName" value={formData.stationName} onChange={handleChange} required />
-          </div>
-          <div className="form-group">
-            <label>Địa chỉ chi tiết</label>
-            <textarea name="address" value={formData.address} onChange={handleChange} required />
-          </div>
-          
-          {/* === THÊM 2 INPUT MỚI === */}
-          <div className="form-group">
-            <label>Vĩ độ (Latitude)</label>
-            <input name="latitude" type="number" step="any" value={formData.latitude} onChange={handleChange} required />
-          </div>
-          <div className="form-group">
-            <label>Kinh độ (Longitude)</label>
-            <input name="longitude" type="number" step="any" value={formData.longitude} onChange={handleChange} required />
-          </div>
-          {/* === HẾT SỬA === */}
+        <div className="modal-header">
+          <h2>{initialData ? "Cập nhật Trạm" : "Thêm Trạm mới"}</h2>
+        </div>
 
-          <div className="modal-actions">
-            <button type="button" onClick={onClose} disabled={loading} className="btn-secondary">
-              Hủy
-            </button>
-            <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? "Đang lưu..." : "Lưu"}
-            </button>
-          </div>
-        </form>
+        <div className="modal-body">
+          <form onSubmit={handleSubmit} id="station-form">
+            {/* === SỬA LẠI INPUT === */}
+            <div className="form-group">
+              <label>Tên trạm</label>
+              <input name="stationName" value={formData.stationName} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>Địa chỉ chi tiết</label>
+              <textarea name="address" value={formData.address} onChange={handleChange} required rows={3} />
+            </div>
+            
+            {/* === THÊM 2 INPUT MỚI === */}
+            <div className="form-group">
+              <label>Vĩ độ (Latitude)</label>
+              <input name="latitude" type="number" step="any" value={formData.latitude} onChange={handleChange} required />
+            </div>
+            <div className="form-group">
+              <label>Kinh độ (Longitude)</label>
+              <input name="longitude" type="number" step="any" value={formData.longitude} onChange={handleChange} required />
+            </div>
+            {/* === HẾT SỬA === */}
+          </form>
+        </div>
+
+        <div className="modal-footer">
+          <button type="button" onClick={onClose} disabled={loading} className="btn-secondary">
+            Hủy
+          </button>
+          <button type="submit" form="station-form" disabled={loading} className="btn-primary">
+            {loading ? "Đang lưu..." : "Lưu"}
+          </button>
+        </div>
       </div>
     </div>
   );

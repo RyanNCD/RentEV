@@ -75,88 +75,93 @@ export default function UserForm({ initialData, roles, onSave, onClose, loading 
   return (
     <div className="modal-backdrop">
       <div className="modal-content">
-        <h2>{initialData ? "Cập nhật Người dùng" : "Thêm Người dùng mới"}</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Họ tên *</label>
-            <input 
-              name="fullName" 
-              value={formData.fullName} 
-              onChange={handleChange} 
-              required 
-            />
-          </div>
-          <div className="form-group">
-            <label>Email *</label>
-            <input 
-              name="email" 
-              type="email" 
-              value={formData.email} 
-              onChange={handleChange} 
-              required 
-              disabled={!!initialData} // Không cho sửa email
-            />
-          </div>
-          <div className="form-group">
-            <label>Số điện thoại</label>
-            <input 
-              name="phone" 
-              type="tel" 
-              value={formData.phone} 
-              onChange={handleChange} 
-            />
-          </div>
-          <div className="form-group">
-            <label>{initialData ? "Mật khẩu mới (để trống nếu không đổi)" : "Mật khẩu *"}</label>
-            <input 
-              name="password" 
-              type="password" 
-              value={formData.password} 
-              onChange={handleChange} 
-              required={!initialData}
-            />
-          </div>
-          <div className="form-group">
-            <label>CMND/CCCD</label>
-            <input 
-              name="identityCard" 
-              value={formData.identityCard} 
-              onChange={handleChange} 
-            />
-          </div>
-          <div className="form-group">
-            <label>Bằng lái xe</label>
-            <input 
-              name="driverLicense" 
-              value={formData.driverLicense} 
-              onChange={handleChange} 
-            />
-          </div>
-          <div className="form-group">
-            <label>Quyền *</label>
-            <select 
-              name="roleId" 
-              value={formData.roleId} 
-              onChange={handleChange} 
-              required
-            >
-              {roles.map(role => (
-                <option key={role.roleId} value={role.roleId}>
-                  {translateRole(role.roleName)}
-                </option>
-              ))}
-            </select>
-          </div>
+        <div className="modal-header">
+          <h2>{initialData ? "Cập nhật Người dùng" : "Thêm Người dùng mới"}</h2>
+        </div>
 
-          <div className="modal-actions">
-            <button type="button" onClick={onClose} disabled={loading} className="btn-secondary">
-              Hủy
-            </button>
-            <button type="submit" disabled={loading} className="btn-primary">
-              {loading ? "Đang lưu..." : "Lưu"}
-            </button>
-          </div>
-        </form>
+        <div className="modal-body">
+          <form onSubmit={handleSubmit} id="user-form">
+            <div className="form-group">
+              <label>Họ tên *</label>
+              <input 
+                name="fullName" 
+                value={formData.fullName} 
+                onChange={handleChange} 
+                required 
+              />
+            </div>
+            <div className="form-group">
+              <label>Email *</label>
+              <input 
+                name="email" 
+                type="email" 
+                value={formData.email} 
+                onChange={handleChange} 
+                required 
+                disabled={!!initialData} // Không cho sửa email
+              />
+            </div>
+            <div className="form-group">
+              <label>Số điện thoại</label>
+              <input 
+                name="phone" 
+                type="tel" 
+                value={formData.phone} 
+                onChange={handleChange} 
+              />
+            </div>
+            <div className="form-group">
+              <label>{initialData ? "Mật khẩu mới (để trống nếu không đổi)" : "Mật khẩu *"}</label>
+              <input 
+                name="password" 
+                type="password" 
+                value={formData.password} 
+                onChange={handleChange} 
+                required={!initialData}
+              />
+            </div>
+            <div className="form-group">
+              <label>CMND/CCCD</label>
+              <input 
+                name="identityCard" 
+                value={formData.identityCard} 
+                onChange={handleChange} 
+              />
+            </div>
+            <div className="form-group">
+              <label>Bằng lái xe</label>
+              <input 
+                name="driverLicense" 
+                value={formData.driverLicense} 
+                onChange={handleChange} 
+              />
+            </div>
+            <div className="form-group">
+              <label>Quyền *</label>
+              <select 
+                name="roleId" 
+                value={formData.roleId} 
+                onChange={handleChange} 
+                required
+              >
+                {roles.map(role => (
+                  <option key={role.roleId} value={role.roleId}>
+                    {translateRole(role.roleName)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </form>
+        </div>
+
+        <div className="modal-footer">
+          <button type="button" onClick={onClose} disabled={loading} className="btn-secondary">
+            Hủy
+          </button>
+          <button type="submit" form="user-form" disabled={loading} className="btn-primary">
+            {loading ? "Đang lưu..." : "Lưu"}
+          </button>
+        </div>
       </div>
     </div>
   );
