@@ -3,7 +3,7 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 
 const http = axios.create({
-  baseURL: "http://localhost:5248", // CHUẨN TỪ SWAGGER
+  baseURL: "https://rentev-b7ee.onrender.com", // CHUẨN TỪ SWAGGER
   timeout: 10000, // 10 giây
   headers: {
     "Content-Type": "application/json",
