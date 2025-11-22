@@ -2,24 +2,30 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Repository.Models;
 
 public partial class Station
 {
-    public Guid StationId { get; set; }
+    [Key]
+    public Guid StationId { get; set; } = Guid.NewGuid();
 
     public string StationName { get; set; }
 
     public string Address { get; set; }
 
-    public decimal? Latitude { get; set; }
+    public double? Latitude { get; set; }
 
-    public decimal? Longitude { get; set; }
+    public double? Longitude { get; set; }
+
+    public DateTime? CreatedAt { get; set; }
 
     public virtual ICollection<Rental> RentalPickupStations { get; set; } = new List<Rental>();
 
     public virtual ICollection<Rental> RentalReturnStations { get; set; } = new List<Rental>();
+
+    public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
     public virtual ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
 }

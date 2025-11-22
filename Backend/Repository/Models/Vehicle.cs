@@ -2,26 +2,44 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Repository.Models;
 
 public partial class Vehicle
 {
-    public Guid VehicleId { get; set; }
+    [Key]
+    public Guid VehicleId { get; set; } = Guid.NewGuid();
 
     public Guid StationId { get; set; }
+
+    public string VehicleName { get; set; }
 
     public string VehicleType { get; set; }
 
     public int? BatteryCapacity { get; set; }
 
-    public string Status { get; set; }
-
-    public decimal? PricePerHour { get; set; }
-
     public string LicensePlate { get; set; }
 
+    public string Status { get; set; }
+
+    public decimal? PricePerDay { get; set; }
+
+    public string Description { get; set; }
+
+    public int? SeatingCapacity { get; set; }
+
+    public string Utilities { get; set; }
+
+    public int NumberOfRenters { get; set; }
+
+    public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
+
+    public virtual ICollection<IncidentReport> IncidentReports { get; set; } = new List<IncidentReport>();
+
     public virtual ICollection<Rental> Rentals { get; set; } = new List<Rental>();
+
+    public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
     public virtual Station Station { get; set; }
 }

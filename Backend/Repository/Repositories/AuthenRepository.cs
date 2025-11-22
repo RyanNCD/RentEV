@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using Repository.Base;
 using Repository.DTO;
 using Repository.Models;
 using System;
@@ -14,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Repository.Repositories
 {
-    public class AuthenRepository : GenericRepository<User>
+    public class AuthenRepository 
     {
         private readonly SWP391RentEVContext _context;
         private readonly IConfiguration _config;
@@ -27,67 +26,83 @@ namespace Repository.Repositories
 
         public async Task<string?> LoginAsync(string email, string password)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
-            if (user == null) return null;
+            var user = await _context.Users
+                .Include(u => u.Role) // ✅ load role
+                .FirstOrDefaultAsync(u => u.Email == email);
 
-            // Kiểm tra mật khẩu
-            if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+            if (user == null) return null;
+            var storedHash = user.PasswordHash?.Trim();
+            if (string.IsNullOrEmpty(storedHash))
                 return null;
 
-            // Tạo JWT token
+            // Normalize PHP-style bcrypt prefixes to a supported version
+            if (storedHash.StartsWith("$2y$"))
+                storedHash = "$2a$" + storedHash.Substring(4);
+            else if (storedHash.StartsWith("$2x$"))
+                storedHash = "$2a$" + storedHash.Substring(4);
+
+            bool verified;
+            try
+            {
+                verified = BCrypt.Net.BCrypt.Verify(password, storedHash);
+            }
+            catch
+            {
+                return null;
+            }
+
+            if (!verified)
+                return null;
+
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
 
             var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-            new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Role, user.RoleId.ToString())
-        };
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+        new Claim(ClaimTypes.Email, user.Email),
+        // Trim role name to avoid whitespace causing [Authorize(Roles=...)] mismatches
+        new Claim(ClaimTypes.Role, (user.Role?.RoleName ?? string.Empty).Trim())
+    };
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddHours(4),
+                Expires = DateTime.UtcNow.AddHours(3),
+                Issuer = _config["Jwt:Issuer"],
+                Audience = _config["Jwt:Audience"],
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256Signature
-                ),
-                Issuer = _config["Jwt:Issuer"],
-                Audience = _config["Jwt:Audience"]
+                    SecurityAlgorithms.HmacSha256Signature)
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
 
-        public async Task<User> RegisterAsync(string fullName, string email, string password, Guid roleId, string phoneNumber, string identityCard, string driverLicense)
+
+        public async Task<User> RegisterAsync(string fullName, string email, string password, string phoneNumber, string identityCard, string driverLicense)
         {
-            // Normalize email
             email = email.Trim().ToLower();
 
-            // Kiểm tra email trùng
-            var existingUser = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email);
+            var existingUser = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             if (existingUser != null)
                 throw new ArgumentException("Email đã tồn tại.");
 
-            // Kiểm tra role
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleId == roleId);
-            if (role == null)
-                throw new InvalidOperationException("Role không tồn tại.");
+            // Lấy role mặc định 'Customer'
+            var defaultRole = await _context.Roles.FirstOrDefaultAsync(r => r.RoleName == "Customer");
+            if (defaultRole == null)
+                throw new InvalidOperationException("Không tìm thấy role mặc định 'Customer'.");
 
-            // Hash mật khẩu
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
 
-            // Tạo user
             var user = new User
             {
                 UserId = Guid.NewGuid(),
                 FullName = fullName,
                 Email = email,
                 PasswordHash = passwordHash,
-                RoleId = roleId,
+                RoleId = defaultRole.RoleId, // Gán role mặc định
                 Phone = phoneNumber,
                 DriverLicense = driverLicense,
                 IdentityCard = identityCard,
@@ -99,6 +114,7 @@ namespace Repository.Repositories
 
             return user;
         }
+
 
     }
 }

@@ -1,0 +1,65 @@
+/* Giữ cho container căn giữa đúng */
+.page--about .container {
+  max-width: 1440px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 0px;
+  padding-right: 150px;
+  box-sizing: border-box;
+}
+
+/* Ngăn card hoặc nội dung tràn lề */
+.page--about section {
+  overflow: hidden;
+}
+
+/* Fix cho các khối có nền xanh để không lệch so với nền */
+.page--about section[style*="background"], 
+.page--about .about-mission,
+.page--about .how-it-works,
+.page--about .why-choose {
+  display: flex;
+  justify-content: center;
+}
+
+.page--about .about-mission > *,
+.page--about .how-it-works > *,
+.page--about .why-choose > * {
+  max-width: 1120px;
+  width: 100%;
+  padding-left: 32px;
+  padding-right: 32px;
+  box-sizing: border-box;
+}
+/* Nền xanh full-width, nhưng căn giữa nội dung bên trong */
+.why-choose {
+  background: #16a34a;
+  padding: 48px 0;
+  display: flex;
+  justify-content: center;
+}
+
+/* Container bên trong giữ khoảng cách 2 bên như các section khác */
+.why-choose .container {
+  max-width: 1120px;
+  width: 100%;
+  padding-left: 32px;
+  padding-right: 32px;
+  box-sizing: border-box;
+}
+
+/* Giữ cho tiêu đề, phụ đề căn giữa và trắng nổi bật */
+.why-choose__title {
+  text-align: center;
+  font-size: 28px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
+}
+
+.why-choose__subtitle {
+  text-align: center;
+  color: #e6fbe6;
+  font-size: 16px;
+  margin-bottom: 24px;
+}

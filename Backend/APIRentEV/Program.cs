@@ -1,25 +1,32 @@
-﻿using Repository.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Microsoft.OpenApi.Models;
+using Repository.Implementations;
+using Repository.Models;
 using Repository.Repositories;
 using Service.Interface;
 using Service.Services;
-using Microsoft.OpenApi.Models;
-using Microsoft.EntityFrameworkCore;
+using System.Text;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
+using Service.Configs;
+using APIRentEV.Mapper;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
+
 builder.Services.AddEndpointsApiExplorer();
 
 // Swagger + JWT Auth
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "RentEV API", Version = "v1" });
 
-    // Add JWT Bearer Auth to Swagger
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -29,6 +36,7 @@ builder.Services.AddSwaggerGen(c =>
         In = ParameterLocation.Header,
         Description = "Nhập token theo dạng: Bearer {your JWT token}"
     });
+
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
@@ -47,11 +55,49 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 builder.Services.AddDbContext<SWP391RentEVContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 21)), mySqlOptions =>
+    {
+        mySqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null);
+    });
+});
 
+
+
+// --- Scoped services (Repository + Service) ---
+builder.Services.AddScoped<RentalRepository>();
+builder.Services.AddScoped<IRentalService, RentalService>();
 
 builder.Services.AddScoped<AuthenRepository>();
 builder.Services.AddScoped<IAuthenService, AuthenService>();
+
+builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<VehicleRepository>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
+
+builder.Services.AddScoped<StationRepository>();
+builder.Services.AddScoped<IStationService, StationService>();
+
+builder.Services.AddScoped<ContractRepository>();
+builder.Services.AddScoped<IContractService, ContractService>();
+
+builder.Services.AddScoped<FeedbackRepository>();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
+
+builder.Services.Configure<PayOSConfig>(builder.Configuration.GetSection("PayOS"));
+builder.Services.AddScoped<PaymentRepository>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
+
+builder.Services.AddScoped<RentalImageRepository>();
+builder.Services.AddScoped<IRentalImageService, RentalImageService>();
+
+builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // JWT config
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -69,23 +115,68 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtIssuer,
             ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            RoleClaimType = ClaimTypes.Role
+        };
+
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(authHeader))
+                {
+                    if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                    {
+                        context.Token = authHeader.Substring("Bearer ".Length).Trim();
+                    }
+                    else
+                    {
+                        context.Token = authHeader;
+                    }
+                }
+
+                return Task.CompletedTask;
+            }
         };
     });
+
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowOrigins")
+    .Get<string[]>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigins", policy =>
+    {
+        policy.WithOrigins(allowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI();
+
+// Chỉ bật HTTPS redirection khi không phải Development
+// Trong Development, tắt để tránh lỗi 307 redirect khi chạy HTTP (port 5248)
+// Trong Production, HTTPS redirection sẽ được bật
+if (app.Environment.IsProduction())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseHttpsRedirection();
 }
 
-app.UseHttpsRedirection();
-
+// Serve static files for uploaded images (e.g., /uploads/...)
+app.UseStaticFiles();
+app.UseCors("AllowSpecificOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

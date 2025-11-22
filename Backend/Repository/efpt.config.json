@@ -15,7 +15,19 @@
    "T4TemplatePath": null,
    "Tables": [
       {
-         "Name": "[dbo].[Deposit]",
+         "Name": "[dbo].[Blacklist]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Contract]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Feedback]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[IncidentReport]",
          "ObjectType": 0
       },
       {
@@ -24,6 +36,14 @@
       },
       {
          "Name": "[dbo].[Rental]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[RentalImage]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Reservation]",
          "ObjectType": 0
       },
       {
