@@ -11,7 +11,7 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 // (loginService giờ trả về { token: "..." })
-import { login as loginService } from "../services/auth";
+import { login as loginService, type LoginResponseFromBE } from "../services/auth";
 import { type IUser } from "../types";
 import {
   decodeToken,
@@ -25,7 +25,8 @@ import {
 interface IAuthContext {
   user: IUser | null;
   isLoading: boolean;
-  login: (email: string, pass: string, redirectTo?: string) => Promise<void>;
+  login: (email: string, pass: string, redirectTo?: string, deviceId?: string) => Promise<LoginResponseFromBE>;
+  completeLoginWithToken: (token: string, redirectTo?: string) => void;
   logout: () => void;
 }
 
@@ -58,6 +59,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true); 
   const navigate = useNavigate();
 
+  const applyToken = useCallback((token: string, redirectTo?: string) => {
+    const decoded = decodeToken(token);
+    const appRole = mapServerRoleToAppRole(decoded.role);
+    if (!appRole) {
+      throw new Error("Missing or invalid role in token");
+    }
+    const userFromToken: IUser = {
+      id: decoded.nameid || "",
+      email: decoded.email || "",
+      fullName: decoded.email || "",
+      role: appRoleToUserRole(appRole),
+    };
+    setUser(userFromToken);
+    localStorage.setItem("accessToken", token);
+    if (redirectTo) {
+      navigate(redirectTo, { replace: true });
+    } else {
+      navigate(getRedirectPathForRole(appRole));
+    }
+  }, [navigate]);
+
   // (useEffect "Lách" - Dùng khi F5)
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -89,38 +111,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // (Hàm login "Lách")
   const login = useCallback(
-    async (email: string, pass: string, redirectTo?: string) => {
+    async (email: string, pass: string, redirectTo?: string, deviceId?: string): Promise<LoginResponseFromBE> => {
       try {
-        const response = await loginService({ email, password: pass });
-        if (!response.token) {
-          throw new Error("BE không trả về token");
+        const response = await loginService({ email, password: pass, deviceId });
+        if (response.token) {
+          applyToken(response.token, redirectTo);
         }
-        
-        const decoded = decodeToken(response.token);
-        const appRole = mapServerRoleToAppRole(decoded.role);
-        if (!appRole) {
-          throw new Error("Missing or invalid role in token");
-        }
-        const userFromToken: IUser = {
-          id: decoded.nameid || "",
-          email: decoded.email || "",
-          fullName: decoded.email || "",
-          role: appRoleToUserRole(appRole),
-        };
-        setUser(userFromToken);
-        localStorage.setItem("accessToken", response.token);
-        // Redirect to intended page if provided, else role-based dashboard
-        if (redirectTo) {
-          navigate(redirectTo, { replace: true });
-        } else {
-          navigate(getRedirectPathForRole(appRole));
-        }
+        return response;
       } catch (error) {
         console.error("Login failed:", error);
         throw error;
       }
     },
-    [navigate]
+    [applyToken]
   );
 
   // (logout, useMemo, if(isLoading), Provider... giữ nguyên)
@@ -131,8 +134,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [navigate]);
 
   const contextValue = useMemo(
-    () => ({ user, isLoading, login, logout }),
-    [user, isLoading, login, logout]
+    () => ({ user, isLoading, login, completeLoginWithToken: applyToken, logout }),
+    [user, isLoading, login, applyToken, logout]
   );
   
   if (isLoading) {

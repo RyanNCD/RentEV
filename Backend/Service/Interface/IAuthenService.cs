@@ -10,7 +10,10 @@ namespace Service.Interface
 {
     public interface IAuthenService
     {
-        Task<string> LoginWithToken(string email, string password);
+        Task<LoginResultDto> LoginAsync(string email, string password, string? deviceId = null);
+        Task<LoginResultDto> VerifyOtpAsync(Guid otpRequestId, string code, bool rememberDevice, string? deviceId = null);
         Task<User> RegisterAsync(UserRegisterDto model);
+        Task VerifyEmailAsync(string token);
+        Task ResendVerificationEmailAsync(string email);
     }
 }

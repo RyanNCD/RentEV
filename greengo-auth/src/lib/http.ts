@@ -2,9 +2,12 @@
 
 import axios, { type InternalAxiosRequestConfig } from "axios";
 
-const http = axios.create({
+const baseURL =
+  import.meta.env?.VITE_API_BASE_URL?.trim() ||
+  "https://rentev-b7ee.onrender.com";
 
-  baseURL: "https://rentev-b7ee.onrender.com", 
+const http = axios.create({
+  baseURL,
   timeout: 10000, // 10 giây
   headers: {
     "Content-Type": "application/json",

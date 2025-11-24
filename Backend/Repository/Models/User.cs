@@ -27,6 +27,18 @@ public partial class User
 
     public DateTime? CreatedAt { get; set; }
 
+    public bool IsEmailVerified { get; set; }
+
+    public string? EmailVerificationToken { get; set; }
+
+    public DateTime? EmailVerificationTokenExpiresAt { get; set; }
+
+    public DateTime? EmailVerifiedAt { get; set; }
+
+    public string? TrustedDeviceHash { get; set; }
+
+    public DateTime? TrustedDeviceExpiresAt { get; set; }
+
     public virtual ICollection<Blacklist> BlacklistCreatedByNavigations { get; set; } = new List<Blacklist>();
 
     public virtual ICollection<Blacklist> BlacklistUsers { get; set; } = new List<Blacklist>();
@@ -48,4 +60,6 @@ public partial class User
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
     public virtual Role Role { get; set; }
+
+    public virtual ICollection<UserOtp> UserOtps { get; set; } = new List<UserOtp>();
 }

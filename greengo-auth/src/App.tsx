@@ -10,6 +10,7 @@ import ProtectedRoutes from "./components/ProtectedRoutes";
 // Pages (Auth)
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 
 // Pages (Public/Renter)
 // (Sửa lại import cho đúng)
@@ -42,6 +43,7 @@ export default function App() {
         
         <Route path="about" element={<AboutPage />} />
         <Route path="pricing" element={<PricingPage />} />
+        <Route path="verify-email" element={<VerifyEmailPage />} />
         
         {/* === THÊM ROUTE NÀY VÀO === */}
         <Route path="vehicles/:id" element={<CarDetailPage />} />

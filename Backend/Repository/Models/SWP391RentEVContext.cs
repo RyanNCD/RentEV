@@ -39,6 +39,8 @@ public partial class SWP391RentEVContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<UserOtp> UserOtps { get; set; }
+
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

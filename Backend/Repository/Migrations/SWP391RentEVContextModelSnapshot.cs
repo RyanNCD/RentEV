@@ -17,7 +17,7 @@ namespace Repository.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.9")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -214,6 +214,10 @@ namespace Repository.Migrations
                         .HasColumnType("varchar(50)")
                         .HasDefaultValue("Pending");
 
+                    b.Property<string>("TransactionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
                     b.Property<string>("Type")
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
@@ -246,11 +250,29 @@ namespace Repository.Migrations
                         .HasColumnType("datetime")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
+                    b.Property<DateTime?>("DeliveredAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("DeliveredByStaffId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("DeliveryCondition")
+                        .HasColumnType("longtext");
+
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime");
 
                     b.Property<Guid>("PickupStationId")
                         .HasColumnType("char(36)");
+
+                    b.Property<DateTime?>("ReceivedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("ReceivedByStaffId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ReturnCondition")
+                        .HasColumnType("longtext");
 
                     b.Property<Guid?>("ReturnStationId")
                         .HasColumnType("char(36)");
@@ -458,6 +480,16 @@ namespace Repository.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<string>("EmailVerificationToken")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("EmailVerificationTokenExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("EmailVerifiedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -466,6 +498,11 @@ namespace Repository.Migrations
                     b.Property<string>("IdentityCard")
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
+
+                    b.Property<bool>("IsEmailVerified")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(false);
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -479,6 +516,13 @@ namespace Repository.Migrations
                     b.Property<Guid>("RoleId")
                         .HasColumnType("char(36)");
 
+                    b.Property<DateTime?>("TrustedDeviceExpiresAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TrustedDeviceHash")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
                     b.HasKey("UserId")
                         .HasName("PK__User__1788CC4CC600D509");
 
@@ -488,6 +532,45 @@ namespace Repository.Migrations
                         .IsUnique();
 
                     b.ToTable("User", (string)null);
+                });
+
+            modelBuilder.Entity("Repository.Models.UserOtp", b =>
+                {
+                    b.Property<Guid>("UserOtpId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)")
+                        .HasDefaultValueSql("(UUID())");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Purpose")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("UserOtpId")
+                        .HasName("PK_UserOtp");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserOtp", (string)null);
                 });
 
             modelBuilder.Entity("Repository.Models.Vehicle", b =>
@@ -501,6 +584,10 @@ namespace Repository.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<string>("ImageUrl")
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
 
@@ -752,6 +839,18 @@ namespace Repository.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("Repository.Models.UserOtp", b =>
+                {
+                    b.HasOne("Repository.Models.User", "User")
+                        .WithMany("UserOtps")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_UserOtp_User");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Repository.Models.Vehicle", b =>
                 {
                     b.HasOne("Repository.Models.Station", "Station")
@@ -816,6 +915,8 @@ namespace Repository.Migrations
                     b.Navigation("RentalUsers");
 
                     b.Navigation("Reservations");
+
+                    b.Navigation("UserOtps");
                 });
 
             modelBuilder.Entity("Repository.Models.Vehicle", b =>

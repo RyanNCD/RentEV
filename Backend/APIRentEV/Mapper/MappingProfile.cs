@@ -1,7 +1,6 @@
 using AutoMapper;
 using Repository.DTO;
 using Repository.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace APIRentEV.Mapper
 {
