@@ -1,4 +1,5 @@
 ﻿
+using APIRentEV.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -25,7 +26,7 @@ namespace APIRentEV.Controllers
             _mapper = mapper;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsersAll()
         {
@@ -42,7 +43,7 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpGet("{id}")]
         public async Task<ActionResult<UserDto>> GetUserById(Guid id)
         {
@@ -73,7 +74,7 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpGet("customers")]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetCustomerUsers()
         {
@@ -92,7 +93,7 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,StaffStation")]
         [HttpGet("roles")]
         public async Task<ActionResult<IEnumerable<RoleDto>>> GetAllRoles()
         {
@@ -106,7 +107,7 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpPost]
         public async Task<ActionResult<UserDto>> CreateUser([FromBody] UserCreateDto dto)
         {
@@ -120,7 +121,7 @@ namespace APIRentEV.Controllers
                                    _mapper.Map<UserDto>(created));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpPut("{id}")]
         public async Task<ActionResult<UserDto>> UpdateUser(Guid id, [FromBody] UserUpdateDto dto)
         {
@@ -133,6 +134,7 @@ namespace APIRentEV.Controllers
             existing.IdentityCard = dto.IdentityCard ?? existing.IdentityCard;
             existing.DriverLicense = dto.DriverLicense ?? existing.DriverLicense;
             existing.RoleId = dto.RoleId != Guid.Empty ? dto.RoleId : existing.RoleId;
+            existing.StationId = dto.StationId ?? existing.StationId;
             
             // Xử lý password nếu có
             if (!string.IsNullOrEmpty(dto.PasswordHash))
@@ -147,7 +149,7 @@ namespace APIRentEV.Controllers
             return Ok(userDto);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
@@ -180,7 +182,7 @@ namespace APIRentEV.Controllers
             return Ok(userDto);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpPost("{id}/ban")]
         public async Task<IActionResult> BanUser(Guid id, [FromBody] BanUserDto dto)
         {
@@ -198,7 +200,7 @@ namespace APIRentEV.Controllers
             return Ok(userDto);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpPatch("{id}/role")]
         public async Task<IActionResult> UpdateUserRole(Guid id, [FromBody] UpdateRoleDto dto)
         {
@@ -206,6 +208,21 @@ namespace APIRentEV.Controllers
             if (user == null) return NotFound();
 
             return Ok(_mapper.Map<UserDto>(user));
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPatch("staffstation/{userId}/station")]
+        public async Task<IActionResult> UpdateStaffStation(Guid userId, [FromBody] UpdateStaffStationDto dto)
+        {
+            var user = await _userService.UpdateStaffStationAsync(userId, dto.StationId);
+            if (user == null)
+            {
+                return NotFound(new { message = "Không tìm thấy nhân viên hoặc không thể cập nhật trạm." });
+            }
+
+            var userDto = _mapper.Map<UserDto>(user);
+            userDto.IsBlacklisted = await _userService.IsUserBlacklistedAsync(userId);
+            return Ok(userDto);
         }
 
     }
@@ -218,5 +235,10 @@ namespace APIRentEV.Controllers
     public class BanUserDto
     {
         public string Reason { get; set; }
+    }
+
+    public class UpdateStaffStationDto
+    {
+        public Guid? StationId { get; set; }
     }
 }

@@ -28,4 +28,6 @@ public partial class Station
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
     public virtual ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
+
+    public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

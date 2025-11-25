@@ -35,6 +35,8 @@ public partial class User
 
     public DateTime? EmailVerifiedAt { get; set; }
 
+    public Guid? StationId { get; set; }
+
     public string? TrustedDeviceHash { get; set; }
 
     public DateTime? TrustedDeviceExpiresAt { get; set; }
@@ -60,6 +62,8 @@ public partial class User
     public virtual ICollection<Reservation> Reservations { get; set; } = new List<Reservation>();
 
     public virtual Role Role { get; set; }
+
+    public virtual Station Station { get; set; }
 
     public virtual ICollection<UserOtp> UserOtps { get; set; } = new List<UserOtp>();
 }

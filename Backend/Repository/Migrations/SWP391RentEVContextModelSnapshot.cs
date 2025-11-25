@@ -516,6 +516,9 @@ namespace Repository.Migrations
                     b.Property<Guid>("RoleId")
                         .HasColumnType("char(36)");
 
+                    b.Property<Guid?>("StationId")
+                        .HasColumnType("char(36)");
+
                     b.Property<DateTime?>("TrustedDeviceExpiresAt")
                         .HasColumnType("datetime(6)");
 
@@ -527,6 +530,8 @@ namespace Repository.Migrations
                         .HasName("PK__User__1788CC4CC600D509");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex("StationId");
 
                     b.HasIndex(new[] { "Email" }, "UQ__User__A9D10534C6163B8C")
                         .IsUnique();
@@ -836,7 +841,13 @@ namespace Repository.Migrations
                         .IsRequired()
                         .HasConstraintName("FK__User__RoleId__4F7CD00D");
 
+                    b.HasOne("Repository.Models.Station", "Station")
+                        .WithMany("Users")
+                        .HasForeignKey("StationId");
+
                     b.Navigation("Role");
+
+                    b.Navigation("Station");
                 });
 
             modelBuilder.Entity("Repository.Models.UserOtp", b =>
@@ -890,6 +901,8 @@ namespace Repository.Migrations
                     b.Navigation("RentalReturnStations");
 
                     b.Navigation("Reservations");
+
+                    b.Navigation("Users");
 
                     b.Navigation("Vehicles");
                 });

@@ -346,6 +346,11 @@ public partial class SWP391RentEVContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__User__RoleId__4F7CD00D");
+
+            entity.HasOne(d => d.Station).WithMany(p => p.Users)
+                .HasForeignKey(d => d.StationId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_User_Station_StationId");
         });
 
         modelBuilder.Entity<Vehicle>(entity =>

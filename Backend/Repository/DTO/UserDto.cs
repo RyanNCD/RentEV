@@ -14,5 +14,7 @@ namespace Repository.DTO
         public string RoleName { get; set; }
         public DateTime? CreatedAt { get; set; }
         public bool IsBlacklisted { get; set; }
+        public Guid? StationId { get; set; }
+        public string StationName { get; set; }
     }
 }

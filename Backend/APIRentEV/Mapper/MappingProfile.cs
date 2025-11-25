@@ -25,6 +25,7 @@ namespace APIRentEV.Mapper
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.RoleName : null))
                 .ForMember(dest => dest.IsBlacklisted, opt => opt.Ignore()) // Will be set in controller
+                .ForMember(dest => dest.StationName, opt => opt.MapFrom(src => src.Station != null ? src.Station.StationName : null))
                 .ReverseMap();
 
             CreateMap<UserCreateDto, User>()

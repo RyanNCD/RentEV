@@ -1,3 +1,4 @@
+using APIRentEV.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,7 @@ using Repository.DTO;
 using Repository.Models;
 using Service.Interface;
 using Service.Services;
+using System.Linq;
 
 namespace APIRentEV.Controllers
 {
@@ -25,21 +27,43 @@ namespace APIRentEV.Controllers
             _logger = logger;
         }
 
-        [Authorize(Roles = "Admin,StaffStation")]
+        [Authorize(Roles = "StaffStation")]
         [HttpGet]
         public async Task<IActionResult> GetAllPayments()
         {
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+
             var payments = await _paymentService.GetAllPaymentsAsync();
+            if (isStaff && staffStationId.HasValue)
+            {
+                payments = payments
+                    .Where(p => p.Rental != null && RentalMatchesStation(p.Rental, staffStationId.Value))
+                    .ToList();
+            }
             var dtos = _mapper.Map<List<PaymentDto>>(payments);
             return Ok(dtos);
         }
 
-        [Authorize(Roles = "Admin,StaffStation,Customer")]
+        [Authorize(Roles = "StaffStation,Customer")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPaymentById(Guid id)
         {
             var payment = await _paymentService.GetPaymentById(id);
             if (payment == null) return NotFound();
+
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue && payment.Rental != null && !RentalMatchesStation(payment.Rental, staffStationId.Value))
+            {
+                return Forbid("Bạn chỉ có thể xem giao dịch thuộc trạm của mình.");
+            }
 
             var dto = _mapper.Map<PaymentDto>(payment);
             return Ok(dto);
@@ -99,6 +123,31 @@ namespace APIRentEV.Controllers
             _logger.LogInformation("[ConfirmPayment] Payment confirmed. paymentId={PaymentId}, transactionId={TransactionId}", payment.PaymentId, payment.TransactionId);
             var dto = _mapper.Map<PaymentDto>(payment);
             return Ok(dto);
+        }
+
+        private (bool isStaff, Guid? stationId, ActionResult? errorResult) ResolveStaffContext()
+        {
+            var isStaff = User?.IsInRole("StaffStation") ?? false;
+            if (!isStaff)
+            {
+                return (false, null, null);
+            }
+
+            var stationId = User.GetStationId();
+            if (!stationId.HasValue)
+            {
+                return (true, null, Forbid("Tài khoản Staff chưa được gán trạm. Vui lòng liên hệ Admin để cập nhật."));
+            }
+
+            return (true, stationId, null);
+        }
+
+        private static bool RentalMatchesStation(Rental rental, Guid stationId)
+        {
+            if (rental == null) return false;
+            if (rental.PickupStationId == stationId) return true;
+            if (rental.ReturnStationId.HasValue && rental.ReturnStationId.Value == stationId) return true;
+            return false;
         }
     }
 }

@@ -8,6 +8,7 @@ export interface DecodedTokenShape {
   email?: string;
   role?: string; // normalized single role string
   exp?: number;
+  stationId?: string;
 }
 
 function extractRole(payload: any): string | undefined {
@@ -38,7 +39,11 @@ export function decodeToken(token: string): DecodedTokenShape {
       ?? raw?.["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"]
       ?? raw?.["http://schemas.microsoft.com/ws/2008/06/identity/claims/emailaddress"];
     const exp = raw?.exp;
-    return { nameid, email, role, exp };
+    const stationId = raw?.stationId
+      ?? raw?.station_id
+      ?? raw?.["stationId"]
+      ?? raw?.["station_id"];
+    return { nameid, email, role, exp, stationId };
   } catch {
     return {};
   }

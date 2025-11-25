@@ -17,6 +17,7 @@ namespace Repository.Implementations
         {
             return await _context.Users
                 .Include(u => u.Role)
+                .Include(u => u.Station)
                 .ToListAsync();
         }
 
@@ -24,18 +25,21 @@ namespace Repository.Implementations
         {
             return await _context.Users
                                  .Include(u => u.Role)
+                                 .Include(u => u.Station)
                                  .FirstOrDefaultAsync(u => u.UserId == id);
         }
         public async Task<User?> GetUseRoleByIdAsync(Guid userId)
         {
             return await _context.Users
                 .Include(u => u.Role)
+                .Include(u => u.Station)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
         }
         public async Task<List<User>> GetUsersByRoleNameAsync(string roleName)
         {
             return await _context.Users
                 .Include(u => u.Role)
+                .Include(u => u.Station)
                 .Where(u => u.Role != null && u.Role.RoleName != null && 
                            u.Role.RoleName.Trim().ToLower() == roleName.Trim().ToLower())
                 .ToListAsync();

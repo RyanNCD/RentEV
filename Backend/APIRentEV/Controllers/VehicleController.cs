@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Linq;
+using APIRentEV.Extensions;
 using APIRentEV.Mapper;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -52,7 +53,7 @@ namespace APIRentEV.Controllers
             return dto;
         }
 
-        [Authorize(Roles = "Admin,StaffStation,Customer")]
+        [Authorize(Roles = "StaffStation,Customer")]
         [HttpGet]
         public async Task<ActionResult> GetAllVehicle(
             [FromQuery] int? page = null,
@@ -61,10 +62,22 @@ namespace APIRentEV.Controllers
             [FromQuery] string? status = null,
             [FromQuery] string? search = null)
         {
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+
+            var effectiveStationId = isStaff ? staffStationId : stationId;
+
             // If no pagination parameters provided, return all (backward compatibility)
             if (!page.HasValue && !pageSize.HasValue && !stationId.HasValue && string.IsNullOrEmpty(status) && string.IsNullOrEmpty(search))
             {
                 var vehicles = await _vehicleService.GetVehicleAllAsync();
+                if (isStaff && staffStationId.HasValue)
+                {
+                    vehicles = vehicles.Where(v => v.StationId == staffStationId.Value);
+                }
                 var dtos = _mapper.Map<List<VehicleDto>>(vehicles);
                 // Map ImageUrl với base URL
                 dtos = dtos.Select(MapVehicleDtoImageUrl).ToList();
@@ -74,7 +87,7 @@ namespace APIRentEV.Controllers
             // Use paginated endpoint
             var currentPage = page ?? 1;
             var currentPageSize = pageSize ?? 10;
-            var (items, totalCount) = await _vehicleService.GetVehiclesPagedAsync(currentPage, currentPageSize, stationId, status, search);
+            var (items, totalCount) = await _vehicleService.GetVehiclesPagedAsync(currentPage, currentPageSize, effectiveStationId, status, search);
             var pagedDtos = items.Select(MapVehicleDtoImageUrl).ToList();
 
             var result = new
@@ -105,11 +118,22 @@ namespace APIRentEV.Controllers
             return Ok(dto);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpPost]
         public async Task<ActionResult<VehicleDto>> CreateVehicle([FromBody] VehicleCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest();
+
+            var (_, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (!staffStationId.HasValue)
+            {
+                return Forbid("Staff chưa được gán trạm. Vui lòng liên hệ quản trị.");
+            }
+            dto.StationId = staffStationId.Value;
 
             var vehicle = _mapper.Map<Vehicle>(dto);
             var created = await _vehicleService.CreateVehicleAsync(vehicle);
@@ -122,7 +146,7 @@ namespace APIRentEV.Controllers
                                    result);
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpPut("{id}")]
         public async Task<ActionResult<VehicleDto>> UpdateVehicle(Guid id, [FromBody] VehicleUpdateDto dto)
         {
@@ -130,6 +154,20 @@ namespace APIRentEV.Controllers
             {
                 var existing = await _vehicleService.GetVehicleByIdAsync(id);
                 if (existing == null) return NotFound();
+
+                var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+                if (stationError != null)
+                {
+                    return stationError;
+                }
+                if (isStaff && staffStationId.HasValue && existing.StationId != staffStationId.Value)
+                {
+                    return Forbid("Bạn chỉ có thể quản lý xe thuộc trạm của mình.");
+                }
+                if (isStaff && staffStationId.HasValue)
+                {
+                    dto.StationId = staffStationId.Value;
+                }
 
                 _mapper.Map(dto, existing); // AutoMapper sẽ map các field không null
                 await _vehicleService.UpdateVehicleAsync(id, existing);
@@ -146,12 +184,24 @@ namespace APIRentEV.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVehicle(Guid id)
         {
             try
             {
+                var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+                if (stationError != null)
+                {
+                    return stationError;
+                }
+                var existing = await _vehicleService.GetVehicleByIdAsync(id);
+                if (existing == null) return NotFound();
+                if (isStaff && staffStationId.HasValue && existing.StationId != staffStationId.Value)
+                {
+                    return Forbid("Bạn chỉ có thể xóa xe thuộc trạm của mình.");
+                }
+
                 var success = await _vehicleService.DeleteViheicleAsync(id);
                 if (!success) return NotFound();
                 return NoContent();
@@ -162,31 +212,58 @@ namespace APIRentEV.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin,StaffStation,Customer")]
+        [Authorize(Roles = "StaffStation,Customer")]
         [HttpGet("search")]
         public async Task<IActionResult> SearchVehicles([FromQuery] string keyword)
         {
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+
             var result = await _vehicleService.SearchVehiclesAsync(keyword);
+            if (isStaff && staffStationId.HasValue)
+            {
+                result = result.Where(v => v.StationId == staffStationId.Value).ToList();
+            }
             // Map ImageUrl với base URL
             result = result.Select(MapVehicleDtoImageUrl).ToList();
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin,StaffStation,Customer")]
+        [Authorize(Roles = "StaffStation,Customer")]
         [HttpGet("filter")]
         public async Task<IActionResult> FilterVehicles([FromQuery] Guid? stationId, [FromQuery] string status, [FromQuery] int? seatingCapacity)
         {
-            var result = await _vehicleService.FilterVehiclesAsync(stationId, status, seatingCapacity);
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            var effectiveStationId = isStaff ? staffStationId : stationId;
+
+            var result = await _vehicleService.FilterVehiclesAsync(effectiveStationId, status, seatingCapacity);
             // Map ImageUrl với base URL
             result = result.Select(MapVehicleDtoImageUrl).ToList();
             return Ok(result);
         }
 
-        [Authorize(Roles = "Admin,StaffStation,Customer")]
+        [Authorize(Roles = "StaffStation,Customer")]
         [HttpGet("sort")]
         public async Task<IActionResult> SortVehicles([FromQuery] string sortBy, [FromQuery] bool isDescending = false)
         {
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+
             var result = await _vehicleService.SortVehiclesAsync(sortBy, isDescending);
+            if (isStaff && staffStationId.HasValue)
+            {
+                result = result.Where(v => v.StationId == staffStationId.Value).ToList();
+            }
             // Map ImageUrl với base URL
             result = result.Select(MapVehicleDtoImageUrl).ToList();
             return Ok(result);
@@ -245,6 +322,21 @@ namespace APIRentEV.Controllers
             return Ok(vehicle);
         }
 
+        private (bool isStaff, Guid? stationId, ActionResult? errorResult) ResolveStaffContext()
+        {
+            var isStaff = User?.IsInRole("StaffStation") ?? false;
+            if (!isStaff)
+            {
+                return (false, null, null);
+            }
 
+            var stationId = User.GetStationId();
+            if (!stationId.HasValue)
+            {
+                return (true, null, Forbid("Tài khoản Staff chưa được gán trạm. Vui lòng liên hệ Admin để cập nhật trạm quản lý."));
+            }
+
+            return (true, stationId, null);
+        }
     }
 }

@@ -7,28 +7,31 @@ import "./AdminLayout.css";
 // === LỖI CỦA ÔNG LÀ DO THIẾU "export default" Ở DÒNG NÀY ===
 export default function AdminLayout() {
   const { user, logout } = useAuth();
+  const homeLink = user?.role === "ADMIN" ? "/dashboard/overview" : "/dashboard/checkin";
 
   return (
     <div className="admin-layout">
       {/* THANH SIDEBAR BÊN TRÁI */}
       <aside className="admin-sidebar">
-        <Link to="/dashboard" className="admin-sidebar__brand">
-          GREENGO (Admin)
+        <Link to={homeLink} className="admin-sidebar__brand">
+          GREENGO Dashboard
         </Link>
         
         <nav className="admin-sidebar__nav">
-          <NavLink to="/dashboard" end>Tổng quan</NavLink>
-          
-          {(user?.role === "STAFF" || user?.role === "ADMIN") && (
-            <NavLink to="/dashboard/checkin">Giao nhận xe</NavLink>
-          )}
-          
-          {user?.role === "ADMIN" && (
+          <NavLink to={homeLink} end>Tổng quan</NavLink>
+
+          {user?.role === "STAFF" && (
             <>
-              <NavLink to="/dashboard/users">Quản lý User</NavLink>
-              <NavLink to="/dashboard/staffs">Quản lý Staff</NavLink>
+              <NavLink to="/dashboard/checkin">Giao nhận xe</NavLink>
               <NavLink to="/dashboard/vehicles">Quản lý Xe</NavLink>
               <NavLink to="/dashboard/stations">Quản lý Trạm</NavLink>
+              <NavLink to="/dashboard/users">Quản lý User</NavLink>
+            </>
+          )}
+
+          {user?.role === "ADMIN" && (
+            <>
+              <NavLink to="/dashboard/staffs">Quản lý Staff</NavLink>
               <NavLink to="/dashboard/revenue">Doanh thu</NavLink>
             </>
           )}

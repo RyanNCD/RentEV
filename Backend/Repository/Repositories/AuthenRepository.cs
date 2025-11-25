@@ -73,6 +73,7 @@ namespace Repository.Repositories
         {
             var user = await _context.Users
                 .Include(u => u.Role)
+                .Include(u => u.Station)
                 .FirstOrDefaultAsync(u => u.Email == email);
 
             if (user == null) return null;
@@ -111,6 +112,11 @@ namespace Repository.Repositories
                 new Claim(ClaimTypes.Role, (user.Role?.RoleName ?? string.Empty).Trim())
             };
 
+            if (user.StationId.HasValue)
+            {
+                claims.Add(new Claim("stationId", user.StationId.Value.ToString()));
+            }
+
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
@@ -136,6 +142,7 @@ namespace Repository.Repositories
         {
             return await _context.Users
                 .Include(u => u.Role)
+                .Include(u => u.Station)
                 .FirstOrDefaultAsync(u => u.UserId == userId);
         }
 
@@ -143,6 +150,7 @@ namespace Repository.Repositories
         {
             return await _context.Users
                 .Include(u => u.Role)
+                .Include(u => u.Station)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 

@@ -16,6 +16,8 @@ export interface IUser {
   driverLicense?: string;
   createdAt?: string;
   avatar?: string;
+  stationId?: string | null;
+  stationName?: string | null;
 }
 
 

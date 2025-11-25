@@ -67,9 +67,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
     const userFromToken: IUser = {
       id: decoded.nameid || "",
+      userId: decoded.nameid || "",
       email: decoded.email || "",
       fullName: decoded.email || "",
       role: appRoleToUserRole(appRole),
+      roleId: "",
+      isBlacklisted: false,
+      stationId: decoded.stationId ?? null,
     };
     setUser(userFromToken);
     localStorage.setItem("accessToken", token);
@@ -96,9 +100,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
           } else {
             const userFromToken: IUser = {
               id: decoded.nameid || "",
+              userId: decoded.nameid || "",
               email: decoded.email || "",
               fullName: decoded.email || "",
               role: appRoleToUserRole(appRole),
+              roleId: "",
+              isBlacklisted: false,
+              stationId: decoded.stationId ?? null,
             };
             setUser(userFromToken);
           }
