@@ -38,9 +38,19 @@ namespace Repository.DTO
 
         public decimal? TotalCost { get; set; }
 
+        public decimal? PricePerDaySnapshot { get; set; }
+
         public string Status { get; set; }
 
         // Contract information
         public ContractDto? Contract { get; set; }
+
+        // Early return request
+        public bool EarlyReturnRequested { get; set; }
+        public DateTime? EarlyReturnRequestedAt { get; set; }
+
+        public DepositDto? Deposit { get; set; }
+
+        public List<RentalPenaltyDto> Penalties { get; set; } = new List<RentalPenaltyDto>();
     }
 }

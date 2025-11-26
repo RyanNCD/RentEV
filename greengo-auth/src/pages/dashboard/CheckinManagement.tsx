@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { type IRentalHistoryItem, type IStation, type IFeedback } from "../../types";
-import { getRentalsPaged, type RentalListParams, checkInRental, checkOutRental, getRentalById, getFeedbacksByRental } from "../../services/rental";
+import { type IRentalHistoryItem, type IStation, type IFeedback, type IPenalty } from "../../types";
+import { getRentalsPaged, type RentalListParams, checkInRental, checkOutRental, getRentalById, getFeedbacksByRental, createRentalPenalty, settleRentalPenalty } from "../../services/rental";
 import { uploadRentalImage, getRentalImages, type RentalImageItem } from "../../services/upload";
 import { getAllStations } from "../../services/station";
 import { useAuth } from "../../context/AuthContext";
+import { createStationPayOSPayment, confirmStationPayment, type StationPaymentConfirmRequest } from "../../services/payment";
+import { getPenalties } from "../../services/penalty";
 import "../checkin.css";
 
 type ModalType = "checkin" | "checkout" | "detail" | null;
@@ -57,6 +59,21 @@ export default function CheckinManagement() {
   const [returnFiles, setReturnFiles] = useState<File[]>([]);
   const [returnNote, setReturnNote] = useState<string>("");
 
+  // Penalty handling state
+  const [penaltyCatalog, setPenaltyCatalog] = useState<IPenalty[]>([]);
+  const [selectedPenaltyId, setSelectedPenaltyId] = useState<string>("");
+  const [penaltyAmount, setPenaltyAmount] = useState<number>(0);
+  const [penaltyDescription, setPenaltyDescription] = useState<string>("");
+  const [useDepositForPenalty, setUseDepositForPenalty] = useState(true);
+  const [penaltySubmitting, setPenaltySubmitting] = useState(false);
+
+  // Station payment state
+  const [paymentMethod, setPaymentMethod] = useState<"Cash" | "BankTransfer" | "PayOS" | "">("");
+  const [paymentProofFile, setPaymentProofFile] = useState<File | null>(null);
+  const [paymentProofPreview, setPaymentProofPreview] = useState<string | null>(null);
+  const [payOSCheckoutUrl, setPayOSCheckoutUrl] = useState<string | null>(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
+
   const loadRentals = async () => {
     setLoading(true);
     setError(null);
@@ -99,6 +116,18 @@ export default function CheckinManagement() {
   useEffect(() => {
     loadRentals();
   }, [page, pageSize, statusFilter, searchQuery, startDate, endDate, stationFilter]);
+
+  useEffect(() => {
+    const fetchPenaltyCatalog = async () => {
+      try {
+        const data = await getPenalties();
+        setPenaltyCatalog(data);
+      } catch (err) {
+        console.error("Failed to load penalties", err);
+      }
+    };
+    fetchPenaltyCatalog();
+  }, []);
 
   useEffect(() => {
     loadStations();
@@ -172,7 +201,22 @@ export default function CheckinManagement() {
     setModalType(null);
     setSelectedRental(null);
     setRentalImages([]);
+    setFeedbacks([]);
+    setFiles([]);
+    setReturnFiles([]);
+    setDescription("");
+    setNote("");
+    setDeliveryCondition("");
+    setReturnCondition("");
+    setReturnNote("");
+    setImageType("Checkin");
     setModalError(null);
+    // Reset payment state
+    setPaymentMethod("");
+    setPaymentProofFile(null);
+    setPaymentProofPreview(null);
+    setPayOSCheckoutUrl(null);
+    setProcessingPayment(false);
   };
 
   const loadRentalImages = async (rentalId: string) => {
@@ -199,9 +243,97 @@ export default function CheckinManagement() {
     }
   };
 
+  const handlePaymentProofChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setPaymentProofFile(file);
+      setPaymentProofPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleCreatePayOSPayment = async () => {
+    if (!selectedRental) return;
+
+    setProcessingPayment(true);
+    setModalError(null);
+
+    try {
+      const response = await createStationPayOSPayment({ rentalId: selectedRental.rentalId });
+      setPayOSCheckoutUrl(response.checkoutUrl);
+      // Mở link PayOS trong tab mới
+      window.open(response.checkoutUrl, "_blank");
+    } catch (err: any) {
+      console.error("Error creating PayOS payment:", err);
+      setModalError(err.response?.data?.message || "Không thể tạo link thanh toán PayOS.");
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
+  const handleConfirmStationPayment = async () => {
+    if (!selectedRental || !paymentMethod) return;
+
+    // Validate BankTransfer requires proof image
+    if (paymentMethod === "BankTransfer" && !paymentProofFile) {
+      setModalError("Vui lòng chọn ảnh chứng từ chuyển khoản.");
+      return;
+    }
+
+    setProcessingPayment(true);
+    setModalError(null);
+
+    try {
+      let proofImageUrl = "";
+
+      // Upload proof image if BankTransfer
+      if (paymentMethod === "BankTransfer" && paymentProofFile) {
+        const uploadResponse = await uploadRentalImage(
+          paymentProofFile,
+          selectedRental.rentalId,
+          "Document",
+          "Ảnh chứng từ chuyển khoản",
+          "Thanh toán tại trạm"
+        );
+        proofImageUrl = uploadResponse.url;
+      }
+
+      // Confirm payment
+      const paymentData: StationPaymentConfirmRequest = {
+        rentalId: selectedRental.rentalId,
+        paymentMethod: paymentMethod as "Cash" | "BankTransfer",
+        paymentProofImageUrl: proofImageUrl || undefined,
+      };
+
+      await confirmStationPayment(paymentData);
+
+      // Reload rentals to update status
+      await loadRentals();
+      
+      // Reset payment form
+      setPaymentMethod("");
+      setPaymentProofFile(null);
+      setPaymentProofPreview(null);
+      setPayOSCheckoutUrl(null);
+
+      // Show success message
+      alert("Xác nhận thanh toán thành công!");
+    } catch (err: any) {
+      console.error("Error confirming station payment:", err);
+      setModalError(err.response?.data?.message || "Xác nhận thanh toán thất bại.");
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
+
   const handleCheckin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedRental) return;
+
+    // Kiểm tra thanh toán trước khi check-in
+    if (!isRentalPaid(selectedRental)) {
+      setModalError("Vui lòng thanh toán trước khi bàn giao xe.");
+      return;
+    }
 
     if (files.length === 0) {
       setModalError("Vui lòng chọn ít nhất một ảnh bàn giao.");
@@ -270,6 +402,85 @@ export default function CheckinManagement() {
     }
   };
 
+  const handlePenaltyTypeChange = (penaltyId: string) => {
+    setSelectedPenaltyId(penaltyId);
+    const selected = penaltyCatalog.find((p) => p.penaltyId === penaltyId);
+    if (selected) {
+      setPenaltyAmount(selected.amount);
+      if (!penaltyDescription) {
+        setPenaltyDescription(selected.description);
+      }
+    }
+  };
+
+  const handleCreatePenalty = async () => {
+    if (!selectedRental || !selectedPenaltyId || penaltyAmount <= 0) {
+      setModalError("Vui lòng chọn loại phạt và nhập số tiền hợp lệ.");
+      return;
+    }
+    setPenaltySubmitting(true);
+    setModalError(null);
+    try {
+      await createRentalPenalty(selectedRental.rentalId, {
+        penaltyId: selectedPenaltyId,
+        amount: penaltyAmount,
+        description: penaltyDescription,
+        useDepositFirst: useDepositForPenalty,
+      });
+      await loadRentals();
+      const rental = await getRentalById(selectedRental.rentalId);
+      setSelectedRental(rental);
+      setSelectedPenaltyId("");
+      setPenaltyAmount(0);
+      setPenaltyDescription("");
+    } catch (err: any) {
+      console.error("Error creating penalty:", err);
+      setModalError(err.response?.data?.message || "Không thể tạo khoản phạt.");
+    } finally {
+      setPenaltySubmitting(false);
+    }
+  };
+
+  const handleSettlePenalty = async (penaltyId: string, mode: "deposit" | "cash", remaining: number) => {
+    if (!selectedRental) return;
+
+    let payloadAmount = 0;
+    let useDeposit = false;
+    let paymentMethod = "Cash";
+
+    if (mode === "deposit") {
+      useDeposit = true;
+    } else {
+      const promptValue = window.prompt("Nhập số tiền khách đã thanh toán", remaining.toString());
+      if (!promptValue) return;
+      const amount = Number(promptValue);
+      if (Number.isNaN(amount) || amount <= 0) {
+        alert("Số tiền không hợp lệ.");
+        return;
+      }
+      payloadAmount = amount;
+      paymentMethod = "Cash";
+    }
+
+    setPenaltySubmitting(true);
+    setModalError(null);
+    try {
+      await settleRentalPenalty(penaltyId, {
+        paymentAmount: payloadAmount,
+        paymentMethod,
+        useDeposit,
+      });
+      await loadRentals();
+      const rental = await getRentalById(selectedRental.rentalId);
+      setSelectedRental(rental);
+    } catch (err: any) {
+      console.error("Error settling penalty:", err);
+      setModalError(err.response?.data?.message || "Không thể cập nhật khoản phạt.");
+    } finally {
+      setPenaltySubmitting(false);
+    }
+  };
+
   const formatDate = (dateString?: string | null) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleString("vi-VN", {
@@ -314,7 +525,14 @@ export default function CheckinManagement() {
 
   const canCheckin = (status: string) => {
     const upperStatus = status.toUpperCase();
+    // Cho phép check-in nếu đã thanh toán hoặc đang booking (có thể thanh toán tại trạm)
     return upperStatus === "PAID" || upperStatus === "BOOKING";
+  };
+
+  // Kiểm tra xem rental đã thanh toán chưa (dựa vào status)
+  const isRentalPaid = (rental: IRentalHistoryItem) => {
+    const upperStatus = rental.status?.toUpperCase() || "";
+    return upperStatus === "PAID";
   };
 
   const canCheckout = (status: string) => {
@@ -554,7 +772,110 @@ export default function CheckinManagement() {
             <p><strong>Xe:</strong> {selectedRental.vehicleName}</p>
             <p><strong>Khách hàng:</strong> {selectedRental.userName}</p>
             <p><strong>Thời gian:</strong> {formatDate(selectedRental.startTime)} - {formatDate(selectedRental.endTime)}</p>
+            <p><strong>Tổng tiền:</strong> {formatPrice(selectedRental.totalCost)}</p>
+            <p><strong>Trạng thái thanh toán:</strong> 
+              <span className={`status-badge ${isRentalPaid(selectedRental) ? "status-paid" : "status-pending"}`} style={{ marginLeft: "8px" }}>
+                {isRentalPaid(selectedRental) ? "Đã thanh toán" : "Chưa thanh toán"}
+              </span>
+            </p>
           </div>
+
+          {/* Payment Section - Only show if not paid */}
+          {!isRentalPaid(selectedRental) && (
+            <div className="form-group" style={{ border: "2px solid #fbbf24", borderRadius: "8px", padding: "16px", marginBottom: "20px", background: "#fffbeb" }}>
+              <h3 style={{ marginTop: 0, marginBottom: "16px", color: "#92400e", fontSize: "16px", fontWeight: "600" }}>
+                💳 Thanh toán tại trạm
+              </h3>
+              
+              <div className="form-group">
+                <label>Phương thức thanh toán *</label>
+                <select 
+                  value={paymentMethod} 
+                  onChange={(e) => {
+                    setPaymentMethod(e.target.value as "Cash" | "BankTransfer" | "PayOS");
+                    if (e.target.value !== "BankTransfer") {
+                      setPaymentProofFile(null);
+                      setPaymentProofPreview(null);
+                    }
+                  }}
+                  disabled={processingPayment}
+                >
+                  <option value="">-- Chọn phương thức --</option>
+                  <option value="Cash">Tiền mặt</option>
+                  <option value="BankTransfer">Chuyển khoản</option>
+                  <option value="PayOS">PayOS (QR Code)</option>
+                </select>
+              </div>
+
+              {paymentMethod === "BankTransfer" && (
+                <div className="form-group">
+                  <label>Ảnh chứng từ chuyển khoản *</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePaymentProofChange}
+                    disabled={processingPayment}
+                  />
+                  {paymentProofPreview && (
+                    <div className="image-preview" style={{ marginTop: "12px" }}>
+                      <img
+                        src={paymentProofPreview}
+                        alt="Payment proof preview"
+                        className="preview-image"
+                        style={{ maxWidth: "200px", maxHeight: "200px" }}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {paymentMethod === "PayOS" && (
+                <div className="form-group">
+                  {payOSCheckoutUrl ? (
+                    <div style={{ padding: "12px", background: "#d1fae5", borderRadius: "6px", marginTop: "8px" }}>
+                      <p style={{ margin: 0, color: "#065f46", fontWeight: "500" }}>
+                        ✓ Link thanh toán đã được tạo. Vui lòng mở link để thanh toán.
+                      </p>
+                      <a 
+                        href={payOSCheckoutUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{ display: "inline-block", marginTop: "8px", color: "#059669", textDecoration: "underline" }}
+                      >
+                        Mở link thanh toán
+                      </a>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleCreatePayOSPayment}
+                      disabled={processingPayment}
+                      className="btn btn--primary"
+                      style={{ width: "100%", marginTop: "8px" }}
+                    >
+                      {processingPayment ? "Đang tạo..." : "Tạo link thanh toán PayOS"}
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {(paymentMethod === "Cash" || paymentMethod === "BankTransfer") && (
+                <button
+                  type="button"
+                  onClick={handleConfirmStationPayment}
+                  disabled={processingPayment || (paymentMethod === "BankTransfer" && !paymentProofFile)}
+                  className="btn btn--success"
+                  style={{ width: "100%", marginTop: "8px" }}
+                >
+                  {processingPayment ? "Đang xử lý..." : `Xác nhận thanh toán ${paymentMethod === "Cash" ? "tiền mặt" : "chuyển khoản"}`}
+                </button>
+              )}
+
+              <div style={{ marginTop: "12px", padding: "8px", background: "#fef3c7", borderRadius: "4px", fontSize: "13px", color: "#92400e" }}>
+                ⚠️ Vui lòng hoàn tất thanh toán trước khi bàn giao xe.
+              </div>
+            </div>
+          )}
           
           <div className="form-group">
             <label>Loại ảnh *</label>
@@ -635,6 +956,39 @@ export default function CheckinManagement() {
             <p><strong>Xe:</strong> {selectedRental.vehicleName}</p>
             <p><strong>Khách hàng:</strong> {selectedRental.userName}</p>
             <p><strong>Thời gian:</strong> {formatDate(selectedRental.startTime)} - {formatDate(selectedRental.endTime)}</p>
+            {(() => {
+              const endTime = selectedRental.endTime ? new Date(selectedRental.endTime) : null;
+              const isEarlyReturn = endTime && new Date() < endTime;
+              const hasRequest = selectedRental.earlyReturnRequested === true;
+              
+              if (isEarlyReturn) {
+                return (
+                  <div style={{ 
+                    marginTop: "12px", 
+                    padding: "12px", 
+                    background: hasRequest ? "#d1fae5" : "#fef3c7", 
+                    borderRadius: "6px",
+                    border: `1px solid ${hasRequest ? "#10b981" : "#f59e0b"}`
+                  }}>
+                    {hasRequest ? (
+                      <p style={{ margin: 0, color: "#065f46", fontWeight: "500" }}>
+                        ✓ Khách hàng đã yêu cầu trả xe sớm
+                        {selectedRental.earlyReturnRequestedAt && (
+                          <span style={{ fontSize: "12px", display: "block", marginTop: "4px" }}>
+                            Thời gian yêu cầu: {formatDate(selectedRental.earlyReturnRequestedAt)}
+                          </span>
+                        )}
+                      </p>
+                    ) : (
+                      <p style={{ margin: 0, color: "#92400e", fontWeight: "500" }}>
+                        ⚠️ Trả xe trước thời hạn: Cần có yêu cầu từ khách hàng trước khi nhận xe.
+                      </p>
+                    )}
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
 
           <div className="form-group">
@@ -678,6 +1032,142 @@ export default function CheckinManagement() {
                 ))}
               </div>
             )}
+          </div>
+
+          {selectedRental.deposit && (
+            <div className="deposit-summary" style={{ marginTop: "16px" }}>
+              <h3>Thông tin cọc</h3>
+              <div className="info-grid">
+                <div className="info-item">
+                  <strong>Đã nộp:</strong> {formatPrice(selectedRental.deposit.amount)}
+                </div>
+                <div className="info-item">
+                  <strong>Đã dùng:</strong> {formatPrice(selectedRental.deposit.usedAmount)}
+                </div>
+                <div className="info-item">
+                  <strong>Còn lại:</strong> {formatPrice(selectedRental.deposit.availableAmount)}
+                </div>
+                <div className="info-item">
+                  <strong>Trạng thái:</strong> {selectedRental.deposit.status}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="penalty-section" style={{ marginTop: "24px" }}>
+            <h3>Khoản phạt hư hỏng</h3>
+            {!selectedRental.penalties || selectedRental.penalties.length === 0 ? (
+              <div style={{ color: "#6b7280" }}>Chưa có khoản phạt nào.</div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-striped" style={{ fontSize: "14px" }}>
+                  <thead>
+                    <tr>
+                      <th>Loại</th>
+                      <th>Số tiền</th>
+                      <th>Đã trừ cọc</th>
+                      <th>Đã thu</th>
+                      <th>Trạng thái</th>
+                      <th>Thao tác</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedRental.penalties.map((penalty) => {
+                      const remaining = penalty.amount - penalty.depositUsedAmount - penalty.paidAmount;
+                      return (
+                        <tr key={penalty.rentalPenaltyId}>
+                          <td>
+                            <div style={{ fontWeight: 600 }}>{penalty.penalty?.violationType || "Phạt"}</div>
+                            <div style={{ color: "#6b7280" }}>{penalty.description}</div>
+                          </td>
+                          <td>{formatPrice(penalty.amount)}</td>
+                          <td>{formatPrice(penalty.depositUsedAmount)}</td>
+                          <td>{formatPrice(penalty.paidAmount)}</td>
+                          <td>
+                            <span className={`status-badge ${getStatusBadgeClass(penalty.status)}`}>
+                              {penalty.status}
+                            </span>
+                          </td>
+                          <td>
+                            {remaining > 0 ? (
+                              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                                <button
+                                  type="button"
+                                  className="btn btn--sm btn--warning"
+                                  onClick={() => handleSettlePenalty(penalty.rentalPenaltyId, "deposit", remaining)}
+                                  disabled={penaltySubmitting}
+                                >
+                                  Trừ cọc
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn--sm btn--success"
+                                  onClick={() => handleSettlePenalty(penalty.rentalPenaltyId, "cash", remaining)}
+                                  disabled={penaltySubmitting}
+                                >
+                                  Đã thu tiền
+                                </button>
+                              </div>
+                            ) : (
+                              <span style={{ color: "#059669" }}>Đã hoàn tất</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            <div className="penalty-form" style={{ marginTop: "16px" }}>
+              <div className="form-group">
+                <label>Loại phạt</label>
+                <select value={selectedPenaltyId} onChange={(e) => handlePenaltyTypeChange(e.target.value)}>
+                  <option value="">-- Chọn loại phạt --</option>
+                  {penaltyCatalog.map((penalty) => (
+                    <option key={penalty.penaltyId} value={penalty.penaltyId}>
+                      {penalty.violationType} ({formatPrice(penalty.amount)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Số tiền phạt</label>
+                <input
+                  type="number"
+                  min={0}
+                  value={penaltyAmount}
+                  onChange={(e) => setPenaltyAmount(Number(e.target.value))}
+                />
+              </div>
+              <div className="form-group">
+                <label>Mô tả</label>
+                <textarea
+                  value={penaltyDescription}
+                  onChange={(e) => setPenaltyDescription(e.target.value)}
+                  placeholder="Mô tả chi tiết thiệt hại..."
+                />
+              </div>
+              <div className="form-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={useDepositForPenalty}
+                    onChange={(e) => setUseDepositForPenalty(e.target.checked)}
+                  />{" "}
+                  Ưu tiên trừ vào cọc nếu còn
+                </label>
+              </div>
+              <button
+                type="button"
+                className="btn btn--primary"
+                onClick={handleCreatePenalty}
+                disabled={penaltySubmitting || !selectedPenaltyId || penaltyAmount <= 0}
+              >
+                {penaltySubmitting ? "Đang xử lý..." : "Thêm khoản phạt"}
+              </button>
+            </div>
           </div>
         </Modal>
       )}

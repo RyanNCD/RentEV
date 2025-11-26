@@ -43,6 +43,12 @@ public partial class SWP391RentEVContext : DbContext
 
     public virtual DbSet<Vehicle> Vehicles { get; set; }
 
+    public virtual DbSet<Deposit> Deposits { get; set; }
+
+    public virtual DbSet<Penalty> Penalties { get; set; }
+
+    public virtual DbSet<RentalPenalty> RentalPenalties { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Blacklist>(entity =>

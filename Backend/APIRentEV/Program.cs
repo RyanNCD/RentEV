@@ -98,6 +98,12 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<RentalImageRepository>();
 builder.Services.AddScoped<IRentalImageService, RentalImageService>();
 
+builder.Services.AddScoped<RentalPenaltyRepository>();
+builder.Services.AddScoped<IRentalPenaltyService, RentalPenaltyService>();
+
+builder.Services.AddScoped<Repository.Repositories.DepositRepository>();
+builder.Services.AddScoped<Service.Interface.IDepositService, Service.Services.DepositService>();
+
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.ShouldMapMethod = _ => false;

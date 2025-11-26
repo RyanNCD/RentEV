@@ -102,6 +102,51 @@ namespace Repository.Migrations
                     b.ToTable("Contract", (string)null);
                 });
 
+            modelBuilder.Entity("Repository.Models.Deposit", b =>
+                {
+                    b.Property<Guid>("DepositId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("LastUsedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("PaymentDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("RefundDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("RefundReason")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("RentalId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("UsedAmount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("DepositId");
+
+                    b.HasIndex("RentalId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Deposits");
+                });
+
             modelBuilder.Entity("Repository.Models.Feedback", b =>
                 {
                     b.Property<Guid>("FeedbackId")
@@ -196,6 +241,9 @@ namespace Repository.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("decimal(20, 2)");
 
+                    b.Property<Guid?>("ConfirmedByStaffId")
+                        .HasColumnType("char(36)");
+
                     b.Property<DateTime?>("PaymentDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime")
@@ -204,6 +252,9 @@ namespace Repository.Migrations
                     b.Property<string>("PaymentMethod")
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
+
+                    b.Property<string>("PaymentProofImageUrl")
+                        .HasColumnType("longtext");
 
                     b.Property<Guid>("RentalId")
                         .HasColumnType("char(36)");
@@ -235,6 +286,37 @@ namespace Repository.Migrations
                     b.ToTable("Payment", (string)null);
                 });
 
+            modelBuilder.Entity("Repository.Models.Penalty", b =>
+                {
+                    b.Property<Guid>("PenaltyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ViolationType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("PenaltyId");
+
+                    b.ToTable("Penalties");
+                });
+
             modelBuilder.Entity("Repository.Models.Rental", b =>
                 {
                     b.Property<Guid>("RentalId")
@@ -259,11 +341,20 @@ namespace Repository.Migrations
                     b.Property<string>("DeliveryCondition")
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("EarlyReturnRequested")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime?>("EarlyReturnRequestedAt")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime");
 
                     b.Property<Guid>("PickupStationId")
                         .HasColumnType("char(36)");
+
+                    b.Property<decimal?>("PricePerDaySnapshot")
+                        .HasColumnType("decimal(65,30)");
 
                     b.Property<DateTime?>("ReceivedAt")
                         .HasColumnType("datetime(6)");
@@ -355,6 +446,53 @@ namespace Repository.Migrations
                     b.HasIndex("RentalId");
 
                     b.ToTable("RentalImage", (string)null);
+                });
+
+            modelBuilder.Entity("Repository.Models.RentalPenalty", b =>
+                {
+                    b.Property<Guid>("RentalPenaltyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("DepositUsedAmount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("PaidAmount")
+                        .HasColumnType("decimal(65,30)");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasColumnType("longtext");
+
+                    b.Property<Guid>("PenaltyId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("RentalId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("RentalPenaltyId");
+
+                    b.HasIndex("PenaltyId");
+
+                    b.HasIndex("RentalId");
+
+                    b.ToTable("RentalPenalties");
                 });
 
             modelBuilder.Entity("Repository.Models.Reservation", b =>
@@ -677,6 +815,25 @@ namespace Repository.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("Repository.Models.Deposit", b =>
+                {
+                    b.HasOne("Repository.Models.Rental", "Rental")
+                        .WithMany("Deposits")
+                        .HasForeignKey("RentalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Repository.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Rental");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Repository.Models.Feedback", b =>
                 {
                     b.HasOne("Repository.Models.Rental", "Rental")
@@ -806,6 +963,25 @@ namespace Repository.Migrations
                     b.Navigation("Rental");
                 });
 
+            modelBuilder.Entity("Repository.Models.RentalPenalty", b =>
+                {
+                    b.HasOne("Repository.Models.Penalty", "Penalty")
+                        .WithMany()
+                        .HasForeignKey("PenaltyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Repository.Models.Rental", "Rental")
+                        .WithMany("RentalPenalties")
+                        .HasForeignKey("RentalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Penalty");
+
+                    b.Navigation("Rental");
+                });
+
             modelBuilder.Entity("Repository.Models.Reservation", b =>
                 {
                     b.HasOne("Repository.Models.Station", "Station")
@@ -843,7 +1019,9 @@ namespace Repository.Migrations
 
                     b.HasOne("Repository.Models.Station", "Station")
                         .WithMany("Users")
-                        .HasForeignKey("StationId");
+                        .HasForeignKey("StationId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_User_Station_StationId");
 
                     b.Navigation("Role");
 
@@ -880,6 +1058,8 @@ namespace Repository.Migrations
 
             modelBuilder.Entity("Repository.Models.Rental", b =>
                 {
+                    b.Navigation("Deposits");
+
                     b.Navigation("Feedbacks");
 
                     b.Navigation("IncidentReports");
@@ -887,6 +1067,8 @@ namespace Repository.Migrations
                     b.Navigation("Payments");
 
                     b.Navigation("RentalImages");
+
+                    b.Navigation("RentalPenalties");
                 });
 
             modelBuilder.Entity("Repository.Models.Role", b =>

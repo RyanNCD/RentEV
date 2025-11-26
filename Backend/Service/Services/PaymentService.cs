@@ -95,14 +95,15 @@ namespace Service.Services
                     {
                         computed = rental.TotalCost.Value;
                     }
-                    else if (rental.StartTime.HasValue && rental.EndTime.HasValue && rental.Vehicle?.PricePerDay.HasValue == true)
+                    else if (rental.StartTime.HasValue && rental.EndTime.HasValue)
                     {
                         var start = rental.StartTime.Value;
                         var end = rental.EndTime.Value;
                         if (end > start)
                         {
                             var days = Math.Ceiling((end - start).TotalDays);
-                            computed = (decimal)days * rental.Vehicle.PricePerDay.Value;
+                            var pricePerDay = rental.PricePerDaySnapshot ?? rental.Vehicle?.PricePerDay ?? 0m;
+                            computed = (decimal)days * pricePerDay;
                         }
                     }
 
@@ -187,6 +188,170 @@ namespace Service.Services
 
                 await _rentalRepo.UpdateAsync(rental);
         }
+
+            return payment;
+        }
+
+        // Tạo payment link PayOS tại trạm (staff tạo cho khách)
+        public async Task<string> CreateStationPayOSPaymentAsync(Guid rentalId, Guid staffId, string ipAddress)
+        {
+            var rental = await _rentalRepo.GetByIdAsync(rentalId);
+            if (rental == null)
+            {
+                throw new InvalidOperationException("Rental not found.");
+            }
+
+            // Tính toán amount từ rental
+            decimal amount = 0m;
+            if (rental.TotalCost.HasValue && rental.TotalCost.Value > 0)
+            {
+                amount = rental.TotalCost.Value;
+            }
+            else if (rental.StartTime.HasValue && rental.EndTime.HasValue)
+            {
+                var start = rental.StartTime.Value;
+                var end = rental.EndTime.Value;
+                if (end > start)
+                {
+                    var days = Math.Ceiling((end - start).TotalDays);
+                    var pricePerDay = rental.PricePerDaySnapshot ?? rental.Vehicle?.PricePerDay ?? 0m;
+                    amount = (decimal)days * pricePerDay;
+                }
+            }
+
+            if (amount <= 0)
+            {
+                throw new InvalidOperationException("Cannot determine rental amount.");
+            }
+
+            // Tạo payment với status Pending
+            var payment = new Payment
+            {
+                PaymentId = Guid.NewGuid(),
+                RentalId = rentalId,
+                UserId = rental.UserId,
+                Amount = amount,
+                PaymentMethod = "PayOS",
+                Type = "Rental",
+                Status = "Pending",
+                PaymentDate = DateTime.UtcNow
+            };
+
+            // Generate orderCode
+            long orderCode = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            payment.TransactionId = orderCode.ToString();
+
+            // Save payment
+            await _repo.AddAsync(payment);
+
+            // Create PayOS payment link
+            var unitAmount = (int)Math.Round(amount);
+            var item = new ItemData("Thuê xe", 1, unitAmount);
+            var items = new List<ItemData> { item };
+            var cancelUrl = _config.ReturnUrl ?? "";
+            var returnUrl = _config.ReturnUrl ?? "";
+
+            var paymentData = new PaymentData(
+                orderCode,
+                unitAmount,
+                "Thanh toan thue xe tai tram",
+                items,
+                cancelUrl,
+                returnUrl
+            );
+
+            CreatePaymentResult createPayment = await _payOS.createPaymentLink(paymentData);
+            return createPayment.checkoutUrl;
+        }
+
+        // Xác nhận thanh toán tại trạm (Cash hoặc BankTransfer)
+        public async Task<Payment> ConfirmStationPaymentAsync(Guid rentalId, string paymentMethod, Guid staffId, string? paymentProofImageUrl)
+        {
+            var rental = await _rentalRepo.GetByIdAsync(rentalId);
+            if (rental == null)
+            {
+                throw new InvalidOperationException("Rental not found.");
+            }
+
+            // Tính toán amount
+            decimal amount = 0m;
+            if (rental.TotalCost.HasValue && rental.TotalCost.Value > 0)
+            {
+                amount = rental.TotalCost.Value;
+            }
+            else if (rental.StartTime.HasValue && rental.EndTime.HasValue)
+            {
+                var start = rental.StartTime.Value;
+                var end = rental.EndTime.Value;
+                if (end > start)
+                {
+                    var days = Math.Ceiling((end - start).TotalDays);
+                    var pricePerDay = rental.PricePerDaySnapshot ?? rental.Vehicle?.PricePerDay ?? 0m;
+                    amount = (decimal)days * pricePerDay;
+                }
+            }
+
+            if (amount <= 0)
+            {
+                throw new InvalidOperationException("Cannot determine rental amount.");
+            }
+
+            // Validate payment method
+            if (paymentMethod != "Cash" && paymentMethod != "BankTransfer")
+            {
+                throw new InvalidOperationException("Invalid payment method. Only Cash or BankTransfer allowed for station payment.");
+            }
+
+            // Validate proof image for BankTransfer
+            if (paymentMethod == "BankTransfer" && string.IsNullOrWhiteSpace(paymentProofImageUrl))
+            {
+                throw new InvalidOperationException("Payment proof image is required for BankTransfer.");
+            }
+
+            // Tạo payment mới hoặc cập nhật payment đã có
+            var existingPayments = await _repo.GetByRentalIdAsync(rentalId);
+            Payment payment;
+
+            // Nếu đã có payment Pending, cập nhật nó
+            var pendingPayment = existingPayments.FirstOrDefault(p => p.Status == "Pending");
+            if (pendingPayment != null)
+            {
+                payment = pendingPayment;
+                payment.PaymentMethod = paymentMethod;
+                payment.PaymentProofImageUrl = paymentProofImageUrl;
+                payment.ConfirmedByStaffId = staffId;
+            }
+            else
+            {
+                // Tạo payment mới
+                payment = new Payment
+                {
+                    PaymentId = Guid.NewGuid(),
+                    RentalId = rentalId,
+                    UserId = rental.UserId,
+                    Amount = amount,
+                    PaymentMethod = paymentMethod,
+                    Type = "Rental",
+                    Status = "Success",
+                    PaymentDate = DateTime.UtcNow,
+                    PaymentProofImageUrl = paymentProofImageUrl,
+                    ConfirmedByStaffId = staffId
+                };
+                await _repo.AddAsync(payment);
+            }
+
+            // Cập nhật status thành Success
+            payment.Status = "Success";
+            payment.PaymentDate = DateTime.UtcNow;
+            await _repo.UpdateAsync(payment);
+
+            // Cập nhật rental
+            if (!rental.TotalCost.HasValue || rental.TotalCost.Value <= 0)
+            {
+                rental.TotalCost = amount;
+            }
+            rental.Status = "PAID";
+            await _rentalRepo.UpdateAsync(rental);
 
             return payment;
         }

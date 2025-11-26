@@ -25,6 +25,10 @@ namespace Repository.Implementations
                 .Include(r => r.PickupStation)
                 .Include(r => r.ReturnStation)
                 .Include(r => r.Contract)
+                .Include(r => r.Deposits)
+                .Include(r => r.RentalPenalties).ThenInclude(rp => rp.Penalty)
+                .Include(r => r.Deposits)
+                .Include(r => r.RentalPenalties).ThenInclude(rp => rp.Penalty)
                 .ToListAsync();
         }
 
@@ -36,6 +40,8 @@ namespace Repository.Implementations
                                  .Include(r => r.Vehicle)
                                  .Include(r => r.User)
                                  .Include(r => r.Contract)
+                                 .Include(r => r.Deposits)
+                                 .Include(r => r.RentalPenalties).ThenInclude(rp => rp.Penalty)
                                  .OrderByDescending(r => r.CreatedAt)
                                  .ToListAsync();
         }
@@ -56,6 +62,8 @@ namespace Repository.Implementations
                                  .Include(r => r.ReturnStation)
                                  .Include(r => r.RentalImages)
                                  .Include(r => r.Contract)
+                                 .Include(r => r.Deposits)
+                                 .Include(r => r.RentalPenalties).ThenInclude(rp => rp.Penalty)
                                  .FirstOrDefaultAsync(r => r.RentalId == id);
         }
 
@@ -68,6 +76,8 @@ namespace Repository.Implementations
                                  .Include(r => r.PickupStation)
                                  .Include(r => r.ReturnStation)
                                  .Include(r => r.Contract)
+                                 .Include(r => r.Deposits)
+                                 .Include(r => r.RentalPenalties).ThenInclude(rp => rp.Penalty)
                                  .FirstOrDefaultAsync();
         }
 
@@ -103,6 +113,8 @@ namespace Repository.Implementations
                                  .Include(r => r.Vehicle)
                                  .Include(r => r.User)
                                  .Include(r => r.Contract)
+                                 .Include(r => r.Deposits)
+                                 .Include(r => r.RentalPenalties).ThenInclude(rp => rp.Penalty)
                                  .OrderByDescending(r => r.CreatedAt)
                                  .ToListAsync();
         }
@@ -162,6 +174,8 @@ namespace Repository.Implementations
                 .Include(r => r.PickupStation)
                 .Include(r => r.ReturnStation)
                 .Include(r => r.Contract)
+                .Include(r => r.Deposits)
+                .Include(r => r.RentalPenalties).ThenInclude(rp => rp.Penalty)
                 .AsQueryable();
 
             // Filter by status
@@ -227,6 +241,8 @@ namespace Repository.Implementations
                 .Include(r => r.PickupStation)
                 .Include(r => r.ReturnStation)
                 .Include(r => r.Contract)
+                .Include(r => r.Deposits)
+                .Include(r => r.RentalPenalties).ThenInclude(rp => rp.Penalty)
                 .AsQueryable();
 
             // Search by vehicle name or rental ID

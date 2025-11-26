@@ -51,5 +51,14 @@ namespace Service.Interface
             DateTime? startDate = null,
             DateTime? endDate = null);
 
+        // Customer request early return
+        Task<Rental?> RequestEarlyReturnAsync(Guid rentalId, Guid userId);
+
+        // Calculate rental cost and deposit
+        Task<Repository.DTO.CalculateRentalCostResponse> CalculateRentalCostAsync(Guid vehicleId, DateTime startTime, DateTime endTime);
+
+        // Get rental bill (rental cost + penalties)
+        Task<Repository.DTO.RentalBillDto> GetRentalBillAsync(Guid rentalId);
+
     }
 }
