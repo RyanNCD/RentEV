@@ -26,5 +26,11 @@ namespace Repository.DTO
 
         // Mã giao dịch PayOS để xác thực
         public string TransactionId { get; set; }
+
+        // Ảnh chứng từ thanh toán
+        public string PaymentProofImageUrl { get; set; }
+
+        // Staff xác nhận thanh toán
+        public Guid? ConfirmedByStaffId { get; set; }
     }
 }
