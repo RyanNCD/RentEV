@@ -70,6 +70,31 @@ export default function CheckoutPage() {
     fetchPenalties();
   }, []); 
 
+  // === Min datetime constraints ===
+  const toLocalInputValue = (d: Date) => {
+    const tzOffset = d.getTimezoneOffset() * 60000;
+    return new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
+  };
+
+  const getTomorrow = () => {
+    const now = new Date();
+    const t = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, now.getHours(), now.getMinutes());
+    return t;
+  };
+
+  const minStartDate = toLocalInputValue(getTomorrow());
+
+  const minEndDate = (() => {
+    if (startDate) {
+      const start = new Date(startDate);
+      const minEnd = new Date(start.getTime() + 24 * 60 * 60 * 1000);
+      return toLocalInputValue(minEnd);
+    }
+    const base = getTomorrow();
+    const minEnd = new Date(base.getTime() + 24 * 60 * 60 * 1000);
+    return toLocalInputValue(minEnd);
+  })();
+
   // Calculate total with validation (minimum 24 hours)
   const calculateTotal = () => {
     if (!startDate || !endDate || !car) return { rentalCost: 0, deposit: 0, days: 0, isValid: false, message: "" };
@@ -96,7 +121,8 @@ export default function CheckoutPage() {
     }
 
     // Tính số ngày: nếu > 24h thì tính là ngày thứ 2
-    const days = Math.ceil(totalHours / 24);
+    // Giảm nhẹ để tránh lỗi làm tròn floating (24h đôi khi thành 24.0000001)
+    const days = Math.ceil(totalHours / 24 - 1e-6);
     const rentalCost = days * (car.pricePerDay ?? 0);
     const deposit = rentalCost * 0.3; // 30% của tổng tiền thuê
 
@@ -333,7 +359,15 @@ export default function CheckoutPage() {
           <input 
             type="datetime-local" 
             value={startDate} 
-            onChange={e => setStartDate(e.target.value)}
+            min={minStartDate}
+            onChange={e => {
+              const value = e.target.value;
+              if (value && value < minStartDate) {
+                setStartDate(minStartDate);
+              } else {
+                setStartDate(value);
+              }
+            }}
             required
             style={{ width: "100%", padding: "0.5rem" }}
           />
@@ -343,7 +377,15 @@ export default function CheckoutPage() {
           <input 
             type="datetime-local" 
             value={endDate} 
-            onChange={e => setEndDate(e.target.value)}
+            min={minEndDate}
+            onChange={e => {
+              const value = e.target.value;
+              if (value && value < minEndDate) {
+                setEndDate(minEndDate);
+              } else {
+                setEndDate(value);
+              }
+            }}
             required
             style={{ width: "100%", padding: "0.5rem" }}
           />
@@ -436,15 +478,24 @@ export default function CheckoutPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {penalties.map((penalty) => (
-                      <tr key={penalty.penaltyId} style={{ borderBottom: "1px solid #f3f4f6" }}>
-                        <td style={{ padding: "8px", fontWeight: "500" }}>{penalty.violationType}</td>
-                        <td style={{ padding: "8px", color: "#6b7280" }}>{penalty.description}</td>
-                        <td style={{ padding: "8px", textAlign: "right", fontWeight: "600", color: "#dc2626" }}>
-                          {formatPrice(penalty.amount)}
-                        </td>
-                      </tr>
-                    ))}
+                    {penalties.map((penalty) => {
+                      const label =
+                        (penalty.violationType === "LateReturn" && "Trả xe trễ giờ") ||
+                        (penalty.violationType === "DamageExterior" && "Hư hỏng ngoại thất") ||
+                        (penalty.violationType === "DamageInterior" && "Hư hỏng nội thất") ||
+                        (penalty.violationType === "LostAccessory" && "Mất phụ kiện") ||
+                        (penalty.violationType === "CleaningFee" && "Phí vệ sinh") ||
+                        penalty.violationType;
+                      return (
+                        <tr key={penalty.penaltyId} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                          <td style={{ padding: "8px", fontWeight: "500" }}>{label}</td>
+                          <td style={{ padding: "8px", color: "#6b7280" }}>{penalty.description}</td>
+                          <td style={{ padding: "8px", textAlign: "right", fontWeight: "600", color: "#dc2626" }}>
+                            {formatPrice(penalty.amount)}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
