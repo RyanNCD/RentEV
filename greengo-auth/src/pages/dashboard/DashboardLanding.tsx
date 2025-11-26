@@ -12,3 +12,4 @@ export default function DashboardLanding() {
   return <Navigate to={target} replace />;
 }
 
+
