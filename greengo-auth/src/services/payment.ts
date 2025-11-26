@@ -23,3 +23,26 @@ export const confirmPayment = async (paymentId: string): Promise<any> => {
   const response = await http.post(`/api/payment/${paymentId}/confirm`);
   return response.data;
 };
+
+// Station payment functions
+export interface CreateStationPayOSPaymentRequest {
+  rentalId: string;
+}
+
+export interface StationPaymentConfirmRequest {
+  rentalId: string;
+  paymentMethod: "Cash" | "BankTransfer" | "PayOS";
+  paymentProofImageUrl?: string;
+}
+
+// Staff tạo payment link PayOS tại trạm
+export const createStationPayOSPayment = async (data: CreateStationPayOSPaymentRequest): Promise<{ checkoutUrl: string; rentalId: string }> => {
+  const response = await http.post<{ checkoutUrl: string; rentalId: string }>("/api/payment/station/create-payos", data);
+  return response.data;
+};
+
+// Staff xác nhận thanh toán tại trạm (Cash hoặc BankTransfer)
+export const confirmStationPayment = async (data: StationPaymentConfirmRequest): Promise<any> => {
+  const response = await http.post("/api/payment/station/confirm", data);
+  return response.data;
+};

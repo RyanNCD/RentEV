@@ -29,6 +29,9 @@ public partial class Rental
 
     public decimal? TotalCost { get; set; }
 
+    // Snapshot giá theo thời điểm booking để không bị thay đổi khi bảng giá đổi
+    public decimal? PricePerDaySnapshot { get; set; }
+
     public string Status { get; set; } = "Pending";
 
     // --- Check-in (Delivery) metadata ---
@@ -41,6 +44,10 @@ public partial class Rental
     public Guid? ReceivedByStaffId { get; set; }
     public string? ReturnCondition { get; set; }
 
+    // --- Early return request (Customer request to return early) ---
+    public bool EarlyReturnRequested { get; set; } = false;
+    public DateTime? EarlyReturnRequestedAt { get; set; }
+
     public DateTime? CreatedAt { get; set; }
 
     public virtual Contract Contract { get; set; }
@@ -50,6 +57,10 @@ public partial class Rental
     public virtual ICollection<IncidentReport> IncidentReports { get; set; } = new List<IncidentReport>();
 
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+    public virtual ICollection<Deposit> Deposits { get; set; } = new List<Deposit>();
+
+    public virtual ICollection<RentalPenalty> RentalPenalties { get; set; } = new List<RentalPenalty>();
 
     public virtual Station PickupStation { get; set; }
 
