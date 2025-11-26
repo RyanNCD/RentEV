@@ -1,6 +1,6 @@
 // File: src/services/admin.ts
 import http from "../lib/http";
-import { type IUser } from "../types";
+import { type IUser, type IStation } from "../types";
 
 export interface IRole {
   roleId: string;
@@ -75,5 +75,15 @@ export const deleteStaff = async (staffId: string): Promise<void> => {
 // Revoke staff role (downgrade to Customer)
 export const revokeStaffRole = async (staffId: string): Promise<IUser> => {
   const response = await http.post<IUser>(`/api/users/staffstation/${staffId}/revoke`);
+  return response.data;
+};
+
+export const getStations = async (): Promise<IStation[]> => {
+  const response = await http.get<IStation[]>("/api/station");
+  return response.data;
+};
+
+export const updateStaffStation = async (staffId: string, stationId: string | null): Promise<IUser> => {
+  const response = await http.patch<IUser>(`/api/users/staffstation/${staffId}/station`, { stationId });
   return response.data;
 };

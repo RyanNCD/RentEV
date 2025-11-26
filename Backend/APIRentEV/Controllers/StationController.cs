@@ -1,4 +1,5 @@
-﻿using APIRentEV.Mapper;
+﻿using APIRentEV.Extensions;
+using APIRentEV.Mapper;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,21 +36,41 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
-        [Authorize(Roles = "Admin,StaffStation,Customer")]
+        [Authorize(Roles = "StaffStation,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult<StationDto>> GetStationById(Guid id)
         {
             var station = await _stationService.GetStationByIdAsync(id);
             if (station == null) return NotFound();
 
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue && staffStationId.Value != id)
+            {
+                return Forbid("Bạn chỉ có thể xem thông tin trạm của mình.");
+            }
+
             return Ok(_mapper.Map<StationDto>(station));
         }
 
-        [Authorize(Roles = "Admim")]
+        [Authorize(Roles = "StaffStation")]
         [HttpPost]
         public async Task<ActionResult<StationDto>> CreateStation([FromBody] StationCreateDto dto)
         {
             if (!ModelState.IsValid) return BadRequest();
+
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext(requireStationAssignment: false);
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue)
+            {
+                return Forbid("Bạn đã được gán trạm và không thể tạo thêm trạm mới.");
+            }
 
             var station = _mapper.Map<Station>(dto);
             var created = await _stationService.CreateStationAsync(station);
@@ -59,12 +80,22 @@ namespace APIRentEV.Controllers
                                    _mapper.Map<StationDto>(created));
         }
 
-        [Authorize(Roles = "Admim")]
+        [Authorize(Roles = "StaffStation")]
         [HttpPut("{id}")]
         public async Task<ActionResult<StationDto>> UpdateStation(Guid id, [FromBody] StationUpdateDto dto)
         {
             var existing = await _stationService.GetStationByIdAsync(id);
             if (existing == null) return NotFound();
+
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue && staffStationId.Value != id)
+            {
+                return Forbid("Bạn chỉ có thể cập nhật trạm của mình.");
+            }
 
             _mapper.Map(dto, existing); // AutoMapper map các field không null
             await _stationService.UpdateStationAsync(id, existing);
@@ -72,15 +103,42 @@ namespace APIRentEV.Controllers
             return Ok(_mapper.Map<StationDto>(existing));
         }
 
-        [Authorize(Roles = "Admim")]
+        [Authorize(Roles = "StaffStation")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStation(Guid id)
         {
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue && staffStationId.Value != id)
+            {
+                return Forbid("Bạn chỉ có thể xóa trạm của mình.");
+            }
+
             var success = await _stationService.DeleteStationAsync(id);
             if (!success)
                 return NotFound();
 
             return NoContent();
+        }
+
+        private (bool isStaff, Guid? stationId, ActionResult? errorResult) ResolveStaffContext(bool requireStationAssignment = true)
+        {
+            var isStaff = User?.IsInRole("StaffStation") ?? false;
+            if (!isStaff)
+            {
+                return (false, null, null);
+            }
+
+            var stationId = User.GetStationId();
+            if (!stationId.HasValue && requireStationAssignment)
+            {
+                return (true, null, Forbid("Tài khoản Staff chưa được gán trạm. Vui lòng liên hệ Admin để cập nhật."));
+            }
+
+            return (true, stationId, null);
         }
     }
 }

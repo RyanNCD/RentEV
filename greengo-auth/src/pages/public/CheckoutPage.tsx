@@ -8,6 +8,9 @@ import { createPaymentRequest, confirmPayment } from "../../services/payment";
 import { getAllStations } from "../../services/station";
 import { useAuth } from "../../context/AuthContext";
 
+import { getPenalties } from "../../services/penalty";
+import { type IPenalty } from "../../types";
+
 export default function CheckoutPage() {
   const formatPrice = (price?: number | null) => {
     if (price == null || Number.isNaN(price)) return "Liên hệ";
@@ -35,6 +38,8 @@ export default function CheckoutPage() {
   const [pickupStationId, setPickupStationId] = useState<string>("");
   const [returnStationId, setReturnStationId] = useState<string>("");
   const [showPayOSDialog, setShowPayOSDialog] = useState<boolean>(false);
+  const [penalties, setPenalties] = useState<IPenalty[]>([]);
+  const [showPenaltyRates, setShowPenaltyRates] = useState<boolean>(false);
   // Bỏ state currentPaymentId, dùng trực tiếp paymentId từ createPaymentResponse để tránh closure stale
   // Loại bỏ state contract; sẽ dùng biến cục bộ createdRental khi điều hướng
 
@@ -54,66 +59,67 @@ export default function CheckoutPage() {
     };
     fetchStations();
   }, []);
-  
-  // 🆕 useEffect: Auto-refresh xe từ API để kiểm tra status mới nhất
+
+  // Load penalty rates
   useEffect(() => {
-    if (!car || !car.vehicleId) return;
-    
-    const refreshVehicle = async () => {
+    const fetchPenalties = async () => {
       try {
-        const { getVehicleById } = await import("../../services/vehicle");
-        const freshVehicle = await getVehicleById(car.vehicleId);
-        
-        console.log(`[Checkout] Auto-refreshed vehicle ${car.vehicleId}:`, {
-          oldStatus: car.status,
-          newStatus: freshVehicle.status,
-          timestamp: new Date().toLocaleTimeString()
-        });
-        
-        // Cập nhật state với data mới
-        setCar(freshVehicle);
-        
-        // Nếu xe không còn available → Hiển thị warning
-        if (freshVehicle.status?.toUpperCase() !== "AVAILABLE") {
-          setError(`⚠️ Cảnh báo: Xe này vừa được cập nhật trạng thái thành "${freshVehicle.status}". Bạn không thể tiếp tục thanh toán.`);
-          console.warn(`[Checkout] ⚠️ Vehicle ${car.vehicleId} is NO LONGER available!`);
-        } else if (car.status?.toUpperCase() !== "AVAILABLE" && freshVehicle.status?.toUpperCase() === "AVAILABLE") {
-          // Trường hợp xe được đổi lại thành available
-          setError(null);
-          console.log(`[Checkout] ✓ Vehicle ${car.vehicleId} is now available again`);
-        }
-      } catch (err: any) {
-        console.error("[Checkout] Error refreshing vehicle:", err);
-        // Không hiển thị lỗi cho user, chỉ log
+        const data = await getPenalties();
+        setPenalties(data);
+      } catch (err) {
+        console.error("Error loading penalties:", err);
       }
     };
-    
-    // Auto refresh mỗi 15 giây khi đang ở trang checkout
-    const refreshInterval = setInterval(() => {
-      console.log(`[Checkout] Auto-refreshing vehicle status...`);
-      refreshVehicle();
-    }, 15000); // 15 giây (nhanh hơn vì đây là trang thanh toán quan trọng)
-    
-    // Cleanup khi unmount
-    return () => clearInterval(refreshInterval);
-  }, [car?.vehicleId]); // Chỉ chạy lại nếu vehicleId thay đổi 
+    fetchPenalties();
+  }, []); 
 
-  // (calculateTotal - giữ nguyên)
+  // Calculate total with validation (minimum 24 hours)
   const calculateTotal = () => {
-    if (!startDate || !endDate || !car) return 0; // (Đã "phòng thủ" ở đây)
-    const start = new Date(startDate).getTime();
-    const end = new Date(endDate).getTime();
-    if (end <= start) return 0;
-    const days = (end - start) / (1000 * 60 * 60 * 24);
-    return Math.ceil(days) * (car.pricePerDay ?? 0);
+    if (!startDate || !endDate || !car) return { rentalCost: 0, deposit: 0, days: 0, isValid: false, message: "" };
+    
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (end <= start) {
+      return { rentalCost: 0, deposit: 0, days: 0, isValid: false, message: "Thời gian kết thúc phải sau thời gian bắt đầu." };
+    }
+
+    // Tính số giờ
+    const totalHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+
+    // Tối thiểu 24 giờ
+    if (totalHours < 24) {
+      return { 
+        rentalCost: 0, 
+        deposit: 0, 
+        days: 0, 
+        isValid: false, 
+        message: "Thời gian thuê xe tối thiểu là 24 giờ." 
+      };
+    }
+
+    // Tính số ngày: nếu > 24h thì tính là ngày thứ 2
+    const days = Math.ceil(totalHours / 24);
+    const rentalCost = days * (car.pricePerDay ?? 0);
+    const deposit = rentalCost * 0.3; // 30% của tổng tiền thuê
+
+    return { rentalCost, deposit, days, isValid: true, message: "" };
   };
   
-  const totalCostForUI = calculateTotal();
+  const costCalculation = calculateTotal();
+  const totalCostForUI = costCalculation.rentalCost;
+  const depositAmount = costCalculation.deposit;
   const { user } = useAuth();
 
   // (Hàm handleSubmit 5 món - Thêm re-fetch vehicle để đảm bảo status mới nhất)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation thời gian
+    if (!costCalculation.isValid) {
+      setError(costCalculation.message || "Thời gian đặt xe không hợp lệ.");
+      return;
+    }
     
     // (Lính gác #1)
     if (!car || totalCostForUI <= 0 || !pickupStationId || !returnStationId) {
@@ -199,11 +205,12 @@ export default function CheckoutPage() {
       // 2. GỌI API BƯỚC 1 (POST /api/rental)
       const createdRental = await createRental(rentalData);
 
-      // 3. TẠO DATA BƯỚC 2 (Tạo Thanh toán)
+      // 3. TẠO DATA BƯỚC 2 (Tạo Thanh toán - bao gồm tiền thuê + cọc)
+      const totalPaymentAmount = totalCostForUI + depositAmount;
       const paymentData: IPaymentRequest = {
         userId: user.id,
         rentalId: (createdRental as any).rentalId ?? (createdRental as any).id, 
-        amount: totalCostForUI,
+        amount: totalPaymentAmount, // Tiền thuê + cọc
         paymentMethod: "PayOS",
         type: "Rental",
         status: "Pending",
@@ -432,10 +439,112 @@ export default function CheckoutPage() {
           </small>
         </div>
         
+        {/* Validation message */}
+        {!costCalculation.isValid && costCalculation.message && (
+          <div style={{
+            padding: "12px",
+            background: "#fef2f2",
+            border: "1px solid #fecaca",
+            borderRadius: "8px",
+            color: "#991b1b",
+            marginTop: "1rem"
+          }}>
+            ⚠️ {costCalculation.message}
+          </div>
+        )}
+
+        {/* Cost breakdown */}
+        {costCalculation.isValid && (
+          <div style={{
+            marginTop: "1rem",
+            padding: "1rem",
+            background: "#f9fafb",
+            borderRadius: "8px",
+            border: "1px solid #e5e7eb"
+          }}>
+            <h3 style={{ marginTop: 0, marginBottom: "12px" }}>Chi tiết thanh toán</h3>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+              <span>Thời gian thuê:</span>
+              <strong>{costCalculation.days} ngày</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
+              <span>Tiền thuê xe ({costCalculation.days} ngày × {formatPrice(car.pricePerDay)}):</span>
+              <strong>{formatPrice(costCalculation.rentalCost)}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", color: "#059669" }}>
+              <span>Tiền cọc (30%):</span>
+              <strong>{formatPrice(depositAmount)}</strong>
+            </div>
+            <hr style={{ margin: "12px 0", borderColor: "#e5e7eb" }} />
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "18px", fontWeight: "600" }}>
+              <span>Tổng thanh toán:</span>
+              <strong style={{ color: "#059669" }}>{formatPrice(costCalculation.rentalCost + depositAmount)}</strong>
+            </div>
+            <div style={{ marginTop: "12px", fontSize: "13px", color: "#6b7280" }}>
+              * Tiền cọc sẽ được hoàn lại sau khi trả xe (trừ phí phạt nếu có)
+            </div>
+          </div>
+        )}
+
+        {/* Penalty rates */}
+        <div style={{ marginTop: "1rem" }}>
+          <button
+            type="button"
+            onClick={() => setShowPenaltyRates(!showPenaltyRates)}
+            style={{
+              background: "transparent",
+              border: "1px solid #d1d5db",
+              padding: "8px 16px",
+              borderRadius: "6px",
+              cursor: "pointer",
+              color: "#374151",
+              fontSize: "14px"
+            }}
+          >
+            {showPenaltyRates ? "Ẩn" : "Xem"} bảng giá phạt
+          </button>
+          {showPenaltyRates && (
+            <div style={{
+              marginTop: "12px",
+              padding: "16px",
+              background: "#fff",
+              border: "1px solid #e5e7eb",
+              borderRadius: "8px",
+              maxHeight: "300px",
+              overflowY: "auto"
+            }}>
+              <h4 style={{ marginTop: 0, marginBottom: "12px" }}>Bảng giá phạt</h4>
+              {penalties.length === 0 ? (
+                <p style={{ color: "#6b7280", fontSize: "14px" }}>Chưa có thông tin về mức phạt.</p>
+              ) : (
+                <table style={{ width: "100%", fontSize: "14px" }}>
+                  <thead>
+                    <tr style={{ borderBottom: "1px solid #e5e7eb" }}>
+                      <th style={{ textAlign: "left", padding: "8px" }}>Loại vi phạm</th>
+                      <th style={{ textAlign: "left", padding: "8px" }}>Mô tả</th>
+                      <th style={{ textAlign: "right", padding: "8px" }}>Mức phạt</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {penalties.map((penalty) => (
+                      <tr key={penalty.penaltyId} style={{ borderBottom: "1px solid #f3f4f6" }}>
+                        <td style={{ padding: "8px", fontWeight: "500" }}>{penalty.violationType}</td>
+                        <td style={{ padding: "8px", color: "#6b7280" }}>{penalty.description}</td>
+                        <td style={{ padding: "8px", textAlign: "right", fontWeight: "600", color: "#dc2626" }}>
+                          {formatPrice(penalty.amount)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* (Tổng tiền, Nút Submit giữ nguyên) */}
         <hr style={{ margin: "2rem 0" }} />
-        <h3>Tổng tiền (Tạm tính): {totalCostForUI.toLocaleString("vi-VN")} VNĐ</h3>
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p style={{ color: "red", marginBottom: "12px" }}>{error}</p>}
         <button
           type="submit"
           disabled={loading || car.status?.toUpperCase() !== "AVAILABLE"}

@@ -15,6 +15,7 @@ namespace Service.Interface
         Task<User?> RevokeStaffRoleAsync(Guid userId);
         Task<User?> BanUserAsync(Guid userId, string reason, Guid adminId);
         Task<User?> UpdateUserRoleAsync(Guid id, Guid roleId);
+        Task<User?> UpdateStaffStationAsync(Guid userId, Guid? stationId);
         Task<List<Role>> GetAllRolesAsync();
         Task<bool> IsUserBlacklistedAsync(Guid userId);
         Task<HashSet<Guid>> GetBlacklistedUserIdsAsync();

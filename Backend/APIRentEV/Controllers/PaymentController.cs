@@ -1,3 +1,4 @@
+using APIRentEV.Extensions;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,8 @@ using Repository.DTO;
 using Repository.Models;
 using Service.Interface;
 using Service.Services;
+using System.Linq;
+using System.Security.Claims;
 
 namespace APIRentEV.Controllers
 {
@@ -25,21 +28,43 @@ namespace APIRentEV.Controllers
             _logger = logger;
         }
 
-        [Authorize(Roles = "Admin,StaffStation")]
+        [Authorize(Roles = "StaffStation")]
         [HttpGet]
         public async Task<IActionResult> GetAllPayments()
         {
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+
             var payments = await _paymentService.GetAllPaymentsAsync();
+            if (isStaff && staffStationId.HasValue)
+            {
+                payments = payments
+                    .Where(p => p.Rental != null && RentalMatchesStation(p.Rental, staffStationId.Value))
+                    .ToList();
+            }
             var dtos = _mapper.Map<List<PaymentDto>>(payments);
             return Ok(dtos);
         }
 
-        [Authorize(Roles = "Admin,StaffStation,Customer")]
+        [Authorize(Roles = "StaffStation,Customer")]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetPaymentById(Guid id)
         {
             var payment = await _paymentService.GetPaymentById(id);
             if (payment == null) return NotFound();
+
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue && payment.Rental != null && !RentalMatchesStation(payment.Rental, staffStationId.Value))
+            {
+                return Forbid("Bạn chỉ có thể xem giao dịch thuộc trạm của mình.");
+            }
 
             var dto = _mapper.Map<PaymentDto>(payment);
             return Ok(dto);
@@ -99,6 +124,151 @@ namespace APIRentEV.Controllers
             _logger.LogInformation("[ConfirmPayment] Payment confirmed. paymentId={PaymentId}, transactionId={TransactionId}", payment.PaymentId, payment.TransactionId);
             var dto = _mapper.Map<PaymentDto>(payment);
             return Ok(dto);
+        }
+
+        // === STATION PAYMENT ===
+        // Staff tạo payment link PayOS tại trạm cho khách
+        [Authorize(Roles = "StaffStation")]
+        [HttpPost("station/create-payos")]
+        public async Task<IActionResult> CreateStationPayOSPayment([FromBody] CreateStationPayOSPaymentDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var (_, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (!staffStationId.HasValue)
+            {
+                return Forbid("Tài khoản staff chưa được gán trạm.");
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                             ?? User.FindFirst("sub")?.Value
+                             ?? User.FindFirst("userId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var staffId))
+            {
+                return Forbid();
+            }
+
+            try
+            {
+                // Verify rental belongs to staff's station
+                var rentalService = HttpContext.RequestServices.GetRequiredService<Service.Interface.IRentalService>();
+                var rental = await rentalService.GetRentalByIdAsync(dto.RentalId);
+                if (rental == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy đơn thuê." });
+                }
+                if (rental.PickupStationId != staffStationId.Value)
+                {
+                    return Forbid("Bạn chỉ có thể tạo thanh toán cho đơn thuê tại trạm của mình.");
+                }
+
+                var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "127.0.0.1";
+                var checkoutUrl = await _paymentService.CreateStationPayOSPaymentAsync(dto.RentalId, staffId, ipAddress);
+                
+                _logger.LogInformation("[StationPayOS] Payment link created for RentalId={RentalId} by StaffId={StaffId}", dto.RentalId, staffId);
+                
+                return Ok(new { checkoutUrl, rentalId = dto.RentalId });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[StationPayOS] Error creating payment link");
+                return StatusCode(500, new { message = "Lỗi khi tạo link thanh toán." });
+            }
+        }
+
+        // Staff xác nhận thanh toán tại trạm (Cash hoặc BankTransfer)
+        [Authorize(Roles = "StaffStation")]
+        [HttpPost("station/confirm")]
+        public async Task<IActionResult> ConfirmStationPayment([FromBody] StationPaymentCreateDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var (_, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (!staffStationId.HasValue)
+            {
+                return Forbid("Tài khoản staff chưa được gán trạm.");
+            }
+
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                             ?? User.FindFirst("sub")?.Value
+                             ?? User.FindFirst("userId")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var staffId))
+            {
+                return Forbid();
+            }
+
+            try
+            {
+                // Verify rental belongs to staff's station
+                var rentalService = HttpContext.RequestServices.GetRequiredService<Service.Interface.IRentalService>();
+                var rental = await rentalService.GetRentalByIdAsync(dto.RentalId);
+                if (rental == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy đơn thuê." });
+                }
+                if (rental.PickupStationId != staffStationId.Value)
+                {
+                    return Forbid("Bạn chỉ có thể xác nhận thanh toán cho đơn thuê tại trạm của mình.");
+                }
+
+                var payment = await _paymentService.ConfirmStationPaymentAsync(
+                    dto.RentalId, 
+                    dto.PaymentMethod, 
+                    staffId, 
+                    dto.PaymentProofImageUrl);
+
+                _logger.LogInformation("[StationPayment] Payment confirmed for RentalId={RentalId}, Method={Method} by StaffId={StaffId}", 
+                    dto.RentalId, dto.PaymentMethod, staffId);
+
+                var paymentDto = _mapper.Map<PaymentDto>(payment);
+                return Ok(paymentDto);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[StationPayment] Error confirming payment");
+                return StatusCode(500, new { message = "Lỗi khi xác nhận thanh toán." });
+            }
+        }
+
+        private (bool isStaff, Guid? stationId, ActionResult? errorResult) ResolveStaffContext()
+        {
+            var isStaff = User?.IsInRole("StaffStation") ?? false;
+            if (!isStaff)
+            {
+                return (false, null, null);
+            }
+
+            var stationId = User.GetStationId();
+            if (!stationId.HasValue)
+            {
+                return (true, null, Forbid("Tài khoản Staff chưa được gán trạm. Vui lòng liên hệ Admin để cập nhật."));
+            }
+
+            return (true, stationId, null);
+        }
+
+        private static bool RentalMatchesStation(Rental rental, Guid stationId)
+        {
+            if (rental == null) return false;
+            if (rental.PickupStationId == stationId) return true;
+            if (rental.ReturnStationId.HasValue && rental.ReturnStationId.Value == stationId) return true;
+            return false;
         }
     }
 }

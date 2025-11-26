@@ -22,5 +22,9 @@ namespace Service.Interface
         Task<Payment?> ConfirmPaymentAsync(Guid paymentId);
         Task<List<Payment>> GetPaymentsByRentalIdAsync(Guid rentalId);
         Task<bool> IsRentalPaidAsync(Guid rentalId);
+
+        // Station payment methods
+        Task<string> CreateStationPayOSPaymentAsync(Guid rentalId, Guid staffId, string ipAddress);
+        Task<Payment> ConfirmStationPaymentAsync(Guid rentalId, string paymentMethod, Guid staffId, string? paymentProofImageUrl);
     }
 }

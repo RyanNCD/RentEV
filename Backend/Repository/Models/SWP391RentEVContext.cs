@@ -39,7 +39,15 @@ public partial class SWP391RentEVContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    public virtual DbSet<UserOtp> UserOtps { get; set; }
+
     public virtual DbSet<Vehicle> Vehicles { get; set; }
+
+    public virtual DbSet<Deposit> Deposits { get; set; }
+
+    public virtual DbSet<Penalty> Penalties { get; set; }
+
+    public virtual DbSet<RentalPenalty> RentalPenalties { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -344,6 +352,11 @@ public partial class SWP391RentEVContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__User__RoleId__4F7CD00D");
+
+            entity.HasOne(d => d.Station).WithMany(p => p.Users)
+                .HasForeignKey(d => d.StationId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_User_Station_StationId");
         });
 
         modelBuilder.Entity<Vehicle>(entity =>

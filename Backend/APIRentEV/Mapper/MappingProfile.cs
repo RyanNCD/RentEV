@@ -1,7 +1,7 @@
 using AutoMapper;
 using Repository.DTO;
 using Repository.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Linq;
 
 namespace APIRentEV.Mapper
 {
@@ -26,6 +26,7 @@ namespace APIRentEV.Mapper
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.RoleName, opt => opt.MapFrom(src => src.Role != null ? src.Role.RoleName : null))
                 .ForMember(dest => dest.IsBlacklisted, opt => opt.Ignore()) // Will be set in controller
+                .ForMember(dest => dest.StationName, opt => opt.MapFrom(src => src.Station != null ? src.Station.StationName : null))
                 .ReverseMap();
 
             CreateMap<UserCreateDto, User>()
@@ -70,6 +71,8 @@ namespace APIRentEV.Mapper
                 .ForMember(dest => dest.PickupStationName, opt => opt.MapFrom(src => src.PickupStation != null ? src.PickupStation.StationName : null))
                 .ForMember(dest => dest.ReturnStationName, opt => opt.MapFrom(src => src.ReturnStation != null ? src.ReturnStation.StationName : null))
                 .ForMember(dest => dest.Contract, opt => opt.MapFrom(src => src.Contract))
+                .ForMember(dest => dest.Deposit, opt => opt.MapFrom(src => src.Deposits != null ? src.Deposits.OrderByDescending(d => d.CreatedAt).FirstOrDefault() : null))
+                .ForMember(dest => dest.Penalties, opt => opt.MapFrom(src => src.RentalPenalties))
                 .ReverseMap();
 
             CreateMap<RentalCreateDto, Rental>()
@@ -92,7 +95,7 @@ namespace APIRentEV.Mapper
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow));
 
             // ===============================
-            // 💵 PAYMENT
+            // 💵 PAYMENT / DEPOSIT / PENALTY
             // ===============================
             CreateMap<Payment, PaymentDto>().ReverseMap();
 
@@ -100,6 +103,11 @@ namespace APIRentEV.Mapper
                 .ForMember(dest => dest.PaymentId, opt => opt.MapFrom(src => Guid.NewGuid()))
                 .ForMember(dest => dest.PaymentDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status ?? "Pending"));
+
+            CreateMap<Deposit, DepositDto>()
+                .ForMember(dest => dest.AvailableAmount, opt => opt.MapFrom(src => src.Amount - src.UsedAmount));
+
+            CreateMap<RentalPenalty, RentalPenaltyDto>().ReverseMap();
 
             // ===============================
             // 📅 RESERVATION

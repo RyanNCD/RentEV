@@ -1,7 +1,7 @@
 // File: src/services/rental.ts (Bản V8 - 5 món)
 
 import http from "../lib/http";
-import { type IContract, type IRentalRequest, type IRentalHistoryItem, type IFeedback } from "../types"; 
+import { type IContract, type IRentalRequest, type IRentalHistoryItem, type IFeedback, type IDepositInfo, type IRentalPenaltyInfo } from "../types"; 
 
 // === SỬA LẠI HÀM NÀY (BƯỚC 1) ===
 // (Hàm này gọi POST /api/rental)
@@ -96,6 +96,12 @@ export const checkOutRental = async (bookingId: string): Promise<IContract> => {
   return response.data;
 };
 
+// Request early return (Customer)
+export const requestEarlyReturn = async (rentalId: string): Promise<{ message: string; rental: IRentalHistoryItem }> => {
+  const response = await http.post<{ message: string; rental: IRentalHistoryItem }>(`/api/rental/${rentalId}/request-early-return`);
+  return response.data;
+};
+
 // Get rental by ID (for detail view)
 export const getRentalById = async (rentalId: string): Promise<IRentalHistoryItem> => {
   const response = await http.get<IRentalHistoryItem>(`/api/rental/${rentalId}`);
@@ -140,5 +146,73 @@ export const createFeedback = async (payload: { rentalId: string; rating: number
     comment: payload.comment ?? null,
   };
   const response = await http.post<IFeedback>(`/api/feedback`, body);
+  return response.data;
+};
+
+// Calculate rental cost (with validation)
+export interface CalculateRentalCostRequest {
+  vehicleId: string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface CalculateRentalCostResponse {
+  days: number;
+  dailyRate: number;
+  rentalCost: number;
+  depositAmount: number;
+  isValid: boolean;
+  validationMessage?: string;
+}
+
+export const calculateRentalCost = async (data: CalculateRentalCostRequest): Promise<CalculateRentalCostResponse> => {
+  const response = await http.post<CalculateRentalCostResponse>("/api/rental/calculate-cost", data);
+  return response.data;
+};
+
+// Get rental bill
+export interface RentalBill {
+  rentalId: string;
+  rentalCost: number;
+  depositAmount: number;
+  penaltyAmount: number;
+  totalAmount: number;
+  penalties: IRentalPenaltyInfo[];
+  deposit?: IDepositInfo | null;
+  refundAmount?: number;
+}
+
+export const getRentalBill = async (rentalId: string): Promise<RentalBill> => {
+  const response = await http.get<RentalBill>(`/api/rental/${rentalId}/bill`);
+  return response.data;
+};
+
+// Confirm return (Customer)
+export const confirmReturn = async (rentalId: string): Promise<{ message: string; rentalId: string }> => {
+  const response = await http.post<{ message: string; rentalId: string }>(`/api/rental/${rentalId}/confirm-return`);
+  return response.data;
+};
+
+export interface CreatePenaltyPayload {
+  penaltyId: string;
+  amount: number;
+  description?: string;
+  useDepositFirst?: boolean;
+}
+
+export interface SettlePenaltyPayload {
+  paymentAmount: number;
+  paymentMethod: string;
+  useDeposit: boolean;
+  note?: string;
+}
+
+export const createRentalPenalty = async (rentalId: string, payload: CreatePenaltyPayload): Promise<IRentalPenaltyInfo> => {
+  const response = await http.post<IRentalPenaltyInfo>(`/api/rental/${rentalId}/penalties`, payload);
+  return response.data;
+};
+
+export const settleRentalPenalty = async (penaltyId: string, payload: SettlePenaltyPayload): Promise<IRentalPenaltyInfo> => {
+  const response = await http.post<IRentalPenaltyInfo>(`/api/rental/penalties/${penaltyId}/settle`, payload);
   return response.data;
 };

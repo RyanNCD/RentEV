@@ -2,18 +2,36 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Repository.Models;
 
 public partial class Deposit
 {
-    public Guid DepositId { get; set; }
+    [Key]
+    public Guid DepositId { get; set; } = Guid.NewGuid();
 
     public Guid RentalId { get; set; }
 
+    public Guid UserId { get; set; }
+
     public decimal Amount { get; set; }
 
-    public string Status { get; set; }
+    public string Status { get; set; } = "Pending"; // Pending, Paid, Refunded, Forfeited
+
+    public DateTime? PaymentDate { get; set; }
+
+    public DateTime? RefundDate { get; set; }
+
+    public string? RefundReason { get; set; } // Lý do hoàn tiền hoặc giữ lại
+
+    public decimal UsedAmount { get; set; } = 0m;
+
+    public DateTime? LastUsedAt { get; set; }
+
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public virtual Rental Rental { get; set; }
+
+    public virtual User User { get; set; }
 }

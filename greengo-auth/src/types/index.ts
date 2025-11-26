@@ -16,6 +16,8 @@ export interface IUser {
   driverLicense?: string;
   createdAt?: string;
   avatar?: string;
+  stationId?: string | null;
+  stationName?: string | null;
 }
 
 
@@ -122,7 +124,47 @@ export interface IContract {
   createdAt?: string | null;
 }
 
+export interface IPenalty {
+  penaltyId: string;
+  violationType: string;
+  description: string;
+  amount: number;
+  isActive: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+}
+
 // === LỊCH SỬ THUÊ XE (phù hợp với RentalDto từ BE) ===
+export interface IDepositInfo {
+  depositId: string;
+  rentalId: string;
+  userId: string;
+  amount: number;
+  usedAmount: number;
+  availableAmount: number;
+  status: string;
+  paymentDate?: string | null;
+  refundDate?: string | null;
+  refundReason?: string | null;
+  lastUsedAt?: string | null;
+  createdAt?: string | null;
+}
+
+export interface IRentalPenaltyInfo {
+  rentalPenaltyId: string;
+  rentalId: string;
+  penaltyId: string;
+  amount: number;
+  description: string;
+  status: string;
+  paidAmount: number;
+  depositUsedAmount: number;
+  paymentMethod?: string | null;
+  createdAt?: string | null;
+  paidAt?: string | null;
+  penalty?: IPenalty | null;
+}
+
 export interface IRentalHistoryItem {
   rentalId: string;
   contractId?: string | null;
@@ -138,6 +180,11 @@ export interface IRentalHistoryItem {
   startTime?: string | null;
   endTime?: string | null;
   totalCost?: number | null;
+  pricePerDaySnapshot?: number | null;
   status: string;
   contract?: IContract | null;
+  earlyReturnRequested?: boolean;
+  earlyReturnRequestedAt?: string | null;
+  deposit?: IDepositInfo | null;
+  penalties?: IRentalPenaltyInfo[];
 }

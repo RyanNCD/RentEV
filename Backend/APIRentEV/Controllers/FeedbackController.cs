@@ -1,4 +1,5 @@
-﻿using APIRentEV.Mapper;
+﻿using APIRentEV.Extensions;
+using APIRentEV.Mapper;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Repository.DTO;
 using Repository.Models;
 using Service.Interface;
+using System.Linq;
 using System.Security.Claims;
 
 namespace APIRentEV.Controllers
@@ -26,25 +28,44 @@ namespace APIRentEV.Controllers
             _mapper = mapper;
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FeedbackDto>>> GetAllFeedback()
         {
             var feedbacks = await _feedbackService.GetAllAsync();
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue)
+            {
+                feedbacks = feedbacks.Where(f => RentalMatchesStation(f.Rental, staffStationId.Value));
+            }
             return Ok(_mapper.Map<List<FeedbackDto>>(feedbacks));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpGet("{id}")]
         public async Task<ActionResult<FeedbackDto>> GetFeedbackById(Guid id)
         {
             var feedback = await _feedbackService.GetByIdAsync(id);
             if (feedback == null) return NotFound();
 
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue && !RentalMatchesStation(feedback.Rental, staffStationId.Value))
+            {
+                return Forbid("Bạn chỉ có thể xem đánh giá thuộc trạm của mình.");
+            }
+
             return Ok(_mapper.Map<FeedbackDto>(feedback));
         }
 
-        [Authorize(Roles = "Admin,StaffStation,Customer")]
+        [Authorize(Roles = "StaffStation,Customer")]
         [HttpGet("rental/{rentalId}")]
         public async Task<ActionResult<IEnumerable<FeedbackDto>>> GetByRentalId(Guid rentalId)
         {
@@ -52,11 +73,20 @@ namespace APIRentEV.Controllers
             return Ok(_mapper.Map<List<FeedbackDto>>(feedbacks));
         }
 
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "StaffStation")]
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<IEnumerable<FeedbackDto>>> GetByUserId(Guid userId)
         {
             var feedbacks = await _feedbackService.GetByUserIdAsync(userId);
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue)
+            {
+                feedbacks = feedbacks.Where(f => RentalMatchesStation(f.Rental, staffStationId.Value));
+            }
             return Ok(_mapper.Map<List<FeedbackDto>>(feedbacks));
         }
 
@@ -125,7 +155,7 @@ namespace APIRentEV.Controllers
                                    _mapper.Map<FeedbackDto>(created));
         }
 
-        [Authorize(Roles = "Customer, Admin")]
+        [Authorize(Roles = "Customer")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFeedback(Guid id)
         {
@@ -158,6 +188,31 @@ namespace APIRentEV.Controllers
         {
             var avg = await _feedbackService.GetAverageRatingByVehicleIdAsync(vehicleId);
             return Ok(new { averageRating = avg });
+        }
+        private (bool isStaff, Guid? stationId, ActionResult? errorResult) ResolveStaffContext()
+        {
+            var isStaff = User?.IsInRole("StaffStation") ?? false;
+            if (!isStaff)
+            {
+                return (false, null, null);
+            }
+
+            var stationId = User.GetStationId();
+            if (!stationId.HasValue)
+            {
+                return (true, null, Forbid("Tài khoản Staff chưa được gán trạm. Vui lòng liên hệ Admin để cập nhật."));
+            }
+
+            return (true, stationId, null);
+        }
+
+        private static bool RentalMatchesStation(Rental rental, Guid stationId)
+        {
+            if (rental == null) return false;
+            if (rental.PickupStationId == stationId) return true;
+            if (rental.ReturnStationId.HasValue && rental.ReturnStationId.Value == stationId) return true;
+            if (rental.Vehicle != null && rental.Vehicle.StationId == stationId) return true;
+            return false;
         }
     }
 }

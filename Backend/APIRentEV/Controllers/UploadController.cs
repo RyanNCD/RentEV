@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace APIRentEV.Controllers
 {
-    [Authorize(Roles = "Admin,StaffStation")]
+    [Authorize(Roles = "StaffStation")]
     [ApiController]
     [Route("api/[controller]")]
     public class UploadController : ControllerBase

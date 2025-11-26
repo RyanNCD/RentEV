@@ -19,12 +19,16 @@ namespace Repository.Repositories
 
         public async Task<Contract?> GetContractByIdAsync(Guid id)
         {
-            return await _context.Contracts.FirstOrDefaultAsync(u => u.ContractId == id);
+            return await _context.Contracts
+                .Include(c => c.Vehicle)
+                .FirstOrDefaultAsync(u => u.ContractId == id);
         }
 
         public async Task<IEnumerable<Contract>> GetContractAllAsync()
         {
-            return await _context.Contracts.ToListAsync();
+            return await _context.Contracts
+                .Include(c => c.Vehicle)
+                .ToListAsync();
         }
 
         public async Task AddContractlAsync(Contract contract)

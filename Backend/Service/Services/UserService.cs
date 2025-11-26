@@ -37,6 +37,7 @@ namespace Service.Services
         {
             user.UserId = Guid.NewGuid();
             user.CreatedAt = DateTime.UtcNow;
+            // PasswordHash already hashed through mapping layer
             await _userRepository.AddAsync(user);
             return user;
         }
@@ -59,6 +60,7 @@ namespace Service.Services
             existing.IdentityCard = user.IdentityCard;
             existing.DriverLicense = user.DriverLicense;
             existing.RoleId = user.RoleId;
+            existing.StationId = user.StationId;
 
             await _userRepository.UpdateAsync(existing);
             return existing;
@@ -155,6 +157,22 @@ namespace Service.Services
             existing.RoleId = roleId;
             await _userRepository.UpdateAsync(existing);
             return existing;
+        }
+
+        public async Task<User?> UpdateStaffStationAsync(Guid userId, Guid? stationId)
+        {
+            var user = await _userRepository.GetUseRoleByIdAsync(userId);
+            if (user == null) return null;
+
+            var roleName = user.Role?.RoleName?.Trim().ToLowerInvariant();
+            if (roleName != "staffstation" && roleName != "staff")
+            {
+                return null;
+            }
+
+            user.StationId = stationId;
+            await _userRepository.UpdateAsync(user);
+            return user;
         }
 
         public async Task<List<Role>> GetAllRolesAsync()

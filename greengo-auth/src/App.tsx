@@ -10,6 +10,7 @@ import ProtectedRoutes from "./components/ProtectedRoutes";
 // Pages (Auth)
 import LoginPage from "./pages/auth/LoginPage";
 import RegisterPage from "./pages/auth/RegisterPage";
+import VerifyEmailPage from "./pages/auth/VerifyEmailPage";
 
 // Pages (Public/Renter)
 // (Sửa lại import cho đúng)
@@ -32,6 +33,7 @@ import StationManagement from "./pages/dashboard/StationManagement"
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import CheckinManagement from "./pages/dashboard/CheckinManagement";
 import RevenueDashboard from "./pages/dashboard/RevenueDashboard";
+import DashboardLanding from "./pages/dashboard/DashboardLanding";
 export default function App() {
   return (
     <Routes>
@@ -42,6 +44,7 @@ export default function App() {
         
         <Route path="about" element={<AboutPage />} />
         <Route path="pricing" element={<PricingPage />} />
+        <Route path="verify-email" element={<VerifyEmailPage />} />
         
         {/* === THÊM ROUTE NÀY VÀO === */}
         <Route path="vehicles/:id" element={<CarDetailPage />} />
@@ -62,17 +65,19 @@ export default function App() {
       {/* 4. Layout cho Dashboard (Admin/Staff) */}
       <Route element={<ProtectedRoutes allowedRoles={["ADMIN", "STAFF"]} />}>
         <Route path="/dashboard" element={<AdminLayout />}>
-          {/* Route chung cho cả Admin và Staff: Giao/Nhận xe (Admin chỉ xem, Staff có thể thao tác) */}
-          <Route path="checkin" element={<CheckinManagement />} />
+          <Route index element={<DashboardLanding />} />
 
-          {/* Route chỉ dành cho Admin */}
-          <Route element={<ProtectedRoutes allowedRoles={["ADMIN"]} />}> 
-             <Route index element={<AdminDashboard />} />
-             <Route path="users" element={<UserManagement />} />
-             <Route path="staffs" element={<StaffManagement />} />
-             <Route path="vehicles" element={<VehicleManagement />} />
-             <Route path="stations" element={<StationManagement />} />
-             <Route path="revenue" element={<RevenueDashboard />} />
+          <Route element={<ProtectedRoutes allowedRoles={["STAFF"]} />}>
+            <Route path="checkin" element={<CheckinManagement />} />
+            <Route path="vehicles" element={<VehicleManagement />} />
+            <Route path="stations" element={<StationManagement />} />
+            <Route path="users" element={<UserManagement />} />
+          </Route>
+
+          <Route element={<ProtectedRoutes allowedRoles={["ADMIN"]} />}>
+            <Route path="overview" element={<AdminDashboard />} />
+            <Route path="staffs" element={<StaffManagement />} />
+            <Route path="revenue" element={<RevenueDashboard />} />
           </Route>
         </Route>
       </Route>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { getUserRentalHistoryPaged, getRentalById, getFeedbacksByRental, type UserRentalListParams, type PagedRentalResult } from "../../services/rental";
+import { getUserRentalHistoryPaged, getRentalById, getFeedbacksByRental, requestEarlyReturn, confirmReturn, type UserRentalListParams, type PagedRentalResult } from "../../services/rental";
 import { getRentalImagesForCustomer, type RentalImageItem } from "../../services/upload";
 import { type IRentalHistoryItem, type IFeedback } from "../../types";
 import "../profile.css";
@@ -104,7 +104,10 @@ export default function ProfilePage() {
     try {
       // Reload rental from API to get latest contract
       const updatedRental = await getRentalById(rental.rentalId);
-      setSelectedRental(updatedRental);
+      setSelectedRental({
+        ...updatedRental,
+        penalties: updatedRental.penalties || []
+      });
       await loadRentalImages(rental.rentalId);
       // Load feedbacks
       setLoadingFeedbacks(true);
@@ -118,7 +121,10 @@ export default function ProfilePage() {
       console.error("Error loading rental detail:", err);
       setError("Không thể tải thông tin chi tiết đơn thuê.");
       // Fallback to original rental if API fails
-      setSelectedRental(rental);
+      setSelectedRental({
+        ...rental,
+        penalties: rental.penalties || []
+      });
       await loadRentalImages(rental.rentalId);
       // Try load feedbacks even if rental reload fails
       try {
@@ -263,22 +269,22 @@ export default function ProfilePage() {
         <>
           <div style={{ marginBottom: "20px" }}>
             {history.map((item) => {
-              const start = item.startTime ? new Date(item.startTime) : null;
-              const end = item.endTime ? new Date(item.endTime) : null;
-              const dayRange = `${start ? start.toLocaleDateString("vi-VN") : "—"} - ${end ? end.toLocaleDateString("vi-VN") : "—"}`;
+            const start = item.startTime ? new Date(item.startTime) : null;
+            const end = item.endTime ? new Date(item.endTime) : null;
+            const dayRange = `${start ? start.toLocaleDateString("vi-VN") : "—"} - ${end ? end.toLocaleDateString("vi-VN") : "—"}`;
               const amount = item.totalCost && item.totalCost > 0 ? formatPrice(item.totalCost) : "—";
-              const status = String(item.status || "").toUpperCase();
+            const status = String(item.status || "").toUpperCase();
 
-              return (
+            return (
                 <div key={item.rentalId} style={{
-                  border: "1px solid #e5e5e5",
-                  borderRadius: 8,
+                border: "1px solid #e5e5e5",
+                borderRadius: 8,
                   padding: "16px",
-                  marginBottom: 12,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 12,
+                marginBottom: 12,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 12,
                   background: "#fff",
                 }}>
                   <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
@@ -290,10 +296,65 @@ export default function ProfilePage() {
                       </span>
                     </span>
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
                     <div style={{ fontWeight: 600, color: amount !== "N/A" ? "#111" : "#999", fontSize: "16px" }}>
                       {amount !== "N/A" ? amount : "Chưa xác định"}
                     </div>
+                    {item.pricePerDaySnapshot && (
+                      <div style={{ fontSize: "13px", color: "#6b7280" }}>
+                        Giá áp dụng: {formatPrice(item.pricePerDaySnapshot)}
+                      </div>
+                    )}
+                    {status === "IN_PROGRESS" && !item.earlyReturnRequested && (
+                      <button
+                        onClick={async () => {
+                          if (window.confirm("Bạn có chắc chắn muốn yêu cầu trả xe sớm không?")) {
+                            try {
+                              await requestEarlyReturn(item.rentalId);
+                              alert("Yêu cầu trả xe sớm đã được gửi thành công!");
+                              await loadHistory();
+                            } catch (err: any) {
+                              alert(err.response?.data?.message || "Không thể gửi yêu cầu trả xe sớm.");
+                            }
+                          }
+                        }}
+                        className="btn btn--sm btn--warning"
+                        style={{ padding: "8px 16px" }}
+                      >
+                        Yêu cầu trả xe sớm
+                      </button>
+                    )}
+                    {status === "IN_PROGRESS" && item.earlyReturnRequested && (
+                      <span style={{ 
+                        padding: "6px 12px", 
+                        background: "#d1fae5", 
+                        color: "#065f46", 
+                        borderRadius: "4px",
+                        fontSize: "13px",
+                        fontWeight: "500"
+                      }}>
+                        ✓ Đã yêu cầu trả xe sớm
+                      </span>
+                    )}
+                    {status === "IN_PROGRESS" && (
+                      <button
+                        onClick={async () => {
+                          if (window.confirm("Bạn có chắc chắn muốn xác nhận trả xe không? Vui lòng đến trạm để hoàn tất thủ tục.")) {
+                            try {
+                              await confirmReturn(item.rentalId);
+                              alert("Xác nhận trả xe thành công! Vui lòng đến trạm để hoàn tất thủ tục.");
+                              await loadHistory();
+                            } catch (err: any) {
+                              alert(err.response?.data?.message || "Không thể xác nhận trả xe.");
+                            }
+                          }
+                        }}
+                        className="btn btn--sm btn--success"
+                        style={{ padding: "8px 16px" }}
+                      >
+                        Xác nhận trả xe
+                      </button>
+                    )}
                     <button
                       onClick={() => openDetailModal(item)}
                       className="btn btn--sm btn--info"
@@ -381,6 +442,12 @@ export default function ProfilePage() {
                 <strong>Tổng tiền:</strong>
                 <span>{formatPrice(selectedRental.totalCost)}</span>
               </div>
+              {selectedRental.pricePerDaySnapshot && (
+                <div className="info-item">
+                  <strong>Giá áp dụng mỗi ngày:</strong>
+                  <span>{formatPrice(selectedRental.pricePerDaySnapshot)}</span>
+                </div>
+              )}
               <div className="info-item">
                 <strong>Trạng thái:</strong>
                 <span className={`status-badge ${getStatusBadgeClass(selectedRental.status)}`}>
@@ -434,6 +501,80 @@ export default function ProfilePage() {
               </div>
             </div>
           )}
+          {selectedRental.deposit && (
+            <div className="deposit-card" style={{ marginTop: "20px" }}>
+              <h3 style={{ marginTop: 0 }}>Tiền cọc</h3>
+              <div className="info-grid">
+                <div className="info-item">
+                  <strong>Đã nộp:</strong>
+                  <span>{formatPrice(selectedRental.deposit.amount)}</span>
+                </div>
+                <div className="info-item">
+                  <strong>Đã sử dụng:</strong>
+                  <span>{formatPrice(selectedRental.deposit.usedAmount)}</span>
+                </div>
+                <div className="info-item">
+                  <strong>Còn lại:</strong>
+                  <span>{formatPrice(selectedRental.deposit.availableAmount)}</span>
+                </div>
+                <div className="info-item">
+                  <strong>Trạng thái:</strong>
+                  <span>{selectedRental.deposit.status}</span>
+                </div>
+                {selectedRental.deposit.lastUsedAt && (
+                  <div className="info-item">
+                    <strong>Lần sử dụng gần nhất:</strong>
+                    <span>{formatDate(selectedRental.deposit.lastUsedAt)}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="modal-penalties-section" style={{ marginTop: "20px" }}>
+            <h3 style={{ marginTop: 0, marginBottom: "12px", fontSize: "18px", fontWeight: 600 }}>Khoản phạt</h3>
+            {!selectedRental.penalties || selectedRental.penalties.length === 0 ? (
+              <div style={{ color: "#666" }}>Không có khoản phạt nào.</div>
+            ) : (
+              <div className="table-responsive">
+                <table className="table table-striped" style={{ width: "100%", fontSize: "14px" }}>
+                  <thead>
+                    <tr>
+                      <th>Mô tả</th>
+                      <th>Số tiền</th>
+                      <th>Đã trừ cọc</th>
+                      <th>Đã thu</th>
+                      <th>Trạng thái</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedRental.penalties.map((penalty) => (
+                      <tr key={penalty.rentalPenaltyId}>
+                        <td>
+                          <div style={{ fontWeight: 600 }}>{penalty.penalty?.violationType || "Phạt"}</div>
+                          <div style={{ color: "#6b7280" }}>{penalty.description}</div>
+                        </td>
+                        <td>{formatPrice(penalty.amount)}</td>
+                        <td>{formatPrice(penalty.depositUsedAmount)}</td>
+                        <td>
+                          {formatPrice(penalty.paidAmount)}
+                          {penalty.paymentMethod && (
+                            <div style={{ fontSize: "12px", color: "#6b7280" }}>{penalty.paymentMethod}</div>
+                          )}
+                        </td>
+                        <td>
+                          <span className={`status-badge ${getStatusBadgeClass(penalty.status)}`}>
+                            {penalty.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+          
 
           {/* Feedback Section */}
           <div className="modal-feedback-section" style={{ marginTop: "20px" }}>

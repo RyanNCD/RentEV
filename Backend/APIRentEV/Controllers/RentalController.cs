@@ -1,3 +1,4 @@
+using APIRentEV.Extensions;
 using APIRentEV.Mapper;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -19,17 +20,23 @@ namespace APIRentEV.Controllers
         private readonly IRentalService _rentalService;
         private readonly IPaymentService _paymentService;
         private readonly IRentalImageService _imageService;
+        private readonly IRentalPenaltyService _rentalPenaltyService;
         private readonly IMapper _mapper;
 
-        public RentalController(IRentalService rentalService, IPaymentService paymentService, IRentalImageService imageService, IMapper mapper)
+        public RentalController(IRentalService rentalService,
+                                IPaymentService paymentService,
+                                IRentalImageService imageService,
+                                IRentalPenaltyService rentalPenaltyService,
+                                IMapper mapper)
         {
             _rentalService = rentalService;
             _paymentService = paymentService;
             _imageService = imageService;
+            _rentalPenaltyService = rentalPenaltyService;
             _mapper = mapper;
         }
 
-        [Authorize(Roles = "Admin,StaffStation")]
+        [Authorize(Roles = "StaffStation")]
         [HttpGet]
         public async Task<ActionResult> GetAllRentals(
             [FromQuery] int? page = null,
@@ -40,10 +47,22 @@ namespace APIRentEV.Controllers
             [FromQuery] DateTime? endDate = null,
             [FromQuery] Guid? stationId = null)
         {
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+
+            var effectiveStationId = isStaff ? staffStationId : stationId;
+
             // If no pagination parameters provided, return all (backward compatibility)
             if (!page.HasValue && !pageSize.HasValue && string.IsNullOrEmpty(status) && string.IsNullOrEmpty(search) && !startDate.HasValue && !endDate.HasValue && !stationId.HasValue)
             {
                 var rentals = await _rentalService.GetPaidRentalsAsync();
+                if (isStaff && staffStationId.HasValue)
+                {
+                    rentals = rentals.Where(r => RentalMatchesStation(r, staffStationId.Value));
+                }
                 var dtos = _mapper.Map<List<RentalDto>>(rentals);
                 return Ok(dtos);
             }
@@ -51,7 +70,7 @@ namespace APIRentEV.Controllers
             // Use paginated endpoint (always return paged result when pagination params are provided)
             var currentPage = page ?? 1;
             var currentPageSize = pageSize ?? 10;
-            var (items, totalCount) = await _rentalService.GetPaidRentalsPagedAsync(currentPage, currentPageSize, status, search, startDate, endDate, stationId);
+            var (items, totalCount) = await _rentalService.GetPaidRentalsPagedAsync(currentPage, currentPageSize, status, search, startDate, endDate, effectiveStationId);
             var pagedDtos = _mapper.Map<List<RentalDto>>(items);
             
             var result = new
@@ -69,7 +88,7 @@ namespace APIRentEV.Controllers
         }
 
         // === FIND BY CODE (use RentalId GUID as the code) ===
-        [Authorize(Roles = "Admin,StaffStation")]
+        [Authorize(Roles = "StaffStation")]
         [HttpGet("find-by-code/{code}")]
         public async Task<IActionResult> FindByCode(string code)
         {
@@ -92,6 +111,16 @@ namespace APIRentEV.Controllers
             }
 
             if (rental == null) return NotFound(new { message = "Không tìm thấy đơn thuê." });
+
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue && !RentalMatchesStation(rental, staffStationId.Value))
+            {
+                return Forbid("Bạn chỉ có thể truy cập đơn thuê thuộc trạm của mình.");
+            }
 
             var vehicleName = rental.Vehicle?.VehicleName ?? "";
             return Ok(new
@@ -155,6 +184,16 @@ namespace APIRentEV.Controllers
         [HttpPost("check-in")]
         public async Task<IActionResult> CheckIn([FromBody] CheckInDto dto)
         {
+            var (_, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (!staffStationId.HasValue)
+            {
+                return Forbid("Tài khoản staff chưa được gán trạm.");
+            }
+
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                              ?? User.FindFirst("sub")?.Value
                              ?? User.FindFirst("userId")?.Value;
@@ -166,12 +205,18 @@ namespace APIRentEV.Controllers
             var deliveredAt = dto.DeliveredAt ?? DateTime.UtcNow;
             try
             {
-                // Bắt buộc: rental phải có payment thành công
-                var paid = await IsRentalPaidByPaymentAsync(dto.BookingId);
-                if (!paid)
+                var rentalDetail = await _rentalService.GetRentalByIdAsync(dto.BookingId);
+                if (rentalDetail == null)
                 {
-                    return BadRequest(new { message = "Đơn thuê chưa có payment thành công, không thể check-in." });
+                    return NotFound(new { message = "Không tìm thấy đơn thuê." });
                 }
+                if (rentalDetail.PickupStationId != staffStationId.Value)
+                {
+                    return Forbid("Bạn không thể bàn giao xe cho trạm khác.");
+                }
+
+                // Cho phép check-in nếu đã thanh toán hoặc sẽ thanh toán tại trạm
+                // Payment sẽ được xử lý riêng qua API thanh toán tại trạm
                 var rental = await _rentalService.CheckInAsync(dto.BookingId, staffId, deliveredAt, dto.DeliveryCondition);
                 if (rental == null) return NotFound(new { message = "Không tìm thấy đơn thuê." });
 
@@ -198,6 +243,16 @@ namespace APIRentEV.Controllers
         [HttpPost("check-out")]
         public async Task<IActionResult> CheckOut([FromBody] CheckOutDto dto)
         {
+            var (_, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (!staffStationId.HasValue)
+            {
+                return Forbid("Tài khoản staff chưa được gán trạm.");
+            }
+
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                              ?? User.FindFirst("sub")?.Value
                              ?? User.FindFirst("userId")?.Value;
@@ -209,6 +264,17 @@ namespace APIRentEV.Controllers
             var receivedAt = dto.ReceivedAt ?? DateTime.UtcNow;
             try
             {
+                var rentalDetail = await _rentalService.GetRentalByIdAsync(dto.BookingId);
+                if (rentalDetail == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy đơn thuê." });
+                }
+                var targetStationId = rentalDetail.ReturnStationId ?? rentalDetail.PickupStationId;
+                if (targetStationId != staffStationId.Value)
+                {
+                    return Forbid("Bạn không thể nhận xe cho trạm khác.");
+                }
+
                 var rental = await _rentalService.CheckOutAsync(dto.BookingId, staffId, receivedAt, dto.ReturnCondition);
                 if (rental == null) return NotFound(new { message = "Không tìm thấy đơn thuê." });
 
@@ -229,12 +295,22 @@ namespace APIRentEV.Controllers
             }
         }
 
-        [Authorize(Roles = "Admin,StaffStation,Customer")]
+        [Authorize(Roles = "StaffStation,Customer")]
         [HttpGet("{id}")]
         public async Task<ActionResult<RentalDto>> GetRentalById(Guid id)
         {
             var rental = await _rentalService.GetPaidRentalByIdAsync(id);
             if (rental == null) return NotFound();
+
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue && !RentalMatchesStation(rental, staffStationId.Value))
+            {
+                return Forbid("Bạn chỉ có thể xem đơn thuê thuộc trạm của mình.");
+            }
 
             return Ok(_mapper.Map<RentalDto>(rental));
         }
@@ -245,20 +321,224 @@ namespace APIRentEV.Controllers
         {
             if (!ModelState.IsValid) return BadRequest();
 
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                          ?? User.FindFirstValue("sub")
+                          ?? User.FindFirstValue("userId");
+
+            if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            {
+                return BadRequest(new { message = "Invalid or missing userId in token." });
+            }
+
             var rental = _mapper.Map<Rental>(dto);
+            rental.UserId = userId; // Ensure userId from token
             var created = await _rentalService.CreateRentalAsync(rental);
+
+            // Tạo deposit (30% của tổng tiền thuê)
+            if (created.TotalCost.HasValue && created.TotalCost.Value > 0)
+            {
+                var depositService = HttpContext.RequestServices.GetRequiredService<Service.Interface.IDepositService>();
+                var depositAmount = created.TotalCost.Value * 0.3m;
+                await depositService.CreateDepositAsync(created.RentalId, userId, depositAmount);
+            }
 
             return CreatedAtAction(nameof(GetRentalById),
                                    new { id = created.RentalId },
                                    _mapper.Map<RentalDto>(created));
         }
 
-        [Authorize(Roles = "Admin,StaffStation")]
+        // === REQUEST EARLY RETURN ===
+        // Customer requests to return vehicle early
+        [Authorize(Roles = "Customer")]
+        [HttpPost("{rentalId}/request-early-return")]
+        public async Task<IActionResult> RequestEarlyReturn(Guid rentalId)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                          ?? User.FindFirstValue("sub")
+                          ?? User.FindFirstValue("userId");
+
+            if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            {
+                return BadRequest(new { message = "Invalid or missing userId in token." });
+            }
+
+            try
+            {
+                var rental = await _rentalService.RequestEarlyReturnAsync(rentalId, userId);
+                if (rental == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy đơn thuê." });
+                }
+
+                var dto = _mapper.Map<RentalDto>(rental);
+                return Ok(new { 
+                    message = "Yêu cầu trả xe sớm đã được gửi thành công.",
+                    rental = dto 
+                });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi xử lý yêu cầu trả xe sớm." });
+            }
+        }
+
+        // === CALCULATE RENTAL COST ===
+        // Calculate rental cost and deposit before booking
+        [AllowAnonymous]
+        [HttpPost("calculate-cost")]
+        public async Task<IActionResult> CalculateRentalCost([FromBody] CalculateRentalCostDto dto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            try
+            {
+                var result = await _rentalService.CalculateRentalCostAsync(dto.VehicleId, dto.StartTime, dto.EndTime);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi tính toán chi phí thuê xe." });
+            }
+        }
+
+        // === GET RENTAL BILL ===
+        // Get bill for a rental (rental cost + penalties)
+        [Authorize(Roles = "Customer,StaffStation")]
+        [HttpGet("{rentalId}/bill")]
+        public async Task<IActionResult> GetRentalBill(Guid rentalId)
+        {
+            try
+            {
+                var bill = await _rentalService.GetRentalBillAsync(rentalId);
+                return Ok(bill);
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound(new { message = "Không tìm thấy đơn thuê." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi lấy hóa đơn." });
+            }
+        }
+
+        // === CONFIRM RETURN ===
+        // Customer confirms return of vehicle
+        [Authorize(Roles = "Customer")]
+        [HttpPost("{rentalId}/confirm-return")]
+        public async Task<IActionResult> ConfirmReturn(Guid rentalId)
+        {
+            var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
+                          ?? User.FindFirstValue("sub")
+                          ?? User.FindFirstValue("userId");
+
+            if (string.IsNullOrWhiteSpace(userIdStr) || !Guid.TryParse(userIdStr, out var userId))
+            {
+                return BadRequest(new { message = "Invalid or missing userId in token." });
+            }
+
+            try
+            {
+                var rental = await _rentalService.GetRentalByIdAsync(rentalId);
+                if (rental == null)
+                {
+                    return NotFound(new { message = "Không tìm thấy đơn thuê." });
+                }
+
+                if (rental.UserId != userId)
+                {
+                    return Forbid("Bạn chỉ có thể xác nhận trả xe cho đơn thuê của mình.");
+                }
+
+                if (!string.Equals(rental.Status, "IN_PROGRESS", StringComparison.OrdinalIgnoreCase))
+                {
+                    return BadRequest(new { message = "Chỉ có thể xác nhận trả xe khi đơn thuê đang trong trạng thái đang thuê." });
+                }
+
+                // Mark as early return requested if returning early
+                if (rental.EndTime.HasValue && DateTime.UtcNow < rental.EndTime.Value)
+                {
+                    rental.EarlyReturnRequested = true;
+                    rental.EarlyReturnRequestedAt = DateTime.UtcNow;
+                    await _rentalService.UpdateRentalAsync(rentalId, rental);
+                }
+
+                return Ok(new { 
+                    message = "Xác nhận trả xe thành công. Vui lòng đến trạm để hoàn tất thủ tục.",
+                    rentalId = rentalId
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi xác nhận trả xe." });
+            }
+        }
+
+        // === PENALTY HANDLING ===
+        [Authorize(Roles = "StaffStation")]
+        [HttpPost("{rentalId}/penalties")]
+        public async Task<IActionResult> CreateRentalPenalty(Guid rentalId, [FromBody] CreateRentalPenaltyDto dto)
+        {
+            try
+            {
+                var penalty = await _rentalPenaltyService.CreatePenaltyAsync(rentalId, dto, dto.UseDepositFirst);
+                var penaltyDto = _mapper.Map<RentalPenaltyDto>(penalty);
+                return Ok(penaltyDto);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi tạo khoản phạt." });
+            }
+        }
+
+        [Authorize(Roles = "StaffStation")]
+        [HttpPost("penalties/{penaltyId}/settle")]
+        public async Task<IActionResult> SettleRentalPenalty(Guid penaltyId, [FromBody] SettleRentalPenaltyDto dto)
+        {
+            try
+            {
+                var penalty = await _rentalPenaltyService.SettlePenaltyAsync(penaltyId, dto);
+                var penaltyDto = _mapper.Map<RentalPenaltyDto>(penalty);
+                return Ok(penaltyDto);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi cập nhật trạng thái phạt." });
+            }
+        }
+
+        [Authorize(Roles = "StaffStation")]
         [HttpPut("{id}")]
         public async Task<ActionResult<RentalDto>> UpdateRental(Guid id, [FromBody] RentalUpdateDto dto)
         {
             var existing = await _rentalService.GetRentalByIdAsync(id);
             if (existing == null) return NotFound();
+
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            if (isStaff && staffStationId.HasValue && !RentalMatchesStation(existing, staffStationId.Value))
+            {
+                return Forbid("Bạn chỉ có thể cập nhật đơn thuê thuộc trạm của mình.");
+            }
 
             _mapper.Map(dto, existing);
             await _rentalService.UpdateRentalAsync(id, existing);
@@ -423,6 +703,29 @@ namespace APIRentEV.Controllers
             return Ok(result);
         }
 
+        private (bool isStaff, Guid? stationId, ActionResult? errorResult) ResolveStaffContext()
+        {
+            var isStaff = User?.IsInRole("StaffStation") ?? false;
+            if (!isStaff)
+            {
+                return (false, null, null);
+            }
 
+            var stationId = User.GetStationId();
+            if (!stationId.HasValue)
+            {
+                return (true, null, Forbid("Tài khoản Staff chưa được gán trạm. Vui lòng liên hệ Admin để cập nhật."));
+            }
+
+            return (true, stationId, null);
+        }
+
+        private static bool RentalMatchesStation(Rental rental, Guid stationId)
+        {
+            if (rental == null) return false;
+            if (rental.PickupStationId == stationId) return true;
+            if (rental.ReturnStationId.HasValue && rental.ReturnStationId.Value == stationId) return true;
+            return false;
+        }
     }
 }   

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using AutoMapper;
 using Repository.Implementations;
 using Repository.Models;
 using Repository.Repositories;
@@ -97,7 +98,19 @@ builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<RentalImageRepository>();
 builder.Services.AddScoped<IRentalImageService, RentalImageService>();
 
-builder.Services.AddAutoMapper(typeof(MappingProfile));
+builder.Services.AddScoped<RentalPenaltyRepository>();
+builder.Services.AddScoped<IRentalPenaltyService, RentalPenaltyService>();
+
+builder.Services.AddScoped<Repository.Repositories.DepositRepository>();
+builder.Services.AddScoped<Service.Interface.IDepositService, Service.Services.DepositService>();
+
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.ShouldMapMethod = _ => false;
+}, typeof(MappingProfile));
+
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // JWT config
 var jwtKey = builder.Configuration["Jwt:Key"];

@@ -29,6 +29,12 @@ public partial class Payment
     [MaxLength(100)]
     public string TransactionId { get; set; }
 
+    // Ảnh chứng từ thanh toán (cho chuyển khoản tại trạm)
+    public string PaymentProofImageUrl { get; set; }
+
+    // Staff xác nhận thanh toán tại trạm
+    public Guid? ConfirmedByStaffId { get; set; }
+
     public virtual Rental Rental { get; set; }
 
     public virtual User User { get; set; }
