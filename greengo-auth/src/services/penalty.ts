@@ -40,7 +40,7 @@ export const updatePenalty = async (
   return response.data;
 };
 
-// Admin: delete (soft) penalty
+// Admin: delete penalty
 export const deletePenalty = async (penaltyId: string): Promise<void> => {
   await http.delete(`/api/penalty/${penaltyId}`);
 };

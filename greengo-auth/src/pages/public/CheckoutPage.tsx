@@ -37,6 +37,7 @@ export default function CheckoutPage() {
   const [showPayOSDialog, setShowPayOSDialog] = useState<boolean>(false);
   const [penalties, setPenalties] = useState<IPenalty[]>([]);
   const [showPenaltyRates, setShowPenaltyRates] = useState<boolean>(false);
+  const [paymentMethod, setPaymentMethod] = useState<"full" | "deposit_only">("full"); // "full" = thanh toán trước, "deposit_only" = thanh toán khi nhận xe
   // Bỏ state currentPaymentId, dùng trực tiếp paymentId từ createPaymentResponse để tránh closure stale
   // Loại bỏ state contract; sẽ dùng biến cục bộ createdRental khi điều hướng
 
@@ -173,12 +174,16 @@ export default function CheckoutPage() {
       // 2. GỌI API BƯỚC 1 (POST /api/rental)
       const createdRental = await createRental(rentalData);
 
-      // 3. TẠO DATA BƯỚC 2 (Tạo Thanh toán - bao gồm tiền thuê + cọc)
-      const totalPaymentAmount = totalCostForUI + depositAmount;
+      // 3. TẠO DATA BƯỚC 2 (Tạo Thanh toán - tùy theo lựa chọn)
+      // Nếu chọn "thanh toán trước" thì thanh toán toàn bộ (tiền thuê + cọc)
+      // Nếu chọn "thanh toán khi nhận xe" thì chỉ thanh toán cọc
+      const totalPaymentAmount = paymentMethod === "full" 
+        ? totalCostForUI + depositAmount 
+        : depositAmount;
       const paymentData: IPaymentRequest = {
         userId: user.id,
         rentalId: (createdRental as any).rentalId ?? (createdRental as any).id, 
-        amount: totalPaymentAmount, // Tiền thuê + cọc
+        amount: totalPaymentAmount,
         paymentMethod: "PayOS",
         type: "Rental",
         status: "Pending",
@@ -405,6 +410,71 @@ export default function CheckoutPage() {
           </div>
         )}
 
+        {/* Payment method selection */}
+        {costCalculation.isValid && (
+          <div style={{
+            marginTop: "1rem",
+            padding: "1rem",
+            background: "#f9fafb",
+            borderRadius: "8px",
+            border: "1px solid #e5e7eb"
+          }}>
+            <h3 style={{ marginTop: 0, marginBottom: "12px" }}>Phương thức thanh toán</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <label style={{ 
+                display: "flex", 
+                alignItems: "center", 
+                cursor: "pointer",
+                padding: "12px",
+                borderRadius: "8px",
+                border: paymentMethod === "full" ? "2px solid #10b981" : "2px solid #e5e7eb",
+                background: paymentMethod === "full" ? "#f0fdf4" : "#fff",
+                transition: "all 0.2s ease"
+              }}>
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="full"
+                  checked={paymentMethod === "full"}
+                  onChange={(e) => setPaymentMethod(e.target.value as "full" | "deposit_only")}
+                  style={{ marginRight: "12px", width: "18px", height: "18px", cursor: "pointer" }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: "600", marginBottom: "4px" }}>Thanh toán trước</div>
+                  <div style={{ fontSize: "13px", color: "#6b7280" }}>
+                    Thanh toán toàn bộ tiền thuê và cọc ngay bây giờ
+                  </div>
+                </div>
+              </label>
+              <label style={{ 
+                display: "flex", 
+                alignItems: "center", 
+                cursor: "pointer",
+                padding: "12px",
+                borderRadius: "8px",
+                border: paymentMethod === "deposit_only" ? "2px solid #10b981" : "2px solid #e5e7eb",
+                background: paymentMethod === "deposit_only" ? "#f0fdf4" : "#fff",
+                transition: "all 0.2s ease"
+              }}>
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="deposit_only"
+                  checked={paymentMethod === "deposit_only"}
+                  onChange={(e) => setPaymentMethod(e.target.value as "full" | "deposit_only")}
+                  style={{ marginRight: "12px", width: "18px", height: "18px", cursor: "pointer" }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: "600", marginBottom: "4px" }}>Thanh toán khi nhận xe</div>
+                  <div style={{ fontSize: "13px", color: "#6b7280" }}>
+                    Chỉ thanh toán cọc trước, phần còn lại thanh toán khi nhận xe
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+        )}
+
         {/* Cost breakdown */}
         {costCalculation.isValid && (
           <div style={{
@@ -427,13 +497,34 @@ export default function CheckoutPage() {
               <span>Tiền cọc (30%):</span>
               <strong>{formatPrice(depositAmount)}</strong>
             </div>
+            {paymentMethod === "deposit_only" && (
+              <div style={{ 
+                display: "flex", 
+                justifyContent: "space-between", 
+                marginBottom: "8px",
+                padding: "8px",
+                background: "#fef3c7",
+                borderRadius: "6px",
+                fontSize: "13px",
+                color: "#92400e"
+              }}>
+                <span>Phần còn lại (thanh toán khi nhận xe):</span>
+                <strong>{formatPrice(costCalculation.rentalCost)}</strong>
+              </div>
+            )}
             <hr style={{ margin: "12px 0", borderColor: "#e5e7eb" }} />
             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "18px", fontWeight: "600" }}>
-              <span>Tổng thanh toán:</span>
-              <strong style={{ color: "#059669" }}>{formatPrice(costCalculation.rentalCost + depositAmount)}</strong>
+              <span>Tổng thanh toán {paymentMethod === "deposit_only" ? "(cọc)" : ""}:</span>
+              <strong style={{ color: "#059669" }}>
+                {formatPrice(paymentMethod === "full" 
+                  ? costCalculation.rentalCost + depositAmount 
+                  : depositAmount)}
+              </strong>
             </div>
             <div style={{ marginTop: "12px", fontSize: "13px", color: "#6b7280" }}>
-              * Tiền cọc sẽ được hoàn lại sau khi trả xe (trừ phí phạt nếu có)
+              {paymentMethod === "full" 
+                ? "* Tiền cọc sẽ được hoàn lại sau khi trả xe (trừ phí phạt nếu có)"
+                : "* Bạn sẽ thanh toán phần còn lại khi nhận xe tại trạm"}
             </div>
           </div>
         )}

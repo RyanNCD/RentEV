@@ -107,6 +107,8 @@ namespace APIRentEV.Mapper
             CreateMap<Deposit, DepositDto>()
                 .ForMember(dest => dest.AvailableAmount, opt => opt.MapFrom(src => src.Amount - src.UsedAmount));
 
+            CreateMap<Penalty, PenaltyDto>().ReverseMap();
+
             CreateMap<RentalPenalty, RentalPenaltyDto>().ReverseMap();
 
             // ===============================

@@ -19,7 +19,6 @@ export default function PenaltyManagement() {
   const [violationType, setViolationType] = useState("");
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState<number>(0);
-  const [isActive, setIsActive] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   const resetForm = () => {
@@ -27,7 +26,6 @@ export default function PenaltyManagement() {
     setViolationType("");
     setDescription("");
     setAmount(0);
-    setIsActive(true);
   };
 
   const loadPenalties = async () => {
@@ -53,7 +51,6 @@ export default function PenaltyManagement() {
     setViolationType(penalty.violationType);
     setDescription(penalty.description);
     setAmount(penalty.amount);
-    setIsActive(penalty.isActive);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,7 +71,7 @@ export default function PenaltyManagement() {
           violationType: violationType.trim(),
           description: description.trim(),
           amount,
-          isActive,
+          isActive: true,
         });
       } else {
         // Ensure only one penalty per violation type on FE as well
@@ -88,7 +85,7 @@ export default function PenaltyManagement() {
           violationType: violationType.trim(),
           description: description.trim(),
           amount,
-          isActive,
+          isActive: true,
         });
       }
       resetForm();
@@ -102,13 +99,14 @@ export default function PenaltyManagement() {
   };
 
   const handleDelete = async (penalty: IPenalty) => {
-    if (!window.confirm(`Bạn chắc chắn muốn vô hiệu hóa mức phạt "${penalty.violationType}"?`)) return;
+    const viLabel = VIOLATION_OPTIONS.find(o => o.value === penalty.violationType)?.label || penalty.violationType;
+    if (!window.confirm(`Bạn chắc chắn muốn xóa mức phạt "${viLabel}"?`)) return;
     try {
       await deletePenalty(penalty.penaltyId);
       await loadPenalties();
     } catch (err: any) {
       console.error("Error deleting penalty:", err);
-      setError(err.response?.data?.message || "Không thể vô hiệu hóa mức phạt.");
+      setError(err.response?.data?.message || "Không thể xóa mức phạt.");
     }
   };
 
@@ -171,10 +169,10 @@ export default function PenaltyManagement() {
               >
                 <thead>
                   <tr>
-                    <th style={{ width: "20%" }}>Loại vi phạm</th>
-                    <th style={{ width: "40%" }}>Mô tả</th>
+                    <th style={{ width: "25%" }}>Loại vi phạm</th>
+                    <th style={{ width: "45%" }}>Mô tả</th>
                     <th style={{ width: "15%" }}>Mức phạt</th>
-                    <th style={{ width: "25%", textAlign: "right" }}>Trạng thái / Thao tác</th>
+                    <th style={{ width: "15%", textAlign: "right" }}>Thao tác</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -189,11 +187,6 @@ export default function PenaltyManagement() {
                         <td>{formatPrice(p.amount)}</td>
                         <td style={{ textAlign: "right" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", justifyContent: "flex-end" }}>
-                            <span
-                              className={`status-badge ${p.isActive ? "status-available" : "status-unavailable"}`}
-                            >
-                              {p.isActive ? "ĐANG ÁP DỤNG" : "NGƯNG ÁP DỤNG"}
-                            </span>
                             <button
                               type="button"
                               className="btn btn--sm btn--info"
@@ -206,7 +199,7 @@ export default function PenaltyManagement() {
                               className="btn btn--sm btn--danger"
                               onClick={() => handleDelete(p)}
                             >
-                              Vô hiệu
+                              Xóa
                             </button>
                           </div>
                         </td>
@@ -265,21 +258,6 @@ export default function PenaltyManagement() {
                 onChange={(e) => setAmount(Number(e.target.value))}
                 required
               />
-            </div>
-            <div className="form-group">
-              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <input
-                  type="checkbox"
-                  checked={isActive}
-                  onChange={(e) => setIsActive(e.target.checked)}
-                  style={{
-                    width: "16px",
-                    height: "16px",
-                    cursor: "pointer",
-                  }}
-                />
-                <span>Đang áp dụng</span>
-              </label>
             </div>
             <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem" }}>
               <button

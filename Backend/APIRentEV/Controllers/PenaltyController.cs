@@ -100,7 +100,7 @@ namespace APIRentEV.Controllers
                 ViolationType = dto.ViolationType,
                 Description = dto.Description,
                 Amount = dto.Amount,
-                IsActive = dto.IsActive,
+                IsActive = true, // Luôn active khi tạo mới
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -146,7 +146,7 @@ namespace APIRentEV.Controllers
             penalty.ViolationType = dto.ViolationType;
             penalty.Description = dto.Description;
             penalty.Amount = dto.Amount;
-            penalty.IsActive = dto.IsActive;
+            penalty.IsActive = true; // Luôn active
             penalty.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -158,7 +158,7 @@ namespace APIRentEV.Controllers
             return Ok(dto);
         }
 
-        // Soft delete / deactivate penalty
+        // Hard delete penalty
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePenalty(Guid id)
@@ -169,9 +169,8 @@ namespace APIRentEV.Controllers
                 return NotFound(new { message = "Không tìm thấy mức phạt." });
             }
 
-            // Soft delete: đánh dấu không còn hoạt động
-            penalty.IsActive = false;
-            penalty.UpdatedAt = DateTime.UtcNow;
+            // Hard delete: xóa hoàn toàn khỏi database
+            _context.Penalties.Remove(penalty);
             await _context.SaveChangesAsync();
 
             return NoContent();

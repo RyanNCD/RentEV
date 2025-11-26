@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { type IVehicle } from "../../types";
 import { getVehiclesPaged, createVehicle, updateVehicle, deleteVehicle, type PagedVehicleResult } from "../../services/vehicle";
 import { getAllStations, type IStation } from "../../services/station";
+import { useAuth } from "../../context/AuthContext";
 import VehicleForm from "./VehicleForm";
 import "./VehicleManagement.css";
 
@@ -61,6 +62,9 @@ const canDeleteVehicle = (status: string | null | undefined): boolean => {
 };
 
 export default function VehicleManagement() {
+  const { user } = useAuth();
+  const isStaff = user?.role === "STAFF";
+  
   const [vehicles, setVehicles] = useState<IVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -73,8 +77,8 @@ export default function VehicleManagement() {
     hasNextPage: false,
   });
   
-  // Filters
-  const [stationFilter, setStationFilter] = useState<string>("");
+  // Filters - Mặc định filter theo trạm của nhân viên nếu có
+  const [stationFilter, setStationFilter] = useState<string>(user?.stationId || "");
   const [statusFilter, setStatusFilter] = useState<string>("");
   const [searchFilter, setSearchFilter] = useState<string>("");
   
@@ -98,6 +102,17 @@ export default function VehicleManagement() {
     };
     loadStations();
   }, []);
+
+  // Set filter mặc định theo trạm của nhân viên khi stations được load
+  useEffect(() => {
+    if (isStaff && user?.stationId && stations.length > 0 && !stationFilter) {
+      // Kiểm tra xem stationId của user có trong danh sách stations không
+      const userStationExists = stations.some(s => s.stationId === user.stationId);
+      if (userStationExists) {
+        setStationFilter(user.stationId);
+      }
+    }
+  }, [stations, user?.stationId, isStaff, stationFilter]);
 
   // Hàm tải dữ liệu
   const fetchVehicles = async () => {
@@ -136,7 +151,8 @@ export default function VehicleManagement() {
 
   // Reset filters
   const handleResetFilters = () => {
-    setStationFilter("");
+    // Reset về trạm của nhân viên nếu là staff, ngược lại reset về rỗng
+    setStationFilter(isStaff && user?.stationId ? user.stationId : "");
     setStatusFilter("");
     setSearchFilter("");
     setPagination(prev => ({ ...prev, page: 1 }));

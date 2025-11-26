@@ -12,7 +12,7 @@ namespace Repository.DTO
         [Required]
         public string PaymentMethod { get; set; } // "Cash", "BankTransfer", "PayOS"
 
-        public string PaymentProofImageUrl { get; set; } // Ảnh chuyển khoản (nếu BankTransfer)
+        public string? PaymentProofImageUrl { get; set; } // Ảnh chuyển khoản (nếu BankTransfer) - nullable để cho phép Cash không cần ảnh
     }
 
     // DTO để staff tạo payment link PayOS tại trạm
