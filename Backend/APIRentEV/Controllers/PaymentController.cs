@@ -70,6 +70,30 @@ namespace APIRentEV.Controllers
             return Ok(dto);
         }
 
+        [Authorize(Roles = "StaffStation,Customer")]
+        [HttpGet("rental/{rentalId}")]
+        public async Task<IActionResult> GetPaymentsByRentalId(Guid rentalId)
+        {
+            var payments = await _paymentService.GetPaymentsByRentalIdAsync(rentalId);
+            
+            var (isStaff, staffStationId, stationError) = ResolveStaffContext();
+            if (stationError != null)
+            {
+                return stationError;
+            }
+            
+            // Filter by station if staff
+            if (isStaff && staffStationId.HasValue)
+            {
+                payments = payments
+                    .Where(p => p.Rental != null && RentalMatchesStation(p.Rental, staffStationId.Value))
+                    .ToList();
+            }
+            
+            var dtos = _mapper.Map<List<PaymentDto>>(payments);
+            return Ok(dtos);
+        }
+
         [Authorize(Roles = "Customer")]
         [HttpPost("create")]
         public async Task<IActionResult> CreatePayment([FromBody] PaymentCreateDto dto)

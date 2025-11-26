@@ -46,3 +46,21 @@ export const confirmStationPayment = async (data: StationPaymentConfirmRequest):
   const response = await http.post("/api/payment/station/confirm", data);
   return response.data;
 };
+
+// Get payments by rental ID
+export interface IPayment {
+  paymentId: string;
+  rentalId: string;
+  userId: string;
+  amount: number;
+  paymentMethod: string;
+  type: string;
+  status: string;
+  paymentDate?: string | null;
+  transactionId?: string | null;
+}
+
+export const getPaymentsByRentalId = async (rentalId: string): Promise<IPayment[]> => {
+  const response = await http.get<IPayment[]>(`/api/payment/rental/${rentalId}`);
+  return response.data;
+};

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { type IRentalHistoryItem, type IStation, type IFeedback, type IPenalty } from "../../types";
-import { getRentalsPaged, type RentalListParams, checkInRental, checkOutRental, getRentalById, getFeedbacksByRental, createRentalPenalty, settleRentalPenalty } from "../../services/rental";
+import { getRentalsPaged, type RentalListParams, checkInRental, checkOutRental, getRentalById, getFeedbacksByRental, createRentalPenalty, settleRentalPenalty, deleteRentalPenalty, updateRentalPenalty } from "../../services/rental";
 import { uploadRentalImage, getRentalImages, type RentalImageItem } from "../../services/upload";
 import { getAllStations } from "../../services/station";
 import { useAuth } from "../../context/AuthContext";
-import { createStationPayOSPayment, confirmStationPayment, type StationPaymentConfirmRequest } from "../../services/payment";
+import { createStationPayOSPayment, confirmStationPayment, getPaymentsByRentalId, type StationPaymentConfirmRequest } from "../../services/payment";
 import { getPenalties } from "../../services/penalty";
 import "../checkin.css";
 
@@ -59,6 +59,9 @@ export default function CheckinManagement() {
   const [returnCondition, setReturnCondition] = useState<string>("");
   const [returnFiles, setReturnFiles] = useState<File[]>([]);
   const [returnNote, setReturnNote] = useState<string>("");
+  
+  // State để lưu tổng số tiền đã trả từ payments cho mỗi rental
+  const [rentalPayments, setRentalPayments] = useState<Record<string, number>>({});
 
   // Penalty handling state
   const [penaltyCatalog, setPenaltyCatalog] = useState<IPenalty[]>([]);
@@ -67,6 +70,9 @@ export default function CheckinManagement() {
   const [penaltyDescription, setPenaltyDescription] = useState<string>("");
   const [useDepositForPenalty, setUseDepositForPenalty] = useState(true);
   const [penaltySubmitting, setPenaltySubmitting] = useState(false);
+  const [editingPenaltyId, setEditingPenaltyId] = useState<string | null>(null);
+  const [editingPenaltyAmount, setEditingPenaltyAmount] = useState<number>(0);
+  const [editingPenaltyDescription, setEditingPenaltyDescription] = useState<string>("");
 
   // Station payment state
   const [paymentMethod, setPaymentMethod] = useState<"Cash" | "BankTransfer" | "PayOS" | "">("");
@@ -94,6 +100,23 @@ export default function CheckinManagement() {
       setRentals(response.items);
       setTotalCount(response.totalCount);
       setTotalPages(response.totalPages);
+      
+      // Fetch payments cho tất cả rentals
+      const paymentsMap: Record<string, number> = {};
+      await Promise.all(
+        response.items.map(async (rental) => {
+          try {
+            const payments = await getPaymentsByRentalId(rental.rentalId);
+            const totalPaid = payments
+              .filter(p => p.status?.toUpperCase() === "SUCCESS")
+              .reduce((sum, p) => sum + (p.amount || 0), 0);
+            paymentsMap[rental.rentalId] = totalPaid;
+          } catch (err) {
+            console.error(`Error fetching payments for rental ${rental.rentalId}:`, err);
+          }
+        })
+      );
+      setRentalPayments(paymentsMap);
     } catch (err: any) {
       console.error("Error loading rentals:", err);
       setError(err.response?.data?.message || "Không thể tải danh sách đơn thuê.");
@@ -161,6 +184,18 @@ export default function CheckinManagement() {
   };
 
   const openModal = async (type: ModalType, rental: IRentalHistoryItem) => {
+    // Fetch payments cho rental này nếu chưa có
+    if (!rentalPayments[rental.rentalId]) {
+      try {
+        const payments = await getPaymentsByRentalId(rental.rentalId);
+        const totalPaid = payments
+          .filter(p => p.status?.toUpperCase() === "SUCCESS")
+          .reduce((sum, p) => sum + (p.amount || 0), 0);
+        setRentalPayments(prev => ({ ...prev, [rental.rentalId]: totalPaid }));
+      } catch (err) {
+        console.error(`Error fetching payments for rental ${rental.rentalId}:`, err);
+      }
+    }
     setModalType(type);
     setModalError(null);
     
@@ -384,6 +419,65 @@ export default function CheckinManagement() {
       return;
     }
 
+    // Kiểm tra thời gian bàn giao: chỉ được phép bàn giao trong khoảng 1 giờ trước thời gian hẹn
+    // Ví dụ: Hẹn 29/11/2025 01:01 thì chỉ được bàn giao từ 29/11/2025 00:01 đến 29/11/2025 01:01
+    if (selectedRental.startTime) {
+      const startTime = new Date(selectedRental.startTime);
+      const now = new Date();
+      const timeDifference = startTime.getTime() - now.getTime();
+      const hoursDifference = timeDifference / (1000 * 60 * 60);
+      
+      // Tính thời gian sớm nhất có thể bàn giao (1 giờ trước thời gian hẹn)
+      const earliestDeliveryTime = new Date(startTime.getTime() - 60 * 60 * 1000);
+      
+      // Không được bàn giao quá sớm (trước 1 giờ trước thời gian hẹn)
+      if (now < earliestDeliveryTime) {
+        const startTimeStr = startTime.toLocaleString("vi-VN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const earliestStr = earliestDeliveryTime.toLocaleString("vi-VN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const nowStr = now.toLocaleString("vi-VN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        setModalError(`Không thể bàn giao xe quá sớm. Chỉ được phép bàn giao từ ${earliestStr} (1 giờ trước thời gian hẹn ${startTimeStr}). Thời gian hiện tại: ${nowStr}.`);
+        return;
+      }
+      
+      // Phải bàn giao ít nhất 1 giờ trước thời gian hẹn (không được quá muộn)
+      if (hoursDifference < 1) {
+        const startTimeStr = startTime.toLocaleString("vi-VN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        const nowStr = now.toLocaleString("vi-VN", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+        setModalError(`Không thể bàn giao xe. Phải bàn giao ít nhất 1 giờ trước thời gian hẹn (${startTimeStr}). Thời gian hiện tại: ${nowStr}.`);
+        return;
+      }
+    }
+
     if (files.length === 0) {
       setModalError("Vui lòng chọn ít nhất một ảnh bàn giao.");
       return;
@@ -467,6 +561,19 @@ export default function CheckinManagement() {
       setModalError("Vui lòng chọn loại phạt và nhập số tiền hợp lệ.");
       return;
     }
+
+    // Kiểm tra nếu penalty liên quan đến "Trả xe trước thời hạn" thì cần có yêu cầu từ khách hàng
+    const selectedPenalty = penaltyCatalog.find((p) => p.penaltyId === selectedPenaltyId);
+    if (selectedPenalty) {
+      const violationType = selectedPenalty.violationType?.toLowerCase() || "";
+      if (violationType.includes("early") || violationType.includes("trả xe trước") || violationType === "earlyreturn") {
+        if (!selectedRental.earlyReturnRequested) {
+          setModalError("⚠️ Trả xe trước thời hạn: Cần có yêu cầu từ khách hàng trước khi nhận xe.");
+          return;
+        }
+      }
+    }
+
     setPenaltySubmitting(true);
     setModalError(null);
     try {
@@ -530,6 +637,65 @@ export default function CheckinManagement() {
     }
   };
 
+  const handleDeletePenalty = async (penaltyId: string) => {
+    if (!selectedRental) return;
+    
+    if (!window.confirm("Bạn có chắc chắn muốn xóa khoản phạt này? Nếu đã trừ cọc, tiền cọc sẽ được hoàn lại.")) {
+      return;
+    }
+
+    setPenaltySubmitting(true);
+    setModalError(null);
+    try {
+      await deleteRentalPenalty(penaltyId);
+      await loadRentals();
+      const rental = await getRentalById(selectedRental.rentalId);
+      setSelectedRental(rental);
+    } catch (err: any) {
+      console.error("Error deleting penalty:", err);
+      setModalError(err.response?.data?.message || "Không thể xóa khoản phạt.");
+    } finally {
+      setPenaltySubmitting(false);
+    }
+  };
+
+  const handleEditPenalty = (penalty: any) => {
+    setEditingPenaltyId(penalty.rentalPenaltyId);
+    setEditingPenaltyAmount(penalty.amount);
+    setEditingPenaltyDescription(penalty.description || "");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingPenaltyId(null);
+    setEditingPenaltyAmount(0);
+    setEditingPenaltyDescription("");
+  };
+
+  const handleUpdatePenalty = async (penaltyId: string) => {
+    if (!selectedRental || editingPenaltyAmount <= 0) {
+      setModalError("Vui lòng nhập số tiền hợp lệ.");
+      return;
+    }
+
+    setPenaltySubmitting(true);
+    setModalError(null);
+    try {
+      await updateRentalPenalty(penaltyId, {
+        amount: editingPenaltyAmount,
+        description: editingPenaltyDescription,
+      });
+      await loadRentals();
+      const rental = await getRentalById(selectedRental.rentalId);
+      setSelectedRental(rental);
+      handleCancelEdit();
+    } catch (err: any) {
+      console.error("Error updating penalty:", err);
+      setModalError(err.response?.data?.message || "Không thể cập nhật khoản phạt.");
+    } finally {
+      setPenaltySubmitting(false);
+    }
+  };
+
   const formatDate = (dateString?: string | null) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleString("vi-VN", {
@@ -542,7 +708,7 @@ export default function CheckinManagement() {
   };
 
   const formatPrice = (price?: number | null) => {
-    if (!price) return "N/A";
+    if (price == null || price === 0) return "0 ₫";
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
@@ -580,8 +746,9 @@ export default function CheckinManagement() {
 
   // Kiểm tra xem rental đã thanh toán chưa (dựa vào status)
   const isRentalPaid = (rental: IRentalHistoryItem) => {
-    const upperStatus = rental.status?.toUpperCase() || "";
-    return upperStatus === "PAID";
+    const paymentStatus = getPaymentStatus(rental);
+    // Đã trả đủ nếu paymentStatus.type === "full"
+    return paymentStatus.type === "full";
   };
 
   const canCheckout = (status: string) => {
@@ -590,9 +757,9 @@ export default function CheckinManagement() {
 
   // Kiểm tra trạng thái thanh toán: đã trả đủ hay chỉ trả cọc
   // Logic: Cọc 30% là riêng, không tính vào tiền thuê
-  // - Tiền thuê xe: rental.totalCost (ví dụ: 20.000 ₫)
-  // - Tiền cọc: 30% của tiền thuê (ví dụ: 6.000 ₫)
-  // - Tổng thanh toán nếu trả trước: tiền thuê + cọc (ví dụ: 26.000 ₫)
+  // - Tiền thuê xe: rental.totalCost (ví dụ: 4.500.000 ₫)
+  // - Tiền cọc: 30% của tiền thuê (ví dụ: 1.350.000 ₫)
+  // - Tổng thanh toán nếu trả trước: tiền thuê + cọc (ví dụ: 5.850.000 ₫)
   // - Nếu chỉ trả cọc: đã trả cọc, còn phải trả tiền thuê xe
   const getPaymentStatus = (rental: IRentalHistoryItem) => {
     const upperStatus = rental.status?.toUpperCase() || "";
@@ -618,15 +785,22 @@ export default function CheckinManagement() {
     const expectedDeposit = rentalCost * 0.3; // Cọc 30% của tiền thuê
     const totalPaymentRequired = rentalCost + expectedDeposit; // Tổng cần trả nếu trả trước
     
+    // Lấy tổng số tiền đã trả từ payments (đã fetch trước đó)
+    const totalPaidFromPayments = rentalPayments[rental.rentalId] || 0;
+    
+    // Tổng số tiền đã trả = deposit + payments thành công
+    const totalPaid = depositAmount + totalPaidFromPayments;
+    
     // Nếu đã trả >= tổng (tiền thuê + cọc) thì đã trả đủ
-    if (depositAmount >= totalPaymentRequired) {
+    if (totalPaid >= totalPaymentRequired) {
       return { 
         type: "full", 
         label: "Đã trả đủ", 
         color: "#059669",
         remaining: 0,
         rentalCost: rentalCost,
-        depositAmount: depositAmount
+        depositAmount: depositAmount,
+        totalPaid: totalPaid
       };
     }
     
@@ -668,6 +842,28 @@ export default function CheckinManagement() {
       "CleaningFee": "Phí vệ sinh",
     };
     return typeMap[violationType] || violationType;
+  };
+
+  // Dịch penalty status sang tiếng Việt
+  const translatePenaltyStatus = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      "Pending": "Chờ xử lý",
+      "Settled": "Đã thanh toán",
+      "OffsetFromDeposit": "Đã trừ cọc",
+    };
+    return statusMap[status] || status;
+  };
+
+  // Dịch deposit status sang tiếng Việt
+  const translateDepositStatus = (status: string): string => {
+    const statusMap: Record<string, string> = {
+      "Pending": "Chờ xử lý",
+      "PartiallyUsed": "Đã sử dụng một phần",
+      "FullyUsed": "Đã sử dụng hết",
+      "Refunded": "Đã hoàn tiền",
+      "Completed": "Đã hoàn tất",
+    };
+    return statusMap[status] || status;
   };
 
   return (
@@ -916,6 +1112,113 @@ export default function CheckinManagement() {
             <p><strong>Khách hàng:</strong> {selectedRental.userName}</p>
             <p><strong>Thời gian:</strong> {formatDate(selectedRental.startTime)} - {formatDate(selectedRental.endTime)}</p>
             <p><strong>Tổng tiền:</strong> {formatPrice(selectedRental.totalCost)}</p>
+            {selectedRental.startTime && (() => {
+              const startTime = new Date(selectedRental.startTime);
+              const now = new Date();
+              const timeDifference = startTime.getTime() - now.getTime();
+              const hoursDifference = timeDifference / (1000 * 60 * 60);
+              const minutesDifference = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+              
+              // Tính thời gian sớm nhất có thể bàn giao (1 giờ trước thời gian hẹn)
+              const earliestDeliveryTime = new Date(startTime.getTime() - 60 * 60 * 1000);
+              
+              // Hiển thị thời gian hẹn với timezone local
+              const startTimeStr = startTime.toLocaleString("vi-VN", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+              });
+              
+              const earliestStr = earliestDeliveryTime.toLocaleString("vi-VN", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+              });
+              
+              // Không được bàn giao quá sớm (trước 1 giờ trước thời gian hẹn)
+              if (now < earliestDeliveryTime) {
+                return (
+                  <div style={{
+                    marginTop: "12px",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    background: "#fee2e2",
+                    border: "2px solid #ef4444",
+                    color: "#991b1b"
+                  }}>
+                    <p style={{ margin: 0, fontWeight: "600" }}>
+                      ⚠️ Cảnh báo: Không thể bàn giao quá sớm
+                    </p>
+                    <p style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
+                      Chỉ được phép bàn giao từ {earliestStr} (1 giờ trước thời gian hẹn {startTimeStr}).
+                    </p>
+                  </div>
+                );
+              }
+              
+              // Phải bàn giao ít nhất 1 giờ trước thời gian hẹn (không được quá muộn)
+              if (hoursDifference < 1) {
+                return (
+                  <div style={{
+                    marginTop: "12px",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    background: "#fee2e2",
+                    border: "2px solid #ef4444",
+                    color: "#991b1b"
+                  }}>
+                    <p style={{ margin: 0, fontWeight: "600" }}>
+                      ⚠️ Cảnh báo: Thời gian bàn giao không hợp lệ
+                    </p>
+                    <p style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
+                      Phải bàn giao ít nhất 1 giờ trước thời gian hẹn ({startTimeStr}). Còn lại: {Math.floor(hoursDifference)} giờ {minutesDifference} phút.
+                    </p>
+                  </div>
+                );
+              } else if (hoursDifference < 2) {
+                return (
+                  <div style={{
+                    marginTop: "12px",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    background: "#fef3c7",
+                    border: "2px solid #f59e0b",
+                    color: "#92400e"
+                  }}>
+                    <p style={{ margin: 0, fontWeight: "600" }}>
+                      ⏰ Lưu ý: Thời gian bàn giao
+                    </p>
+                    <p style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
+                      Thời gian hẹn: {startTimeStr}. Còn lại: {Math.floor(hoursDifference)} giờ {minutesDifference} phút.
+                    </p>
+                  </div>
+                );
+              } else {
+                return (
+                  <div style={{
+                    marginTop: "12px",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    background: "#d1fae5",
+                    border: "2px solid #059669",
+                    color: "#065f46"
+                  }}>
+                    <p style={{ margin: 0, fontWeight: "600" }}>
+                      ✓ Thời gian bàn giao hợp lệ
+                    </p>
+                    <p style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
+                      Thời gian hẹn: {startTimeStr}. Còn lại: {Math.floor(hoursDifference)} giờ {minutesDifference} phút.
+                    </p>
+                  </div>
+                );
+              }
+            })()}
             {(() => {
               const paymentStatus = getPaymentStatus(selectedRental);
               return (
@@ -1223,68 +1526,190 @@ export default function CheckinManagement() {
                   <strong>Còn lại:</strong> {formatPrice(selectedRental.deposit.availableAmount)}
                 </div>
                 <div className="info-item">
-                  <strong>Trạng thái:</strong> {selectedRental.deposit.status}
+                  <strong>Trạng thái:</strong> {translateDepositStatus(selectedRental.deposit.status)}
                 </div>
               </div>
             </div>
           )}
 
           <div className="penalty-section" style={{ marginTop: "24px" }}>
-            <h3>Khoản phạt hư hỏng</h3>
+            <h3 style={{ marginBottom: "16px", fontSize: "18px", fontWeight: "600", color: "#1f2937" }}>Khoản phạt hư hỏng</h3>
             {!selectedRental.penalties || selectedRental.penalties.length === 0 ? (
-              <div style={{ color: "#6b7280" }}>Chưa có khoản phạt nào.</div>
+              <div style={{ color: "#6b7280", padding: "16px", textAlign: "center", background: "#f9fafb", borderRadius: "8px", border: "1px solid #e5e7eb" }}>Chưa có khoản phạt nào.</div>
             ) : (
-              <div className="table-responsive">
-                <table className="table table-striped" style={{ fontSize: "14px" }}>
+              <div className="table-responsive" style={{ borderRadius: "8px", overflow: "hidden", border: "1px solid #e5e7eb", boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)" }}>
+                <table className="table table-striped" style={{ fontSize: "14px", width: "100%", tableLayout: "auto", borderCollapse: "separate", borderSpacing: 0, margin: 0 }}>
                   <thead>
-                    <tr>
-                      <th>Loại</th>
-                      <th>Số tiền</th>
-                      <th>Đã trừ cọc</th>
-                      <th>Đã thu</th>
-                      <th>Trạng thái</th>
-                      <th>Thao tác</th>
+                    <tr style={{ background: "#f9fafb" }}>
+                      <th style={{ width: "25%", textAlign: "left", padding: "12px 16px", fontWeight: "600", color: "#374151", borderBottom: "2px solid #e5e7eb", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Loại</th>
+                      <th style={{ width: "12%", textAlign: "center", padding: "12px 16px", fontWeight: "600", color: "#374151", borderBottom: "2px solid #e5e7eb", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Số tiền</th>
+                      <th style={{ width: "12%", textAlign: "center", padding: "12px 16px", fontWeight: "600", color: "#374151", borderBottom: "2px solid #e5e7eb", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Đã trừ cọc</th>
+                      <th style={{ width: "12%", textAlign: "center", padding: "12px 16px", fontWeight: "600", color: "#374151", borderBottom: "2px solid #e5e7eb", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Đã thu</th>
+                      <th style={{ width: "15%", textAlign: "left", padding: "12px 16px", fontWeight: "600", color: "#374151", borderBottom: "2px solid #e5e7eb", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Trạng thái</th>
+                      <th style={{ width: "24%", textAlign: "left", padding: "12px 16px", fontWeight: "600", color: "#374151", borderBottom: "2px solid #e5e7eb", fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Thao tác</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {selectedRental.penalties.map((penalty) => {
+                    {selectedRental.penalties.map((penalty, index) => {
                       const remaining = penalty.amount - penalty.depositUsedAmount - penalty.paidAmount;
                       return (
-                        <tr key={penalty.rentalPenaltyId}>
-                          <td>
-                            <div style={{ fontWeight: 600 }}>{penalty.penalty ? translateViolationType(penalty.penalty.violationType) : "Phạt"}</div>
-                            <div style={{ color: "#6b7280" }}>{penalty.description}</div>
+                        <tr 
+                          key={penalty.rentalPenaltyId}
+                          style={{ 
+                            background: index % 2 === 0 ? "#ffffff" : "#f9fafb",
+                            borderBottom: "1px solid #e5e7eb",
+                            transition: "background-color 0.2s ease"
+                          }}
+                          onMouseEnter={(e) => e.currentTarget.style.background = "#f3f4f6"}
+                          onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? "#ffffff" : "#f9fafb"}
+                        >
+                          <td style={{ verticalAlign: "top", padding: "16px" }}>
+                            <div style={{ fontWeight: "600", color: "#1f2937", marginBottom: "4px" }}>{penalty.penalty ? translateViolationType(penalty.penalty.violationType) : "Phạt"}</div>
+                            {editingPenaltyId === penalty.rentalPenaltyId ? (
+                              <textarea
+                                value={editingPenaltyDescription}
+                                onChange={(e) => setEditingPenaltyDescription(e.target.value)}
+                                placeholder="Mô tả chi tiết..."
+                                rows={2}
+                                style={{ width: "100%", padding: "8px 12px", fontSize: "13px", marginTop: "8px", resize: "vertical", border: "1px solid #d1d5db", borderRadius: "6px", fontFamily: "inherit" }}
+                                disabled={penaltySubmitting}
+                              />
+                            ) : (
+                              <div style={{ color: "#6b7280", fontSize: "13px", marginTop: "4px", lineHeight: "1.5" }}>{penalty.description}</div>
+                            )}
                           </td>
-                          <td>{formatPrice(penalty.amount)}</td>
-                          <td>{formatPrice(penalty.depositUsedAmount)}</td>
-                          <td>{formatPrice(penalty.paidAmount)}</td>
-                          <td>
+                          <td style={{ textAlign: "center", verticalAlign: "top", padding: "16px" }}>
+                            {editingPenaltyId === penalty.rentalPenaltyId ? (
+                              <input
+                                type="number"
+                                min={0}
+                                value={editingPenaltyAmount}
+                                onChange={(e) => setEditingPenaltyAmount(Number(e.target.value))}
+                                style={{ width: "120px", padding: "8px 12px", fontSize: "14px", border: "1px solid #d1d5db", borderRadius: "6px", textAlign: "center", fontFamily: "inherit" }}
+                                disabled={penaltySubmitting}
+                              />
+                            ) : (
+                              <span style={{ fontWeight: "600", color: "#1f2937" }}>{formatPrice(penalty.amount)}</span>
+                            )}
+                          </td>
+                          <td style={{ textAlign: "center", verticalAlign: "top", padding: "16px" }}>
+                            <span style={{ color: "#f59e0b", fontWeight: "500" }}>{formatPrice(penalty.depositUsedAmount)}</span>
+                          </td>
+                          <td style={{ textAlign: "center", verticalAlign: "top", padding: "16px" }}>
+                            <span style={{ color: "#059669", fontWeight: "500" }}>{formatPrice(penalty.paidAmount)}</span>
+                          </td>
+                          <td style={{ verticalAlign: "top", padding: "16px" }}>
                             <span className={`status-badge ${getStatusBadgeClass(penalty.status)}`}>
-                              {penalty.status}
+                              {translatePenaltyStatus(penalty.status)}
                             </span>
                           </td>
-                          <td>
-                            {remaining > 0 ? (
-                              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                                <button
-                                  type="button"
-                                  className="btn btn--sm btn--warning"
-                                  onClick={() => handleSettlePenalty(penalty.rentalPenaltyId, "deposit", remaining)}
-                                  disabled={penaltySubmitting}
-                                >
-                                  Trừ cọc
-                                </button>
+                          <td style={{ verticalAlign: "top", padding: "16px" }}>
+                            {editingPenaltyId === penalty.rentalPenaltyId ? (
+                              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
                                 <button
                                   type="button"
                                   className="btn btn--sm btn--success"
-                                  onClick={() => handleSettlePenalty(penalty.rentalPenaltyId, "cash", remaining)}
-                                  disabled={penaltySubmitting}
+                                  onClick={() => handleUpdatePenalty(penalty.rentalPenaltyId)}
+                                  disabled={penaltySubmitting || editingPenaltyAmount <= 0}
+                                  style={{ 
+                                    padding: "6px 12px", 
+                                    fontSize: "12px", 
+                                    borderRadius: "6px",
+                                    fontWeight: "500",
+                                    transition: "all 0.2s ease"
+                                  }}
                                 >
-                                  Đã thu tiền
+                                  Lưu
+                                </button>
+                                <button
+                                  type="button"
+                                  className="btn btn--sm btn--secondary"
+                                  onClick={handleCancelEdit}
+                                  disabled={penaltySubmitting}
+                                  style={{ 
+                                    padding: "6px 12px", 
+                                    fontSize: "12px", 
+                                    borderRadius: "6px",
+                                    fontWeight: "500",
+                                    transition: "all 0.2s ease"
+                                  }}
+                                >
+                                  Hủy
                                 </button>
                               </div>
                             ) : (
-                              <span style={{ color: "#059669" }}>Đã hoàn tất</span>
+                              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", alignItems: "center" }}>
+                                {remaining > 0 ? (
+                                  <>
+                                    <button
+                                      type="button"
+                                      className="btn btn--sm btn--warning"
+                                      onClick={() => handleSettlePenalty(penalty.rentalPenaltyId, "deposit", remaining)}
+                                      disabled={penaltySubmitting}
+                                      style={{ 
+                                        padding: "6px 12px", 
+                                        fontSize: "12px", 
+                                        borderRadius: "6px",
+                                        fontWeight: "500",
+                                        transition: "all 0.2s ease"
+                                      }}
+                                    >
+                                      Trừ cọc
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="btn btn--sm btn--success"
+                                      onClick={() => handleSettlePenalty(penalty.rentalPenaltyId, "cash", remaining)}
+                                      disabled={penaltySubmitting}
+                                      style={{ 
+                                        padding: "6px 12px", 
+                                        fontSize: "12px", 
+                                        borderRadius: "6px",
+                                        fontWeight: "500",
+                                        transition: "all 0.2s ease"
+                                      }}
+                                    >
+                                      Đã thu tiền
+                                    </button>
+                                  </>
+                                ) : (
+                                  <span style={{ color: "#059669", fontWeight: "500", fontSize: "13px" }}>Đã hoàn tất</span>
+                                )}
+                                {(penalty.status === "Pending" || penalty.status === "OffsetFromDeposit") && (
+                                  <>
+                                    <button
+                                      type="button"
+                                      className="btn btn--sm btn--primary"
+                                      onClick={() => handleEditPenalty(penalty)}
+                                      disabled={penaltySubmitting}
+                                      style={{ 
+                                        padding: "6px 12px", 
+                                        fontSize: "12px", 
+                                        borderRadius: "6px",
+                                        fontWeight: "500",
+                                        transition: "all 0.2s ease"
+                                      }}
+                                    >
+                                      Sửa
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="btn btn--sm btn--danger"
+                                      onClick={() => handleDeletePenalty(penalty.rentalPenaltyId)}
+                                      disabled={penaltySubmitting}
+                                      style={{ 
+                                        padding: "6px 12px", 
+                                        fontSize: "12px", 
+                                        borderRadius: "6px",
+                                        fontWeight: "500",
+                                        transition: "all 0.2s ease"
+                                      }}
+                                    >
+                                      Xóa
+                                    </button>
+                                  </>
+                                )}
+                              </div>
                             )}
                           </td>
                         </tr>

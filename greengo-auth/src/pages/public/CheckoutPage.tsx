@@ -121,9 +121,17 @@ export default function CheckoutPage() {
       };
     }
 
-    // Tính số ngày: nếu > 24h thì tính là ngày thứ 2
-    // Giảm nhẹ để tránh lỗi làm tròn floating (24h đôi khi thành 24.0000001)
-    const days = Math.ceil(totalHours / 24 - 1e-6);
+    // Tính số ngày với buffer 2 giờ cho phép trả chậm
+    // Logic: Cho phép trả chậm hơn 2 giờ mà vẫn tính là cùng 1 ngày
+    // Ví dụ: Thuê 10:00 AM ngày 27/11, trả 12:00 PM ngày 28/11 (26 giờ) -> 1 ngày
+    //        Thuê 10:00 AM ngày 27/11, trả 12:01 PM ngày 28/11 (26.01 giờ) -> 2 ngày
+    const baseDays = Math.floor(totalHours / 24);
+    const remainingHours = totalHours % 24;
+    const bufferHours = 2; // Cho phép trả chậm 2 giờ
+    
+    // Nếu số giờ dư <= 2 giờ thì vẫn tính là số ngày cơ bản, ngược lại cộng thêm 1 ngày
+    const days = remainingHours <= bufferHours ? baseDays : baseDays + 1;
+    
     const rentalCost = days * (car.pricePerDay ?? 0);
     const deposit = rentalCost * 0.3; // 30% của tổng tiền thuê
 

@@ -64,5 +64,11 @@ namespace Repository.DTO
         public bool UseDeposit { get; set; }
         public string? Note { get; set; }
     }
+
+    public class UpdateRentalPenaltyDto
+    {
+        public decimal Amount { get; set; }
+        public string? Description { get; set; }
+    }
 }
 
