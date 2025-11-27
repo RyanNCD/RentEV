@@ -420,20 +420,20 @@ export default function CheckinManagement() {
       return;
     }
 
-    // Kiểm tra thời gian bàn giao: chỉ được phép bàn giao trong khoảng 1 giờ trước thời gian hẹn
-    // Ví dụ: Hẹn 29/11/2025 01:01 thì chỉ được bàn giao từ 29/11/2025 00:01 đến 29/11/2025 01:01
+    // Kiểm tra thời gian bàn giao: được phép bàn giao từ 1 giờ trước thời gian bắt đầu đến trước thời gian kết thúc
+    // Ví dụ: Hẹn 10:00 27/11/2025 - 10:00 28/11/2025 thì được bàn giao từ 09:00 27/11/2025 đến trước 10:00 28/11/2025
     if (selectedRental.startTime) {
-      const startTime = new Date(selectedRental.startTime);
+      // Sử dụng toVietnamTime để xử lý timezone đúng
+      const startTime = toVietnamTime(selectedRental.startTime) || new Date(selectedRental.startTime);
       const now = new Date();
-      const timeDifference = startTime.getTime() - now.getTime();
-      const hoursDifference = timeDifference / (1000 * 60 * 60);
       
-      // Tính thời gian sớm nhất có thể bàn giao (1 giờ trước thời gian hẹn)
+      // Tính thời gian sớm nhất có thể bàn giao (1 giờ trước thời gian bắt đầu)
       const earliestDeliveryTime = new Date(startTime.getTime() - 60 * 60 * 1000);
       
-      // Không được bàn giao quá sớm (trước 1 giờ trước thời gian hẹn)
+      // Không được bàn giao quá sớm (trước 1 giờ trước thời gian bắt đầu)
       if (now < earliestDeliveryTime) {
-        const startTimeStr = formatVietnamDate(startTime, {
+        // Truyền string trực tiếp để formatVietnamDate xử lý timezone
+        const startTimeStr = formatVietnamDate(selectedRental.startTime, {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",
@@ -454,27 +454,34 @@ export default function CheckinManagement() {
           hour: "2-digit",
           minute: "2-digit",
         });
-        setModalError(`Không thể bàn giao xe quá sớm. Chỉ được phép bàn giao từ ${earliestStr} (1 giờ trước thời gian hẹn ${startTimeStr}). Thời gian hiện tại: ${nowStr}.`);
+        setModalError(`Không thể bàn giao xe quá sớm. Chỉ được phép bàn giao từ ${earliestStr} (1 giờ trước thời gian bắt đầu ${startTimeStr}). Thời gian hiện tại: ${nowStr}.`);
         return;
       }
+    }
+    
+    // Không được bàn giao sau thời gian kết thúc
+    if (selectedRental.endTime) {
+      // Sử dụng toVietnamTime để xử lý timezone đúng
+      const endTime = toVietnamTime(selectedRental.endTime) || new Date(selectedRental.endTime);
+      const now = new Date();
       
-      // Phải bàn giao ít nhất 1 giờ trước thời gian hẹn (không được quá muộn)
-      if (hoursDifference < 1) {
-        const startTimeStr = startTime.toLocaleString("vi-VN", {
+      if (now >= endTime) {
+        // Truyền string trực tiếp để formatVietnamDate xử lý timezone
+        const endTimeStr = formatVietnamDate(selectedRental.endTime, {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",
           hour: "2-digit",
           minute: "2-digit",
         });
-        const nowStr = now.toLocaleString("vi-VN", {
+        const nowStr = formatVietnamDate(now, {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",
           hour: "2-digit",
           minute: "2-digit",
         });
-        setModalError(`Không thể bàn giao xe. Phải bàn giao ít nhất 1 giờ trước thời gian hẹn (${startTimeStr}). Thời gian hiện tại: ${nowStr}.`);
+        setModalError(`Không thể bàn giao xe sau thời gian kết thúc (${endTimeStr}). Thời gian hiện tại: ${nowStr}.`);
         return;
       }
     }
@@ -1112,18 +1119,25 @@ export default function CheckinManagement() {
             <p><strong>Khách hàng:</strong> {selectedRental.userName}</p>
             <p><strong>Thời gian:</strong> {formatDate(selectedRental.startTime)} - {formatDate(selectedRental.endTime)}</p>
             <p><strong>Tổng tiền:</strong> {formatPrice(selectedRental.totalCost)}</p>
-            {selectedRental.startTime && (() => {
-              const startTime = new Date(selectedRental.startTime);
+            {selectedRental.startTime && selectedRental.endTime && (() => {
+              // Sử dụng toVietnamTime để xử lý timezone đúng
+              const startTime = toVietnamTime(selectedRental.startTime) || new Date(selectedRental.startTime);
+              const endTime = toVietnamTime(selectedRental.endTime) || new Date(selectedRental.endTime);
               const now = new Date();
-              const timeDifference = startTime.getTime() - now.getTime();
-              const hoursDifference = timeDifference / (1000 * 60 * 60);
-              const minutesDifference = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
               
-              // Tính thời gian sớm nhất có thể bàn giao (1 giờ trước thời gian hẹn)
+              // Tính thời gian sớm nhất có thể bàn giao (1 giờ trước thời gian bắt đầu)
               const earliestDeliveryTime = new Date(startTime.getTime() - 60 * 60 * 1000);
               
-              // Hiển thị thời gian hẹn với timezone local
-              const startTimeStr = formatVietnamDate(startTime, {
+              // Hiển thị thời gian với timezone Vietnam - truyền string trực tiếp để formatVietnamDate xử lý timezone
+              const startTimeStr = formatVietnamDate(selectedRental.startTime, {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+              
+              const endTimeStr = formatVietnamDate(selectedRental.endTime, {
                 year: "numeric",
                 month: "2-digit",
                 day: "2-digit",
@@ -1139,7 +1153,7 @@ export default function CheckinManagement() {
                 minute: "2-digit",
               });
               
-              // Không được bàn giao quá sớm (trước 1 giờ trước thời gian hẹn)
+              // Không được bàn giao quá sớm (trước 1 giờ trước thời gian bắt đầu)
               if (now < earliestDeliveryTime) {
                 return (
                   <div style={{
@@ -1154,14 +1168,14 @@ export default function CheckinManagement() {
                       ⚠️ Cảnh báo: Không thể bàn giao quá sớm
                     </p>
                     <p style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
-                      Chỉ được phép bàn giao từ {earliestStr} (1 giờ trước thời gian hẹn {startTimeStr}).
+                      Chỉ được phép bàn giao từ {earliestStr} (1 giờ trước thời gian bắt đầu {startTimeStr}).
                     </p>
                   </div>
                 );
               }
               
-              // Phải bàn giao ít nhất 1 giờ trước thời gian hẹn (không được quá muộn)
-              if (hoursDifference < 1) {
+              // Không được bàn giao sau thời gian kết thúc
+              if (now >= endTime) {
                 return (
                   <div style={{
                     marginTop: "12px",
@@ -1172,14 +1186,47 @@ export default function CheckinManagement() {
                     color: "#991b1b"
                   }}>
                     <p style={{ margin: 0, fontWeight: "600" }}>
-                      ⚠️ Cảnh báo: Thời gian bàn giao không hợp lệ
+                      ⚠️ Cảnh báo: Không thể bàn giao sau thời gian kết thúc
                     </p>
                     <p style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
-                      Phải bàn giao ít nhất 1 giờ trước thời gian hẹn ({startTimeStr}). Còn lại: {Math.floor(hoursDifference)} giờ {minutesDifference} phút.
+                      Thời gian kết thúc: {endTimeStr}. Vui lòng kiểm tra lại đơn thuê.
                     </p>
                   </div>
                 );
-              } else if (hoursDifference < 2) {
+              }
+              
+              // Tính thời gian còn lại đến thời gian kết thúc
+              const timeToEnd = endTime.getTime() - now.getTime();
+              const hoursToEnd = Math.floor(timeToEnd / (1000 * 60 * 60));
+              const minutesToEnd = Math.floor((timeToEnd % (1000 * 60 * 60)) / (1000 * 60));
+              
+              // Tính thời gian từ bây giờ đến thời gian bắt đầu
+              const timeToStart = startTime.getTime() - now.getTime();
+              const hoursToStart = timeToStart / (1000 * 60 * 60);
+              
+              // Nếu đã qua thời gian bắt đầu
+              if (now >= startTime) {
+                return (
+                  <div style={{
+                    marginTop: "12px",
+                    padding: "12px",
+                    borderRadius: "8px",
+                    background: "#fef3c7",
+                    border: "2px solid #f59e0b",
+                    color: "#92400e"
+                  }}>
+                    <p style={{ margin: 0, fontWeight: "600" }}>
+                      ⏰ Lưu ý: Đã qua thời gian bắt đầu
+                    </p>
+                    <p style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
+                      Thời gian bắt đầu: {startTimeStr}. Thời gian kết thúc: {endTimeStr}. Còn lại đến kết thúc: {hoursToEnd} giờ {minutesToEnd} phút.
+                    </p>
+                  </div>
+                );
+              }
+              
+              // Nếu còn ít hơn 2 giờ đến thời gian bắt đầu
+              if (hoursToStart < 2) {
                 return (
                   <div style={{
                     marginTop: "12px",
@@ -1193,29 +1240,30 @@ export default function CheckinManagement() {
                       ⏰ Lưu ý: Thời gian bàn giao
                     </p>
                     <p style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
-                      Thời gian hẹn: {startTimeStr}. Còn lại: {Math.floor(hoursDifference)} giờ {minutesDifference} phút.
-                    </p>
-                  </div>
-                );
-              } else {
-                return (
-                  <div style={{
-                    marginTop: "12px",
-                    padding: "12px",
-                    borderRadius: "8px",
-                    background: "#d1fae5",
-                    border: "2px solid #059669",
-                    color: "#065f46"
-                  }}>
-                    <p style={{ margin: 0, fontWeight: "600" }}>
-                      ✓ Thời gian bàn giao hợp lệ
-                    </p>
-                    <p style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
-                      Thời gian hẹn: {startTimeStr}. Còn lại: {Math.floor(hoursDifference)} giờ {minutesDifference} phút.
+                      Thời gian bắt đầu: {startTimeStr}. Thời gian kết thúc: {endTimeStr}. Còn lại đến bắt đầu: {Math.floor(hoursToStart)} giờ {Math.floor((timeToStart % (1000 * 60 * 60)) / (1000 * 60))} phút.
                     </p>
                   </div>
                 );
               }
+              
+              // Thời gian hợp lệ
+              return (
+                <div style={{
+                  marginTop: "12px",
+                  padding: "12px",
+                  borderRadius: "8px",
+                  background: "#d1fae5",
+                  border: "2px solid #059669",
+                  color: "#065f46"
+                }}>
+                  <p style={{ margin: 0, fontWeight: "600" }}>
+                    ✓ Thời gian bàn giao hợp lệ
+                  </p>
+                  <p style={{ margin: "4px 0 0 0", fontSize: "14px" }}>
+                      Thời gian bắt đầu: {startTimeStr}. Thời gian kết thúc: {endTimeStr}. Còn lại đến bắt đầu: {Math.floor(hoursToStart)} giờ {Math.floor((timeToStart % (1000 * 60 * 60)) / (1000 * 60))} phút.
+                    </p>
+                </div>
+              );
             })()}
             {(() => {
               const paymentStatus = getPaymentStatus(selectedRental);

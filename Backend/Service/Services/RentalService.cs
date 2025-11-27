@@ -246,24 +246,23 @@ namespace Service.Services
             var rental = await _rentalRepo.GetByIdAsync(rentalId);
             if (rental == null) return null;
 
-            // Kiểm tra thời gian bàn giao: chỉ được phép bàn giao trong khoảng 1 giờ trước thời gian hẹn
-            // Ví dụ: Hẹn 29/11/2025 01:01 thì chỉ được bàn giao từ 29/11/2025 00:01 đến 29/11/2025 01:01
+            // Kiểm tra thời gian bàn giao: được phép bàn giao từ 1 giờ trước thời gian bắt đầu đến trước thời gian kết thúc
+            // Ví dụ: Hẹn 10:00 27/11/2025 - 10:00 28/11/2025 thì được bàn giao từ 09:00 27/11/2025 đến trước 10:00 28/11/2025
             if (rental.StartTime.HasValue)
             {
-                var timeDifference = rental.StartTime.Value - deliveredAt;
                 var earliestDeliveryTime = rental.StartTime.Value.AddHours(-1);
                 
-                // Không được bàn giao quá sớm (trước 1 giờ trước thời gian hẹn)
+                // Không được bàn giao quá sớm (trước 1 giờ trước thời gian bắt đầu)
                 if (deliveredAt < earliestDeliveryTime)
                 {
-                    throw new InvalidOperationException($"Không thể bàn giao xe quá sớm. Chỉ được phép bàn giao từ {earliestDeliveryTime:dd/MM/yyyy HH:mm} (1 giờ trước thời gian hẹn {rental.StartTime.Value:dd/MM/yyyy HH:mm}). Thời gian hiện tại: {deliveredAt:dd/MM/yyyy HH:mm}.");
+                    throw new InvalidOperationException($"Không thể bàn giao xe quá sớm. Chỉ được phép bàn giao từ {earliestDeliveryTime:dd/MM/yyyy HH:mm} (1 giờ trước thời gian bắt đầu {rental.StartTime.Value:dd/MM/yyyy HH:mm}). Thời gian hiện tại: {deliveredAt:dd/MM/yyyy HH:mm}.");
                 }
-                
-                // Phải bàn giao ít nhất 1 giờ trước thời gian hẹn (không được quá muộn)
-                if (timeDifference.TotalHours < 1)
-                {
-                    throw new InvalidOperationException($"Không thể bàn giao xe. Phải bàn giao ít nhất 1 giờ trước thời gian hẹn ({rental.StartTime.Value:dd/MM/yyyy HH:mm}). Thời gian hiện tại: {deliveredAt:dd/MM/yyyy HH:mm}.");
-                }
+            }
+            
+            // Không được bàn giao sau thời gian kết thúc
+            if (rental.EndTime.HasValue && deliveredAt >= rental.EndTime.Value)
+            {
+                throw new InvalidOperationException($"Không thể bàn giao xe sau thời gian kết thúc ({rental.EndTime.Value:dd/MM/yyyy HH:mm}). Thời gian hiện tại: {deliveredAt:dd/MM/yyyy HH:mm}.");
             }
 
             // Create Contract if not exists
