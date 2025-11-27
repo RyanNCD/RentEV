@@ -10,6 +10,11 @@ import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { getPenalties } from "../../services/penalty";
 import { type IPenalty } from "../../types";
+import { DatePicker, TimePicker, ConfigProvider } from "antd";
+import type { Dayjs } from "dayjs";
+import dayjs from "dayjs";
+import "dayjs/locale/vi";
+import locale from "antd/locale/vi_VN";
 
 export default function CheckoutPage() {
   const formatPrice = (price?: number | null) => {
@@ -26,9 +31,17 @@ export default function CheckoutPage() {
   // (Biến "car" CÓ THỂ BỊ NULL)
   const car = location.state?.car as IVehicle | null;
 
+  // Configure dayjs locale
+  dayjs.locale("vi");
+
   // (State (startDate, endDate, stations...) giữ nguyên)
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
+  // New states for Ant Design DatePicker and TimePicker
+  const [startDateValue, setStartDateValue] = useState<Dayjs | null>(null);
+  const [startTimeValue, setStartTimeValue] = useState<Dayjs | null>(null);
+  const [endDateValue, setEndDateValue] = useState<Dayjs | null>(null);
+  const [endTimeValue, setEndTimeValue] = useState<Dayjs | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [stations, setStations] = useState<IStation[]>([]);
@@ -71,30 +84,101 @@ export default function CheckoutPage() {
     fetchPenalties();
   }, []); 
 
-  // === Min datetime constraints ===
-  const toLocalInputValue = (d: Date) => {
-    const tzOffset = d.getTimezoneOffset() * 60000;
-    return new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
-  };
-
-  const getTomorrow = () => {
-    const now = new Date();
-    const t = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, now.getHours(), now.getMinutes());
-    return t;
-  };
-
-  const minStartDate = toLocalInputValue(getTomorrow());
-
-  const minEndDate = (() => {
-    if (startDate) {
-      const start = new Date(startDate);
-      const minEnd = new Date(start.getTime() + 24 * 60 * 60 * 1000);
-      return toLocalInputValue(minEnd);
+  // Helper: Round time up to nearest 30-minute slot
+  const roundUpToNearest30Min = (date: Dayjs): Dayjs => {
+    const minutes = date.minute();
+    const roundedMinutes = Math.ceil(minutes / 30) * 30;
+    if (roundedMinutes >= 60) {
+      return date.add(1, "hour").minute(0);
     }
-    const base = getTomorrow();
-    const minEnd = new Date(base.getTime() + 24 * 60 * 60 * 1000);
-    return toLocalInputValue(minEnd);
-  })();
+    return date.minute(roundedMinutes).second(0).millisecond(0);
+  };
+
+  // Helper: Get minimum time (8:00) or round up current time if today
+  const getMinTime = (date: Dayjs | null, isToday: boolean): Dayjs | null => {
+    if (!date) return null;
+    const minTime = date.hour(8).minute(0).second(0).millisecond(0);
+    if (isToday) {
+      const now = dayjs();
+      const rounded = roundUpToNearest30Min(now);
+      // If rounded time is before 8:00, use 8:00; if after 22:30, return null (should use next day)
+      if (rounded.hour() < 8) {
+        return minTime;
+      }
+      if (rounded.hour() > 22 || (rounded.hour() === 22 && rounded.minute() > 30)) {
+        return null; // Should use next day
+      }
+      return rounded;
+    }
+    return minTime;
+  };
+
+  // Helper: Get maximum time (22:30)
+  const getMaxTime = (): Dayjs => {
+    return dayjs().hour(22).minute(30).second(0).millisecond(0);
+  };
+
+  // Initialize with today's date and rounded-up time
+  useEffect(() => {
+    if (!startDateValue) {
+      const today = dayjs();
+      const roundedTime = roundUpToNearest30Min(today);
+      // If after 22:30, use tomorrow
+      if (roundedTime.hour() > 22 || (roundedTime.hour() === 22 && roundedTime.minute() > 30)) {
+        const tomorrow = today.add(1, "day").hour(8).minute(0).second(0).millisecond(0);
+        setStartDateValue(tomorrow);
+        setStartTimeValue(tomorrow);
+      } else {
+        setStartDateValue(today);
+        setStartTimeValue(roundedTime.hour() < 8 ? today.hour(8).minute(0) : roundedTime);
+      }
+    }
+  }, []);
+
+  // Update startDate string when startDateValue or startTimeValue changes
+  useEffect(() => {
+    if (startDateValue && startTimeValue) {
+      const combined = startDateValue
+        .hour(startTimeValue.hour())
+        .minute(startTimeValue.minute())
+        .second(0)
+        .millisecond(0);
+      setStartDate(combined.toISOString());
+      
+      // Auto-update end date/time to ensure minimum 24 hours
+      const minEnd = combined.add(24, "hour");
+      const minEndDate = minEnd.startOf("day");
+      const minEndTime = minEnd;
+      
+      // Check if current end is valid
+      if (!endDateValue || !endTimeValue) {
+        setEndDateValue(minEndDate);
+        setEndTimeValue(minEndTime);
+      } else {
+        const currentEnd = endDateValue
+          .hour(endTimeValue.hour())
+          .minute(endTimeValue.minute())
+          .second(0)
+          .millisecond(0);
+        if (currentEnd.isBefore(minEnd)) {
+          setEndDateValue(minEndDate);
+          setEndTimeValue(minEndTime);
+        }
+      }
+    }
+  }, [startDateValue, startTimeValue]);
+
+  // Update endDate string when endDateValue or endTimeValue changes
+  useEffect(() => {
+    if (endDateValue && endTimeValue) {
+      const combined = endDateValue
+        .hour(endTimeValue.hour())
+        .minute(endTimeValue.minute())
+        .second(0)
+        .millisecond(0);
+      setEndDate(combined.toISOString());
+    }
+  }, [endDateValue, endTimeValue]);
 
   // Calculate total with validation (minimum 24 hours)
   const calculateTotal = () => {
@@ -314,7 +398,8 @@ export default function CheckoutPage() {
 
   // (JSX - Giờ đã an toàn, 100% "car" không null)
   return (
-    <div style={{ padding: "2rem", maxWidth: "600px", margin: "auto" }}>
+    <ConfigProvider locale={locale}>
+      <div style={{ padding: "2rem", maxWidth: "600px", margin: "auto" }}>
       <h1>Xác nhận Thuê xe & Thanh toán</h1>
       
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
@@ -366,42 +451,175 @@ export default function CheckoutPage() {
           </select>
         </div>
       
-        {/* (Input Ngày giờ - giữ nguyên) */}
+        {/* Date and Time Selection with Ant Design */}
         <div className="form-group" style={{ marginTop: "1rem" }}>
           <label>Nhận xe (Từ ngày)</label>
-          <input 
-            type="datetime-local" 
-            value={startDate} 
-            min={minStartDate}
-            onChange={e => {
-              const value = e.target.value;
-              if (value && value < minStartDate) {
-                setStartDate(minStartDate);
-              } else {
-                setStartDate(value);
-              }
-            }}
-            required
-            style={{ width: "100%", padding: "0.5rem" }}
-          />
+          <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+            <DatePicker
+              value={startDateValue}
+              onChange={(date) => {
+                if (date) {
+                  const isToday = date.isSame(dayjs(), "day");
+                  setStartDateValue(date);
+                  // If selecting today, round up time; otherwise use 8:00
+                  if (isToday) {
+                    const rounded = roundUpToNearest30Min(dayjs());
+                    if (rounded.hour() < 8) {
+                      setStartTimeValue(date.hour(8).minute(0));
+                    } else if (rounded.hour() > 22 || (rounded.hour() === 22 && rounded.minute() > 30)) {
+                      // After 22:30, move to next day
+                      const tomorrow = date.add(1, "day").hour(8).minute(0);
+                      setStartDateValue(tomorrow);
+                      setStartTimeValue(tomorrow);
+                    } else {
+                      setStartTimeValue(rounded);
+                    }
+                  } else {
+                    // Future date, default to 8:00
+                    if (!startTimeValue) {
+                      setStartTimeValue(date.hour(8).minute(0));
+                    }
+                  }
+                } else {
+                  setStartDateValue(null);
+                  setStartTimeValue(null);
+                }
+              }}
+              disabledDate={(current) => {
+                // Can select today and future dates
+                return current && current.isBefore(dayjs().startOf("day"));
+              }}
+              format="DD/MM/YYYY"
+              placeholder="Chọn ngày"
+              style={{ flex: 2 }}
+              locale={dayjs.locale("vi")}
+            />
+            <TimePicker
+              value={startTimeValue}
+              onChange={(time) => {
+                setStartTimeValue(time);
+              }}
+              minuteStep={30}
+              format="HH:mm"
+              placeholder="Chọn giờ"
+              disabledHours={() => {
+                // Disable hours before 8 and after 22
+                const hours = [];
+                for (let i = 0; i < 8; i++) hours.push(i);
+                for (let i = 23; i < 24; i++) hours.push(i);
+                return hours;
+              }}
+              disabledMinutes={(selectedHour) => {
+                // Disable minutes after 30 if hour is 22
+                if (selectedHour === 22) {
+                  return [30, 45];
+                }
+                return [];
+              }}
+              style={{ flex: 1 }}
+            />
+          </div>
         </div>
         <div className="form-group" style={{ marginTop: "1rem" }}>
           <label>Trả xe (Đến ngày)</label>
-          <input 
-            type="datetime-local" 
-            value={endDate} 
-            min={minEndDate}
-            onChange={e => {
-              const value = e.target.value;
-              if (value && value < minEndDate) {
-                setEndDate(minEndDate);
-              } else {
-                setEndDate(value);
-              }
-            }}
-            required
-            style={{ width: "100%", padding: "0.5rem" }}
-          />
+          <div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+            <DatePicker
+              value={endDateValue}
+              onChange={(date) => {
+                if (date) {
+                  const isToday = date.isSame(dayjs(), "day");
+                  setEndDateValue(date);
+                  // If selecting today, round up time; if same day as start, ensure after start time
+                  if (isToday) {
+                    const rounded = roundUpToNearest30Min(dayjs());
+                    if (rounded.hour() < 8) {
+                      setEndTimeValue(date.hour(8).minute(0));
+                    } else if (rounded.hour() > 22 || (rounded.hour() === 22 && rounded.minute() > 30)) {
+                      // After 22:30, move to next day
+                      const tomorrow = date.add(1, "day").hour(8).minute(0);
+                      setEndDateValue(tomorrow);
+                      setEndTimeValue(tomorrow);
+                    } else {
+                      setEndTimeValue(rounded);
+                    }
+                  } else if (startDateValue && date.isSame(startDateValue, "day") && startTimeValue) {
+                    // Same day as start, ensure end time is after start time
+                    const startTime = startTimeValue;
+                    const nextSlot = startTime.add(30, "minute");
+                    if (nextSlot.hour() > 22 || (nextSlot.hour() === 22 && nextSlot.minute() > 30)) {
+                      // Move to next day
+                      const tomorrow = date.add(1, "day").hour(8).minute(0);
+                      setEndDateValue(tomorrow);
+                      setEndTimeValue(tomorrow);
+                    } else {
+                      setEndTimeValue(nextSlot);
+                    }
+                  } else {
+                    // Future date, default to 8:00
+                    if (!endTimeValue) {
+                      setEndTimeValue(date.hour(8).minute(0));
+                    }
+                  }
+                } else {
+                  setEndDateValue(null);
+                  setEndTimeValue(null);
+                }
+              }}
+              disabledDate={(current) => {
+                if (!current) return false;
+                // Calculate minimum end date (start date + 24 hours)
+                if (startDateValue && startTimeValue) {
+                  const minEnd = startDateValue
+                    .hour(startTimeValue.hour())
+                    .minute(startTimeValue.minute())
+                    .add(24, "hour")
+                    .startOf("day");
+                  return current.isBefore(minEnd);
+                }
+                // Can select today and future dates
+                return current.isBefore(dayjs().startOf("day"));
+              }}
+              format="DD/MM/YYYY"
+              placeholder="Chọn ngày"
+              style={{ flex: 2 }}
+              locale={dayjs.locale("vi")}
+            />
+            <TimePicker
+              value={endTimeValue}
+              onChange={(time) => {
+                setEndTimeValue(time);
+              }}
+              minuteStep={30}
+              format="HH:mm"
+              placeholder="Chọn giờ"
+              disabledHours={() => {
+                // Disable hours before 8 and after 22
+                const hours = [];
+                for (let i = 0; i < 8; i++) hours.push(i);
+                for (let i = 23; i < 24; i++) hours.push(i);
+                return hours;
+              }}
+              disabledMinutes={(selectedHour) => {
+                // Disable minutes after 30 if hour is 22
+                if (selectedHour === 22) {
+                  return [30, 45];
+                }
+                // If same day as start, disable times before or equal to start time
+                if (startDateValue && endDateValue && startDateValue.isSame(endDateValue, "day") && startTimeValue) {
+                  const startHour = startTimeValue.hour();
+                  const startMin = startTimeValue.minute();
+                  if (selectedHour < startHour) {
+                    return Array.from({ length: 60 }, (_, i) => i);
+                  }
+                  if (selectedHour === startHour) {
+                    return Array.from({ length: startMin + 1 }, (_, i) => i);
+                  }
+                }
+                return [];
+              }}
+              style={{ flex: 1 }}
+            />
+          </div>
         </div>
         
         {/* Validation message */}
@@ -661,6 +879,7 @@ export default function CheckoutPage() {
           </div>
         )}
       </form>
-    </div>
+      </div>
+    </ConfigProvider>
   );
 }

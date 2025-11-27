@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { getCheckinRentals, checkinRental, type Rental, type VehicleConditionCheck } from "../services/rental";
+import { formatVietnamDate } from "../utils/dateTime";
 import "./checkin.css";
 
 export default function CheckinPage() {
@@ -79,8 +80,7 @@ export default function CheckinPage() {
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString("vi-VN");
+    return formatVietnamDate(dateString);
   };
 
   if (loading) {

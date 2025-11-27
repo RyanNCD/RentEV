@@ -109,10 +109,11 @@ namespace APIRentEV.Mapper
 
             CreateMap<Penalty, PenaltyDto>().ReverseMap();
 
-            CreateMap<RentalPenalty, RentalPenaltyDto>().ReverseMap();
+            CreateMap<RentalPenalty, RentalPenaltyDto>()
+                .ForMember(dest => dest.Penalty, opt => opt.MapFrom(src => src.Penalty != null ? src.Penalty : null));
 
             // ===============================
-            // 📅 RESERVATION
+            // 📅 RESERVATIONjc 
             // ===============================
             CreateMap<Reservation, ReservationDto>().ReverseMap();
 

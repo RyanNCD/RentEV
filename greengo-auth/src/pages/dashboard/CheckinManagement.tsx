@@ -6,6 +6,7 @@ import { getAllStations } from "../../services/station";
 import { useAuth } from "../../context/AuthContext";
 import { createStationPayOSPayment, confirmStationPayment, getPaymentsByRentalId, type StationPaymentConfirmRequest } from "../../services/payment";
 import { getPenalties } from "../../services/penalty";
+import { formatVietnamDate, toVietnamTime } from "../../utils/dateTime";
 import "../checkin.css";
 
 type ModalType = "checkin" | "checkout" | "detail" | null;
@@ -432,21 +433,21 @@ export default function CheckinManagement() {
       
       // Không được bàn giao quá sớm (trước 1 giờ trước thời gian hẹn)
       if (now < earliestDeliveryTime) {
-        const startTimeStr = startTime.toLocaleString("vi-VN", {
+        const startTimeStr = formatVietnamDate(startTime, {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",
           hour: "2-digit",
           minute: "2-digit",
         });
-        const earliestStr = earliestDeliveryTime.toLocaleString("vi-VN", {
+        const earliestStr = formatVietnamDate(earliestDeliveryTime, {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",
           hour: "2-digit",
           minute: "2-digit",
         });
-        const nowStr = now.toLocaleString("vi-VN", {
+        const nowStr = formatVietnamDate(now, {
           year: "numeric",
           month: "2-digit",
           day: "2-digit",
@@ -697,8 +698,7 @@ export default function CheckinManagement() {
   };
 
   const formatDate = (dateString?: string | null) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString("vi-VN", {
+    return formatVietnamDate(dateString, {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -1123,22 +1123,20 @@ export default function CheckinManagement() {
               const earliestDeliveryTime = new Date(startTime.getTime() - 60 * 60 * 1000);
               
               // Hiển thị thời gian hẹn với timezone local
-              const startTimeStr = startTime.toLocaleString("vi-VN", {
+              const startTimeStr = formatVietnamDate(startTime, {
                 year: "numeric",
                 month: "2-digit",
                 day: "2-digit",
                 hour: "2-digit",
                 minute: "2-digit",
-                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
               });
               
-              const earliestStr = earliestDeliveryTime.toLocaleString("vi-VN", {
+              const earliestStr = formatVietnamDate(earliestDeliveryTime, {
                 year: "numeric",
                 month: "2-digit",
                 day: "2-digit",
                 hour: "2-digit",
                 minute: "2-digit",
-                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
               });
               
               // Không được bàn giao quá sớm (trước 1 giờ trước thời gian hẹn)

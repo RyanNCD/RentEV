@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getVehicleById } from "../../services/vehicle";
 import { type IVehicle, type IFeedback } from "../../types";
+import { formatVietnamDateOnly } from "../../utils/dateTime";
 import { 
   getFeedbacksByVehicle, 
   getAverageRatingByVehicle, 
@@ -186,12 +187,7 @@ export default function CarDetailPage() {
   };
 
   const formatDate = (dateString?: string | null) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
+    return formatVietnamDateOnly(dateString);
   };
 
   if (loading) {

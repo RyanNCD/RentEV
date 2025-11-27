@@ -10,7 +10,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "antd": "^6.0.0",
     "axios": "^1.13.1",
+    "dayjs": "^1.11.19",
     "jwt-decode": "^4.0.0",
     "payos-checkout": "^1.0.9",
     "react": "^19.1.1",
