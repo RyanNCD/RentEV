@@ -160,13 +160,22 @@ namespace APIRentEV.Controllers
                 {
                     return stationError;
                 }
+                // Staff chỉ có thể quản lý xe thuộc trạm của mình
                 if (isStaff && staffStationId.HasValue && existing.StationId != staffStationId.Value)
                 {
                     return Forbid("Bạn chỉ có thể quản lý xe thuộc trạm của mình.");
                 }
-                if (isStaff && staffStationId.HasValue)
+                
+                // Nếu staff cố gắng chuyển xe từ trạm khác về trạm của mình thì không cho phép
+                // (Trường hợp này đã được chặn ở check trên, nhưng để an toàn thêm check này)
+                if (isStaff && staffStationId.HasValue && dto.StationId != Guid.Empty)
                 {
-                    dto.StationId = staffStationId.Value;
+                    // Nếu xe không thuộc trạm của staff nhưng cố set về trạm của staff
+                    if (existing.StationId != staffStationId.Value && dto.StationId == staffStationId.Value)
+                    {
+                        return Forbid("Bạn không thể chuyển xe từ trạm khác về trạm của mình.");
+                    }
+                    // Nếu xe thuộc trạm của staff: Cho phép chuyển sang trạm khác (không force stationId)
                 }
 
                 _mapper.Map(dto, existing); // AutoMapper sẽ map các field không null

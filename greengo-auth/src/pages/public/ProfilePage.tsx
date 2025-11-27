@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { getUserRentalHistoryPaged, getRentalById, getFeedbacksByRental, requestEarlyReturn, confirmReturn, type UserRentalListParams, type PagedRentalResult } from "../../services/rental";
+import { getUserRentalHistoryPaged, getRentalById, getFeedbacksByRental, requestEarlyReturn, confirmReturn, type UserRentalListParams } from "../../services/rental";
 import { getRentalImagesForCustomer, type RentalImageItem } from "../../services/upload";
 import { type IRentalHistoryItem, type IFeedback } from "../../types";
+import { formatVietnamDate, formatVietnamDateOnly } from "../../utils/dateTime";
 import "../profile.css";
 import "../checkin.css";
 
@@ -153,8 +154,7 @@ export default function ProfilePage() {
   };
 
   const formatDate = (dateString?: string | null) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString("vi-VN", {
+    return formatVietnamDate(dateString, {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -164,7 +164,7 @@ export default function ProfilePage() {
   };
 
   const formatPrice = (price?: number | null) => {
-    if (!price) return "N/A";
+    if (price == null || price === 0) return "0 ₫";
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
@@ -203,6 +203,18 @@ export default function ProfilePage() {
       "DOCUMENT": "Giấy tờ",
     };
     return typeMap[typeUpper] || type || "Không xác định";
+  };
+
+  const translateViolationType = (type: string | null | undefined) => {
+    if (!type) return "Phạt vi phạm";
+    const typeMap: Record<string, string> = {
+      "LateReturn": "Trả xe trễ giờ",
+      "DamageExterior": "Hư hỏng ngoại thất",
+      "DamageInterior": "Hư hỏng nội thất",
+      "LostAccessory": "Mất phụ kiện",
+      "CleaningFee": "Phí vệ sinh",
+    };
+    return typeMap[type] || type;
   };
 
   return (
@@ -269,9 +281,9 @@ export default function ProfilePage() {
         <>
           <div style={{ marginBottom: "20px" }}>
             {history.map((item) => {
-            const start = item.startTime ? new Date(item.startTime) : null;
-            const end = item.endTime ? new Date(item.endTime) : null;
-            const dayRange = `${start ? start.toLocaleDateString("vi-VN") : "—"} - ${end ? end.toLocaleDateString("vi-VN") : "—"}`;
+            const startDateStr = item.startTime ? formatVietnamDateOnly(item.startTime) : "—";
+            const endDateStr = item.endTime ? formatVietnamDateOnly(item.endTime) : "—";
+            const dayRange = `${startDateStr} - ${endDateStr}`;
               const amount = item.totalCost && item.totalCost > 0 ? formatPrice(item.totalCost) : "—";
             const status = String(item.status || "").toUpperCase();
 
@@ -300,11 +312,6 @@ export default function ProfilePage() {
                     <div style={{ fontWeight: 600, color: amount !== "N/A" ? "#111" : "#999", fontSize: "16px" }}>
                       {amount !== "N/A" ? amount : "Chưa xác định"}
                     </div>
-                    {item.pricePerDaySnapshot && (
-                      <div style={{ fontSize: "13px", color: "#6b7280" }}>
-                        Giá áp dụng: {formatPrice(item.pricePerDaySnapshot)}
-                      </div>
-                    )}
                     {status === "IN_PROGRESS" && !item.earlyReturnRequested && (
                       <button
                         onClick={async () => {
@@ -503,75 +510,188 @@ export default function ProfilePage() {
           )}
 
           {selectedRental.deposit && (
-            <div className="deposit-card" style={{ marginTop: "20px" }}>
-              <h3 style={{ marginTop: 0 }}>Tiền cọc</h3>
-              <div className="info-grid">
-                <div className="info-item">
-                  <strong>Đã nộp:</strong>
-                  <span>{formatPrice(selectedRental.deposit.amount)}</span>
-                </div>
-                <div className="info-item">
-                  <strong>Đã sử dụng:</strong>
-                  <span>{formatPrice(selectedRental.deposit.usedAmount)}</span>
-                </div>
-                <div className="info-item">
-                  <strong>Còn lại:</strong>
-                  <span>{formatPrice(selectedRental.deposit.availableAmount)}</span>
-                </div>
-                <div className="info-item">
-                  <strong>Trạng thái:</strong>
-                  <span>{selectedRental.deposit.status}</span>
-                </div>
-                {selectedRental.deposit.lastUsedAt && (
-                  <div className="info-item">
-                    <strong>Lần sử dụng gần nhất:</strong>
-                    <span>{formatDate(selectedRental.deposit.lastUsedAt)}</span>
+            <div style={{ 
+              marginTop: "20px", 
+              padding: "20px", 
+              backgroundColor: "#f8f9fa", 
+              borderRadius: "12px",
+              border: "1px solid #e9ecef"
+            }}>
+              <h3 style={{ marginTop: 0, marginBottom: "16px", fontSize: "18px", fontWeight: 600, color: "#212529" }}>
+                💰 Tiền cọc
+              </h3>
+              <div style={{ 
+                display: "grid", 
+                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", 
+                gap: "16px",
+                marginBottom: "16px"
+              }}>
+                <div style={{ 
+                  padding: "12px", 
+                  backgroundColor: "#fff", 
+                  borderRadius: "8px",
+                  border: "1px solid #dee2e6"
+                }}>
+                  <div style={{ fontSize: "13px", color: "#6c757d", marginBottom: "4px" }}>Đã nộp</div>
+                  <div style={{ fontSize: "18px", fontWeight: 600, color: "#28a745" }}>
+                    {formatPrice(selectedRental.deposit.amount)}
                   </div>
-                )}
+                </div>
+                <div style={{ 
+                  padding: "12px", 
+                  backgroundColor: "#fff", 
+                  borderRadius: "8px",
+                  border: "1px solid #dee2e6"
+                }}>
+                  <div style={{ fontSize: "13px", color: "#6c757d", marginBottom: "4px" }}>Đã sử dụng</div>
+                  <div style={{ fontSize: "18px", fontWeight: 600, color: "#dc3545" }}>
+                    {formatPrice(selectedRental.deposit.usedAmount)}
+                  </div>
+                </div>
+                <div style={{ 
+                  padding: "12px", 
+                  backgroundColor: "#fff", 
+                  borderRadius: "8px",
+                  border: "1px solid #dee2e6"
+                }}>
+                  <div style={{ fontSize: "13px", color: "#6c757d", marginBottom: "4px" }}>Còn lại</div>
+                  <div style={{ fontSize: "18px", fontWeight: 600, color: "#007bff" }}>
+                    {formatPrice(
+                      selectedRental.deposit.availableAmount ?? 
+                      (selectedRental.deposit.amount - selectedRental.deposit.usedAmount)
+                    )}
+                  </div>
+                </div>
+                <div style={{ 
+                  padding: "12px", 
+                  backgroundColor: "#fff", 
+                  borderRadius: "8px",
+                  border: "1px solid #dee2e6"
+                }}>
+                  <div style={{ fontSize: "13px", color: "#6c757d", marginBottom: "4px" }}>Trạng thái</div>
+                  <div>
+                    <span className={`status-badge ${
+                      selectedRental.status?.toUpperCase() === "COMPLETED" 
+                        ? "status-completed" 
+                        : selectedRental.deposit.status?.toUpperCase() === "PAID" 
+                        ? "status-paid" 
+                        : "status-pending"
+                    }`}>
+                      {selectedRental.status?.toUpperCase() === "COMPLETED" 
+                        ? "Đã hoàn tất" 
+                        : selectedRental.deposit.status?.toUpperCase() === "PAID" 
+                        ? "Đã thanh toán" 
+                        : selectedRental.deposit.status?.toUpperCase() === "REFUNDED"
+                        ? "Đã hoàn trả"
+                        : "Chờ xử lý"}
+                    </span>
+                  </div>
+                </div>
               </div>
+              {selectedRental.deposit.lastUsedAt && (
+                <div style={{ 
+                  fontSize: "13px", 
+                  color: "#6c757d",
+                  paddingTop: "12px",
+                  borderTop: "1px solid #dee2e6"
+                }}>
+                  <strong>Lần sử dụng gần nhất:</strong> {formatDate(selectedRental.deposit.lastUsedAt)}
+                </div>
+              )}
             </div>
           )}
 
-          <div className="modal-penalties-section" style={{ marginTop: "20px" }}>
-            <h3 style={{ marginTop: 0, marginBottom: "12px", fontSize: "18px", fontWeight: 600 }}>Khoản phạt</h3>
+          <div style={{ 
+            marginTop: "20px", 
+            padding: "20px", 
+            backgroundColor: "#fff3cd", 
+            borderRadius: "12px",
+            border: "1px solid #ffc107"
+          }}>
+            <h3 style={{ marginTop: 0, marginBottom: "16px", fontSize: "18px", fontWeight: 600, color: "#856404" }}>
+              ⚠️ Khoản phạt
+            </h3>
             {!selectedRental.penalties || selectedRental.penalties.length === 0 ? (
-              <div style={{ color: "#666" }}>Không có khoản phạt nào.</div>
+              <div style={{ 
+                padding: "16px", 
+                backgroundColor: "#fff", 
+                borderRadius: "8px",
+                color: "#6c757d",
+                textAlign: "center"
+              }}>
+                Không có khoản phạt nào.
+              </div>
             ) : (
-              <div className="table-responsive">
-                <table className="table table-striped" style={{ width: "100%", fontSize: "14px" }}>
-                  <thead>
-                    <tr>
-                      <th>Mô tả</th>
-                      <th>Số tiền</th>
-                      <th>Đã trừ cọc</th>
-                      <th>Đã thu</th>
-                      <th>Trạng thái</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {selectedRental.penalties.map((penalty) => (
-                      <tr key={penalty.rentalPenaltyId}>
-                        <td>
-                          <div style={{ fontWeight: 600 }}>{penalty.penalty?.violationType || "Phạt"}</div>
-                          <div style={{ color: "#6b7280" }}>{penalty.description}</div>
-                        </td>
-                        <td>{formatPrice(penalty.amount)}</td>
-                        <td>{formatPrice(penalty.depositUsedAmount)}</td>
-                        <td>
-                          {formatPrice(penalty.paidAmount)}
-                          {penalty.paymentMethod && (
-                            <div style={{ fontSize: "12px", color: "#6b7280" }}>{penalty.paymentMethod}</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {selectedRental.penalties.map((penalty) => {
+                  const remaining = penalty.amount - (penalty.depositUsedAmount + penalty.paidAmount);
+                  return (
+                    <div 
+                      key={penalty.rentalPenaltyId}
+                      style={{ 
+                        padding: "16px", 
+                        backgroundColor: "#fff", 
+                        borderRadius: "8px",
+                        border: "1px solid #ffc107"
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "12px" }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: "16px", fontWeight: 600, color: "#212529", marginBottom: "4px" }}>
+                            {translateViolationType(penalty.penalty?.violationType)}
+                          </div>
+                          {penalty.description && (
+                            <div style={{ fontSize: "14px", color: "#6c757d", marginTop: "4px" }}>
+                              {penalty.description}
+                            </div>
                           )}
-                        </td>
-                        <td>
-                          <span className={`status-badge ${getStatusBadgeClass(penalty.status)}`}>
-                            {penalty.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </div>
+                        <span className={`status-badge ${getStatusBadgeClass(penalty.status)}`} style={{ marginLeft: "12px" }}>
+                          {penalty.status === "Settled" ? "Đã thanh toán" : 
+                           penalty.status === "OffsetFromDeposit" ? "Đã trừ cọc" : 
+                           penalty.status === "Pending" ? "Chờ xử lý" : penalty.status}
+                        </span>
+                      </div>
+                      <div style={{ 
+                        display: "grid", 
+                        gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", 
+                        gap: "12px",
+                        paddingTop: "12px",
+                        borderTop: "1px solid #dee2e6"
+                      }}>
+                        <div>
+                          <div style={{ fontSize: "12px", color: "#6c757d", marginBottom: "4px" }}>Tổng tiền phạt</div>
+                          <div style={{ fontSize: "16px", fontWeight: 600, color: "#dc3545" }}>
+                            {formatPrice(penalty.amount)}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: "12px", color: "#6c757d", marginBottom: "4px" }}>Đã trừ cọc</div>
+                          <div style={{ fontSize: "16px", fontWeight: 600, color: "#ffc107" }}>
+                            {formatPrice(penalty.depositUsedAmount)}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: "12px", color: "#6c757d", marginBottom: "4px" }}>Đã thu</div>
+                          <div style={{ fontSize: "16px", fontWeight: 600, color: "#28a745" }}>
+                            {formatPrice(penalty.paidAmount)}
+                            {penalty.paymentMethod && (
+                              <div style={{ fontSize: "11px", color: "#6c757d", marginTop: "2px" }}>
+                                ({penalty.paymentMethod})
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: "12px", color: "#6c757d", marginBottom: "4px" }}>Còn lại</div>
+                          <div style={{ fontSize: "16px", fontWeight: 600, color: remaining > 0 ? "#dc3545" : "#28a745" }}>
+                            {formatPrice(remaining > 0 ? remaining : 0)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { type IVehicle, type IStation } from "../../types";
 import { getAllStations } from "../../services/station";
 import { uploadVehicleImage } from "../../services/upload";
+import { useAuth } from "../../context/AuthContext";
 import "./VehicleForm.css";
 
 type Props = Readonly<{
@@ -14,6 +15,10 @@ type Props = Readonly<{
 }>;
 
 export default function VehicleForm({ initialData, onSave, onClose, loading }: Props) {
+  const { user } = useAuth();
+  const isStaff = user?.role === "STAFF";
+  const staffStationId = user?.stationId;
+  
   const [stations, setStations] = useState<IStation[]>([]);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -74,8 +79,10 @@ export default function VehicleForm({ initialData, onSave, onClose, loading }: P
         imageUrl: initialData.imageUrl || "",
       });
     } else {
+      // Khi tạo mới, nếu là staff thì set mặc định trạm của staff
+      const defaultStationId = isStaff && staffStationId ? String(staffStationId) : "";
       setFormData({
-        stationId: "",
+        stationId: defaultStationId,
         vehicleName: "",
         vehicleType: "",
         batteryCapacity: "",
@@ -259,21 +266,42 @@ export default function VehicleForm({ initialData, onSave, onClose, loading }: P
                   onChange={handleChange} 
                   required
                   className={errors.stationId ? "error" : ""}
+                  disabled={isStaff && !initialData && staffStationId ? true : false}
                 >
                   <option value="">-- Chọn trạm --</option>
                   {stations.length === 0 ? (
                     <option value="" disabled>Đang tải danh sách trạm...</option>
                   ) : (
-                    stations.map(station => {
-                      const stationIdStr = String(station.stationId || "");
-                      return (
-                        <option key={stationIdStr} value={stationIdStr}>
-                          {station.stationName} - {station.address}
-                        </option>
-                      );
-                    })
+                    stations
+                      .filter(station => {
+                        // Khi tạo mới: Staff chỉ thấy trạm của mình
+                        if (isStaff && !initialData && staffStationId) {
+                          return String(station.stationId) === String(staffStationId);
+                        }
+                        // Khi cập nhật: Staff thấy tất cả trạm (để có thể chuyển sang trạm khác)
+                        // Nhưng chỉ có thể cập nhật xe thuộc trạm của mình (backend sẽ check)
+                        return true;
+                      })
+                      .map(station => {
+                        const stationIdStr = String(station.stationId || "");
+                        return (
+                          <option key={stationIdStr} value={stationIdStr}>
+                            {station.stationName} - {station.address}
+                          </option>
+                        );
+                      })
                   )}
                 </select>
+                {isStaff && !initialData && staffStationId && (
+                  <p style={{ marginTop: "4px", fontSize: "12px", color: "#666" }}>
+                    Bạn chỉ có thể thêm xe vào trạm của mình
+                  </p>
+                )}
+                {isStaff && initialData && staffStationId && String(initialData.stationId) === String(staffStationId) && (
+                  <p style={{ marginTop: "4px", fontSize: "12px", color: "#666" }}>
+                    Bạn có thể chuyển xe này sang trạm khác, nhưng không thể lấy xe trạm khác về trạm của mình
+                  </p>
+                )}
                 {stations.length === 0 && (
                   <p style={{ marginTop: "4px", fontSize: "12px", color: "#666" }}>
                     Đang tải danh sách trạm...

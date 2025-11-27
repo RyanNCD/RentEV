@@ -3,11 +3,15 @@
   "WorkspaceRootPath": "D:\\RentEV\\Backend\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|D:\\RentEV\\Backend\\apirentev\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|D:\\RentEV\\Backend\\apirentev\\controllers\\vehiclecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\controllers\\vehiclecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\rentev\\backend\\apirentev\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|d:\\rentev\\backend\\apirentev\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|D:\\RentEV\\Backend\\apirentev\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -29,10 +33,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|D:\\RentEV\\Backend\\repository\\models\\vehicleextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|solutionrelative:repository\\models\\vehicleextensions.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|D:\\RentEV\\Backend\\apirentev\\controllers\\vehiclecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{2CDC6978-C08B-45B5-9461-D199BF8994C0}|APIRentEV\\APIRentEV.csproj|solutionrelative:apirentev\\controllers\\vehiclecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{BAD780F2-5781-4B01-AAB8-485185D90C95}|Repository\\Repository.csproj|D:\\RentEV\\Backend\\repository\\models\\vehicle.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -88,7 +88,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 10,
+          "SelectedChildIndex": 7,
           "Children": [
             {
               "$type": "Bookmark",
@@ -103,45 +103,16 @@
               "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
             },
             {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "20251107174753_AddImageUrlToVehicle.Designer.cs",
-              "DocumentMoniker": "D:\\RentEV\\Backend\\Repository\\Migrations\\20251107174753_AddImageUrlToVehicle.Designer.cs",
-              "RelativeDocumentMoniker": "Repository\\Migrations\\20251107174753_AddImageUrlToVehicle.Designer.cs",
-              "ToolTip": "D:\\RentEV\\Backend\\Repository\\Migrations\\20251107174753_AddImageUrlToVehicle.Designer.cs",
-              "RelativeToolTip": "Repository\\Migrations\\20251107174753_AddImageUrlToVehicle.Designer.cs",
-              "ViewState": "AQIAACgAAAAAAAAAAAAgwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-24T15:34:26.538Z"
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "Program.cs",
-              "DocumentMoniker": "D:\\RentEV\\Backend\\APIRentEV\\Program.cs",
-              "RelativeDocumentMoniker": "APIRentEV\\Program.cs",
-              "ToolTip": "D:\\RentEV\\Backend\\APIRentEV\\Program.cs",
-              "RelativeToolTip": "APIRentEV\\Program.cs",
-              "ViewState": "AQIAAFwAAAAAAAAAAAAgwGYAAAAlAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-07T17:11:26.556Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "20251124152320_AddTrustedDeviceToUser.Designer.cs",
-              "DocumentMoniker": "D:\\RentEV\\Backend\\Repository\\Migrations\\20251124152320_AddTrustedDeviceToUser.Designer.cs",
-              "RelativeDocumentMoniker": "Repository\\Migrations\\20251124152320_AddTrustedDeviceToUser.Designer.cs",
-              "ToolTip": "D:\\RentEV\\Backend\\Repository\\Migrations\\20251124152320_AddTrustedDeviceToUser.Designer.cs",
-              "RelativeToolTip": "Repository\\Migrations\\20251124152320_AddTrustedDeviceToUser.Designer.cs",
-              "ViewState": "AQIAAA8AAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-24T15:34:18.174Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 5,
               "Title": "20251107174753_AddImageUrlToVehicle.cs",
               "DocumentMoniker": "D:\\RentEV\\Backend\\Repository\\Migrations\\20251107174753_AddImageUrlToVehicle.cs",
               "RelativeDocumentMoniker": "Repository\\Migrations\\20251107174753_AddImageUrlToVehicle.cs",
@@ -165,6 +136,23 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "VehicleController.cs",
+              "DocumentMoniker": "D:\\RentEV\\Backend\\APIRentEV\\Controllers\\VehicleController.cs",
+              "RelativeDocumentMoniker": "APIRentEV\\Controllers\\VehicleController.cs",
+              "ToolTip": "D:\\RentEV\\Backend\\APIRentEV\\Controllers\\VehicleController.cs",
+              "RelativeToolTip": "APIRentEV\\Controllers\\VehicleController.cs",
+              "ViewState": "AQIAAJ0AAAAAAAAAAAAlwKoAAABWAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-11T13:15:35.496Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 19,
               "Title": "20251124142120_EmailVerificationAndOtp.cs",
               "DocumentMoniker": "D:\\RentEV\\Backend\\Repository\\Migrations\\20251124142120_EmailVerificationAndOtp.cs",
@@ -177,32 +165,56 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "VehicleController.cs",
-              "DocumentMoniker": "D:\\RentEV\\Backend\\APIRentEV\\Controllers\\VehicleController.cs",
-              "RelativeDocumentMoniker": "APIRentEV\\Controllers\\VehicleController.cs",
-              "ToolTip": "D:\\RentEV\\Backend\\APIRentEV\\Controllers\\VehicleController.cs",
-              "RelativeToolTip": "APIRentEV\\Controllers\\VehicleController.cs",
-              "ViewState": "AQIAABUAAAAAAAAAAAAgwAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-11T13:15:35.496Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "appsettings.json",
               "DocumentMoniker": "D:\\RentEV\\Backend\\APIRentEV\\appsettings.json",
               "RelativeDocumentMoniker": "APIRentEV\\appsettings.json",
               "ToolTip": "D:\\RentEV\\Backend\\APIRentEV\\appsettings.json",
               "RelativeToolTip": "APIRentEV\\appsettings.json",
-              "ViewState": "AQIAAAYAAAAAAAAAAAAAABoAAAAPAAAA",
+              "ViewState": "AQIAAAYAAAAAAAAAAAAowBoAAAAPAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
               "WhenOpened": "2025-11-05T13:15:48.259Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "20251124152320_AddTrustedDeviceToUser.Designer.cs",
+              "DocumentMoniker": "D:\\RentEV\\Backend\\Repository\\Migrations\\20251124152320_AddTrustedDeviceToUser.Designer.cs",
+              "RelativeDocumentMoniker": "Repository\\Migrations\\20251124152320_AddTrustedDeviceToUser.Designer.cs",
+              "ToolTip": "D:\\RentEV\\Backend\\Repository\\Migrations\\20251124152320_AddTrustedDeviceToUser.Designer.cs",
+              "RelativeToolTip": "Repository\\Migrations\\20251124152320_AddTrustedDeviceToUser.Designer.cs",
+              "ViewState": "AQIAAA8AAAAAAAAAAAAAAAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-24T15:34:18.174Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\RentEV\\Backend\\APIRentEV\\Program.cs",
+              "RelativeDocumentMoniker": "APIRentEV\\Program.cs",
+              "ToolTip": "D:\\RentEV\\Backend\\APIRentEV\\Program.cs",
+              "RelativeToolTip": "APIRentEV\\Program.cs",
+              "ViewState": "AQIAAFwAAAAAAAAAAAAgwGYAAAAlAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-07T17:11:26.556Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "20251107174753_AddImageUrlToVehicle.Designer.cs",
+              "DocumentMoniker": "D:\\RentEV\\Backend\\Repository\\Migrations\\20251107174753_AddImageUrlToVehicle.Designer.cs",
+              "RelativeDocumentMoniker": "Repository\\Migrations\\20251107174753_AddImageUrlToVehicle.Designer.cs",
+              "ToolTip": "D:\\RentEV\\Backend\\Repository\\Migrations\\20251107174753_AddImageUrlToVehicle.Designer.cs",
+              "RelativeToolTip": "Repository\\Migrations\\20251107174753_AddImageUrlToVehicle.Designer.cs",
+              "ViewState": "AQIAACgAAAAAAAAAAAAgwAAAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-24T15:34:26.538Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "AuthenService.cs",
               "DocumentMoniker": "D:\\RentEV\\Backend\\Service\\Services\\AuthenService.cs",
               "RelativeDocumentMoniker": "Service\\Services\\AuthenService.cs",
@@ -250,7 +262,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
               "Title": "PaymentController.cs",
               "DocumentMoniker": "D:\\RentEV\\Backend\\APIRentEV\\Controllers\\PaymentController.cs",
               "RelativeDocumentMoniker": "APIRentEV\\Controllers\\PaymentController.cs",
@@ -274,7 +286,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "VehicleExtensions.cs",
               "DocumentMoniker": "D:\\RentEV\\Backend\\Repository\\Models\\VehicleExtensions.cs",
               "RelativeDocumentMoniker": "Repository\\Models\\VehicleExtensions.cs",

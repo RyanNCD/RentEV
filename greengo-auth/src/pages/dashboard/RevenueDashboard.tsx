@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getRevenueSummary, getDailyRevenue, getRecentPayments, getRevenueByStation, type IRevenueSummary, type IDailyRevenue, type IRecentPayment, type IRevenueByStation } from "../../services/revenue";
+import { formatVietnamDateOnly } from "../../utils/dateTime";
 
 export default function RevenueDashboard() {
   const [summary, setSummary] = useState<IRevenueSummary | null>(null);
@@ -66,7 +67,17 @@ export default function RevenueDashboard() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN');
+    return formatVietnamDateOnly(dateString);
+  };
+
+  const translatePaymentMethod = (method: string) => {
+    const methodMap: Record<string, string> = {
+      "Cash": "Tiền mặt",
+      "BankTransfer": "Chuyển khoản",
+      "PayOS": "PayOS (QR Code)",
+      "Unknown": "Không xác định"
+    };
+    return methodMap[method] || method;
   };
 
   if (loading) {
@@ -306,7 +317,7 @@ export default function RevenueDashboard() {
           <tbody>
             {summary.revenueByMethod.map((item, index) => (
               <tr key={index} style={{ borderBottom: "1px solid #eee" }}>
-                <td style={{ padding: "12px", border: "1px solid #ddd" }}>{item.method}</td>
+                <td style={{ padding: "12px", border: "1px solid #ddd" }}>{translatePaymentMethod(item.method)}</td>
                 <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "right", fontWeight: "bold" }}>
                   {formatCurrency(item.revenue)}
                 </td>
@@ -351,6 +362,7 @@ export default function RevenueDashboard() {
                 <td colSpan={5} style={{ padding: "32px", border: "1px solid #ddd", textAlign: "center", color: "#666" }}>
                   Chưa có giao dịch nào
                 </td>
+                <td style={{ padding: "12px", border: "1px solid #ddd" }}>{translatePaymentMethod(payment.paymentMethod)}</td>
               </tr>
             ) : (
               recentPayments.map((payment) => (

@@ -45,6 +45,12 @@ namespace Repository.Repositories
             _context.RentalPenalties.Update(penalty);
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeleteAsync(RentalPenalty penalty)
+        {
+            _context.RentalPenalties.Remove(penalty);
+            await _context.SaveChangesAsync();
+        }
     }
 }
 

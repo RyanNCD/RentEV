@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { formatVietnamDate } from "../../utils/dateTime";
 
 // [Inference] BE có thể trả về status như "Booking"/"PENDING"/"PAID"...
 // Ánh xạ sang tiếng Việt để hiển thị nhất quán.
@@ -17,9 +18,8 @@ const toVietnameseStatus = (status: unknown): string => {
 };
 
 const formatDateVi = (value: unknown): string => {
-  const d = new Date(String(value || ""));
-  if (isNaN(d.getTime())) return "—"; // Tránh "Invalid Date"
-  return d.toLocaleString("vi-VN");
+  if (!value) return "—";
+  return formatVietnamDate(String(value));
 };
 
 const pickTotal = (contract: any): number => {

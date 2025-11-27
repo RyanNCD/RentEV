@@ -25,11 +25,40 @@ namespace Repository.Implementations
                 .Include(r => r.PickupStation)
                 .Include(r => r.ReturnStation)
                 .Include(r => r.Contract)
-                .Include(r => r.Deposits)
-                .Include(r => r.RentalPenalties).ThenInclude(rp => rp.Penalty)
+                .Include(r => r.Payments)
                 .Include(r => r.Deposits)
                 .Include(r => r.RentalPenalties).ThenInclude(rp => rp.Penalty)
                 .ToListAsync();
+        }
+        
+        // Check if vehicle has conflicting rentals in the given time period
+        // Only check rentals that have been paid (have successful payment) or have status PAID, BOOKING, IN_PROGRESS
+        public async Task<bool> HasConflictingRentalsAsync(Guid vehicleId, DateTime startTime, DateTime endTime, Guid? excludeRentalId = null)
+        {
+            return await _context.Rentals
+                .Include(r => r.Payments)
+                .AnyAsync(r => r.VehicleId == vehicleId
+                    && r.StartTime.HasValue
+                    && r.EndTime.HasValue
+                    && (excludeRentalId == null || r.RentalId != excludeRentalId.Value)
+                    // Chỉ kiểm tra các rental chưa completed
+                    && (r.Status == null || r.Status.ToUpper() != "COMPLETED")
+                    && (
+                        // Đã thanh toán (có payment thành công)
+                        r.Payments.Any(p => p.Status != null && p.Status.ToUpper() == "SUCCESS")
+                        ||
+                        // Hoặc có status đã thanh toán/đang thuê
+                        (r.Status != null && (
+                            r.Status.ToUpper() == "PAID" 
+                            || r.Status.ToUpper() == "BOOKING" 
+                            || r.Status.ToUpper() == "IN_PROGRESS"
+                        ))
+                    )
+                    && (
+                        // Kiểm tra overlap thời gian: (newStart < existingEnd && newEnd > existingStart)
+                        (startTime < r.EndTime.Value && endTime > r.StartTime.Value)
+                    )
+                );
         }
 
         // Rentals that have at least one successful payment (Status = "Success")

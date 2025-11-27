@@ -216,3 +216,17 @@ export const settleRentalPenalty = async (penaltyId: string, payload: SettlePena
   const response = await http.post<IRentalPenaltyInfo>(`/api/rental/penalties/${penaltyId}/settle`, payload);
   return response.data;
 };
+
+export const deleteRentalPenalty = async (penaltyId: string): Promise<void> => {
+  await http.delete(`/api/rental/penalties/${penaltyId}`);
+};
+
+export interface UpdatePenaltyPayload {
+  amount: number;
+  description?: string;
+}
+
+export const updateRentalPenalty = async (penaltyId: string, payload: UpdatePenaltyPayload): Promise<IRentalPenaltyInfo> => {
+  const response = await http.put<IRentalPenaltyInfo>(`/api/rental/penalties/${penaltyId}`, payload);
+  return response.data;
+};

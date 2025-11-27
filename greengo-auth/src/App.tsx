@@ -33,6 +33,7 @@ import StationManagement from "./pages/dashboard/StationManagement"
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import CheckinManagement from "./pages/dashboard/CheckinManagement";
 import RevenueDashboard from "./pages/dashboard/RevenueDashboard";
+import PenaltyManagement from "./pages/dashboard/PenaltyManagement";
 import DashboardLanding from "./pages/dashboard/DashboardLanding";
 export default function App() {
   return (
@@ -78,6 +79,7 @@ export default function App() {
             <Route path="overview" element={<AdminDashboard />} />
             <Route path="staffs" element={<StaffManagement />} />
             <Route path="revenue" element={<RevenueDashboard />} />
+            <Route path="penalties" element={<PenaltyManagement />} />
           </Route>
         </Route>
       </Route>

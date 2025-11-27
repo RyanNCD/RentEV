@@ -44,7 +44,7 @@ namespace APIRentEV.Controllers
             return Ok(dtos);
         }
 
-        // Get penalty by ID
+        // Get penalty by ID (public, for display)
         [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<ActionResult<PenaltyDto>> GetPenalty(Guid id)
@@ -67,6 +67,113 @@ namespace APIRentEV.Controllers
             };
 
             return Ok(dto);
+        }
+
+        // === ADMIN CRUD ===
+
+        // Create new penalty
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<ActionResult<PenaltyDto>> CreatePenalty([FromBody] PenaltyDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.ViolationType))
+            {
+                return BadRequest(new { message = "Loại vi phạm không được để trống." });
+            }
+
+            if (dto.Amount <= 0)
+            {
+                return BadRequest(new { message = "Số tiền phạt phải lớn hơn 0." });
+            }
+
+            // Ensure unique violation type
+            var exists = await _context.Penalties
+                .AnyAsync(p => p.ViolationType == dto.ViolationType);
+            if (exists)
+            {
+                return BadRequest(new { message = "Mỗi loại vi phạm chỉ được cấu hình một mức phạt. Vui lòng chọn loại khác hoặc sửa mức phạt hiện có." });
+            }
+
+            var entity = new Penalty
+            {
+                PenaltyId = dto.PenaltyId != Guid.Empty ? dto.PenaltyId : Guid.NewGuid(),
+                ViolationType = dto.ViolationType,
+                Description = dto.Description,
+                Amount = dto.Amount,
+                IsActive = true, // Luôn active khi tạo mới
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _context.Penalties.Add(entity);
+            await _context.SaveChangesAsync();
+
+            dto.PenaltyId = entity.PenaltyId;
+            dto.CreatedAt = entity.CreatedAt;
+            dto.UpdatedAt = entity.UpdatedAt;
+
+            return CreatedAtAction(nameof(GetPenalty), new { id = entity.PenaltyId }, dto);
+        }
+
+        // Update existing penalty
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{id}")]
+        public async Task<ActionResult<PenaltyDto>> UpdatePenalty(Guid id, [FromBody] PenaltyDto dto)
+        {
+            var penalty = await _context.Penalties.FindAsync(id);
+            if (penalty == null)
+            {
+                return NotFound(new { message = "Không tìm thấy mức phạt." });
+            }
+
+            if (string.IsNullOrWhiteSpace(dto.ViolationType))
+            {
+                return BadRequest(new { message = "Loại vi phạm không được để trống." });
+            }
+
+            if (dto.Amount <= 0)
+            {
+                return BadRequest(new { message = "Số tiền phạt phải lớn hơn 0." });
+            }
+
+            // Ensure unique violation type (exclude current record)
+            var exists = await _context.Penalties
+                .AnyAsync(p => p.PenaltyId != id && p.ViolationType == dto.ViolationType);
+            if (exists)
+            {
+                return BadRequest(new { message = "Đã tồn tại mức phạt cho loại vi phạm này. Vui lòng chọn loại khác hoặc chỉnh sửa bản ghi hiện có." });
+            }
+
+            penalty.ViolationType = dto.ViolationType;
+            penalty.Description = dto.Description;
+            penalty.Amount = dto.Amount;
+            penalty.IsActive = true; // Luôn active
+            penalty.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            dto.PenaltyId = penalty.PenaltyId;
+            dto.CreatedAt = penalty.CreatedAt;
+            dto.UpdatedAt = penalty.UpdatedAt;
+
+            return Ok(dto);
+        }
+
+        // Hard delete penalty
+        [Authorize(Roles = "Admin")]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePenalty(Guid id)
+        {
+            var penalty = await _context.Penalties.FindAsync(id);
+            if (penalty == null)
+            {
+                return NotFound(new { message = "Không tìm thấy mức phạt." });
+            }
+
+            // Hard delete: xóa hoàn toàn khỏi database
+            _context.Penalties.Remove(penalty);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }

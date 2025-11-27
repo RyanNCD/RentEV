@@ -24,7 +24,8 @@ export default function AdminLayout() {
             <>
               <NavLink to="/dashboard/checkin">Giao nhận xe</NavLink>
               <NavLink to="/dashboard/vehicles">Quản lý Xe</NavLink>
-              <NavLink to="/dashboard/stations">Quản lý Trạm</NavLink>
+              {/* Ẩn quản lý trạm khỏi staff theo yêu cầu */}
+              {/* <NavLink to="/dashboard/stations">Quản lý Trạm</NavLink> */}
               <NavLink to="/dashboard/users">Quản lý User</NavLink>
             </>
           )}
@@ -33,6 +34,7 @@ export default function AdminLayout() {
             <>
               <NavLink to="/dashboard/staffs">Quản lý Staff</NavLink>
               <NavLink to="/dashboard/revenue">Doanh thu</NavLink>
+              <NavLink to="/dashboard/penalties">Bảng giá phạt</NavLink>
             </>
           )}
         </nav>

@@ -330,21 +330,32 @@ namespace APIRentEV.Controllers
                 return BadRequest(new { message = "Invalid or missing userId in token." });
             }
 
-            var rental = _mapper.Map<Rental>(dto);
-            rental.UserId = userId; // Ensure userId from token
-            var created = await _rentalService.CreateRentalAsync(rental);
-
-            // Tạo deposit (30% của tổng tiền thuê)
-            if (created.TotalCost.HasValue && created.TotalCost.Value > 0)
+            try
             {
-                var depositService = HttpContext.RequestServices.GetRequiredService<Service.Interface.IDepositService>();
-                var depositAmount = created.TotalCost.Value * 0.3m;
-                await depositService.CreateDepositAsync(created.RentalId, userId, depositAmount);
-            }
+                var rental = _mapper.Map<Rental>(dto);
+                rental.UserId = userId; // Ensure userId from token
+                var created = await _rentalService.CreateRentalAsync(rental);
 
-            return CreatedAtAction(nameof(GetRentalById),
-                                   new { id = created.RentalId },
-                                   _mapper.Map<RentalDto>(created));
+                // Tạo deposit (30% của tổng tiền thuê)
+                if (created.TotalCost.HasValue && created.TotalCost.Value > 0)
+                {
+                    var depositService = HttpContext.RequestServices.GetRequiredService<Service.Interface.IDepositService>();
+                    var depositAmount = created.TotalCost.Value * 0.3m;
+                    await depositService.CreateDepositAsync(created.RentalId, userId, depositAmount);
+                }
+
+                return CreatedAtAction(nameof(GetRentalById),
+                                       new { id = created.RentalId },
+                                       _mapper.Map<RentalDto>(created));
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi tạo đơn thuê xe." });
+            }
         }
 
         // === REQUEST EARLY RETURN ===
@@ -497,6 +508,10 @@ namespace APIRentEV.Controllers
             {
                 return NotFound(new { message = ex.Message });
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Lỗi khi tạo khoản phạt." });
@@ -520,6 +535,53 @@ namespace APIRentEV.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, new { message = "Lỗi khi cập nhật trạng thái phạt." });
+            }
+        }
+
+        [Authorize(Roles = "StaffStation")]
+        [HttpDelete("penalties/{penaltyId}")]
+        public async Task<IActionResult> DeleteRentalPenalty(Guid penaltyId)
+        {
+            try
+            {
+                var deleted = await _rentalPenaltyService.DeletePenaltyAsync(penaltyId);
+                if (!deleted)
+                {
+                    return NotFound(new { message = "Không tìm thấy khoản phạt." });
+                }
+                return NoContent();
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi xóa khoản phạt." });
+            }
+        }
+
+        [Authorize(Roles = "StaffStation")]
+        [HttpPut("penalties/{penaltyId}")]
+        public async Task<IActionResult> UpdateRentalPenalty(Guid penaltyId, [FromBody] UpdateRentalPenaltyDto dto)
+        {
+            try
+            {
+                var penalty = await _rentalPenaltyService.UpdatePenaltyAsync(penaltyId, dto);
+                var penaltyDto = _mapper.Map<RentalPenaltyDto>(penalty);
+                return Ok(penaltyDto);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Lỗi khi cập nhật khoản phạt." });
             }
         }
 
