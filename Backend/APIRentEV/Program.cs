@@ -13,11 +13,24 @@ using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Service.Configs;
 using APIRentEV.Mapper;
 using System.Security.Claims;
+using System.Text.Json.Serialization;
+using APIRentEV.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Configure DateTime serialization to always use UTC format with 'Z' suffix
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        
+        // Custom converter for DateTime
+        options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
+        
+        // Custom converter for DateTime?
+        options.JsonSerializerOptions.Converters.Add(new NullableDateTimeConverter());
+    });
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 
 builder.Services.AddEndpointsApiExplorer();

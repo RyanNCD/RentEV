@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { getRevenueSummary, getDailyRevenue, getRecentPayments, getRevenueByStation, type IRevenueSummary, type IDailyRevenue, type IRecentPayment, type IRevenueByStation } from "../../services/revenue";
+import { formatVietnamDateOnly } from "../../utils/dateTime";
 
 export default function RevenueDashboard() {
   const [summary, setSummary] = useState<IRevenueSummary | null>(null);
@@ -43,7 +44,7 @@ export default function RevenueDashboard() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN');
+    return formatVietnamDateOnly(dateString);
   };
 
   const translatePaymentMethod = (method: string) => {

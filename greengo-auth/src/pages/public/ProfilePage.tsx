@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { getUserRentalHistoryPaged, getRentalById, getFeedbacksByRental, requestEarlyReturn, confirmReturn, type UserRentalListParams, type PagedRentalResult } from "../../services/rental";
+import { getUserRentalHistoryPaged, getRentalById, getFeedbacksByRental, requestEarlyReturn, confirmReturn, type UserRentalListParams } from "../../services/rental";
 import { getRentalImagesForCustomer, type RentalImageItem } from "../../services/upload";
 import { type IRentalHistoryItem, type IFeedback } from "../../types";
+import { formatVietnamDate, formatVietnamDateOnly } from "../../utils/dateTime";
 import "../profile.css";
 import "../checkin.css";
 
@@ -153,8 +154,7 @@ export default function ProfilePage() {
   };
 
   const formatDate = (dateString?: string | null) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleString("vi-VN", {
+    return formatVietnamDate(dateString, {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
@@ -281,9 +281,9 @@ export default function ProfilePage() {
         <>
           <div style={{ marginBottom: "20px" }}>
             {history.map((item) => {
-            const start = item.startTime ? new Date(item.startTime) : null;
-            const end = item.endTime ? new Date(item.endTime) : null;
-            const dayRange = `${start ? start.toLocaleDateString("vi-VN") : "—"} - ${end ? end.toLocaleDateString("vi-VN") : "—"}`;
+            const startDateStr = item.startTime ? formatVietnamDateOnly(item.startTime) : "—";
+            const endDateStr = item.endTime ? formatVietnamDateOnly(item.endTime) : "—";
+            const dayRange = `${startDateStr} - ${endDateStr}`;
               const amount = item.totalCost && item.totalCost > 0 ? formatPrice(item.totalCost) : "—";
             const status = String(item.status || "").toUpperCase();
 
@@ -312,11 +312,6 @@ export default function ProfilePage() {
                     <div style={{ fontWeight: 600, color: amount !== "N/A" ? "#111" : "#999", fontSize: "16px" }}>
                       {amount !== "N/A" ? amount : "Chưa xác định"}
                     </div>
-                    {item.pricePerDaySnapshot && (
-                      <div style={{ fontSize: "13px", color: "#6b7280" }}>
-                        Giá áp dụng: {formatPrice(item.pricePerDaySnapshot)}
-                      </div>
-                    )}
                     {status === "IN_PROGRESS" && !item.earlyReturnRequested && (
                       <button
                         onClick={async () => {
