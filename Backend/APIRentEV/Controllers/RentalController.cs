@@ -474,16 +474,25 @@ namespace APIRentEV.Controllers
                     return BadRequest(new { message = "Chỉ có thể xác nhận trả xe khi đơn thuê đang trong trạng thái đang thuê." });
                 }
 
+                // Kiểm tra staff đã checkout chưa (ReceivedAt phải có giá trị)
+                if (!rental.ReceivedAt.HasValue)
+                {
+                    return BadRequest(new { message = "Vui lòng đợi staff hoàn thành nhận xe trước khi xác nhận trả xe." });
+                }
+
                 // Mark as early return requested if returning early
                 if (rental.EndTime.HasValue && DateTime.UtcNow < rental.EndTime.Value)
                 {
                     rental.EarlyReturnRequested = true;
                     rental.EarlyReturnRequestedAt = DateTime.UtcNow;
-                    await _rentalService.UpdateRentalAsync(rentalId, rental);
                 }
 
+                // Set status = "COMPLETED" khi user xác nhận trả xe
+                rental.Status = "COMPLETED";
+                await _rentalService.UpdateRentalAsync(rentalId, rental);
+
                 return Ok(new { 
-                    message = "Xác nhận trả xe thành công. Vui lòng đến trạm để hoàn tất thủ tục.",
+                    message = "Xác nhận trả xe thành công.",
                     rentalId = rentalId
                 });
             }

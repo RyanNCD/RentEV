@@ -171,11 +171,49 @@ namespace Repository.Repositories
                 .ToListAsync();
         }
 
-        public async Task<List<VehicleDto>> GetAvailableVehiclesAsync()
+        public async Task<List<VehicleDto>> GetAvailableVehiclesAsync(DateTime? startTime = null, DateTime? endTime = null)
         {
-            return await _context.Vehicles
+            var query = _context.Vehicles
                 .Include(v => v.Reservations)
+                .Include(v => v.Rentals)
+                    .ThenInclude(r => r.Payments)
                 .Where(v => v.Status != null && v.Status.ToLower() == "available")
+                .AsQueryable();
+
+            // Nếu có tham số thời gian, lọc các xe đã được đặt trong khoảng thời gian đó
+            if (startTime.HasValue && endTime.HasValue)
+            {
+                var vehicleIdsWithConflicts = await _context.Rentals
+                    .Include(r => r.Payments)
+                    .Where(r => r.StartTime.HasValue
+                        && r.EndTime.HasValue
+                        // Chỉ kiểm tra các rental chưa completed
+                        && (r.Status == null || r.Status.ToUpper() != "COMPLETED")
+                        && (
+                            // Đã thanh toán (có payment thành công)
+                            r.Payments.Any(p => p.Status != null && p.Status.ToUpper() == "SUCCESS")
+                            ||
+                            // Hoặc có status đã thanh toán/đang thuê
+                            (r.Status != null && (
+                                r.Status.ToUpper() == "PAID" 
+                                || r.Status.ToUpper() == "BOOKING" 
+                                || r.Status.ToUpper() == "IN_PROGRESS"
+                            ))
+                        )
+                        && (
+                            // Kiểm tra overlap thời gian: (newStart < existingEnd && newEnd > existingStart)
+                            (startTime.Value < r.EndTime.Value && endTime.Value > r.StartTime.Value)
+                        )
+                    )
+                    .Select(r => r.VehicleId)
+                    .Distinct()
+                    .ToListAsync();
+
+                // Loại bỏ các xe có conflict
+                query = query.Where(v => !vehicleIdsWithConflicts.Contains(v.VehicleId));
+            }
+
+            return await query
                 .Select(v => new VehicleDto
                 {
                     VehicleId = v.VehicleId,

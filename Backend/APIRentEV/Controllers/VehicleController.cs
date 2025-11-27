@@ -309,9 +309,9 @@ namespace APIRentEV.Controllers
 
         [AllowAnonymous]
         [HttpGet("available")]
-        public async Task<IActionResult> GetAvailableVehicles()
+        public async Task<IActionResult> GetAvailableVehicles([FromQuery] DateTime? startTime = null, [FromQuery] DateTime? endTime = null)
         {
-            var vehicles = await _vehicleService.GetAvailableVehiclesAsync();
+            var vehicles = await _vehicleService.GetAvailableVehiclesAsync(startTime, endTime);
             // Map ImageUrl với base URL của API
             var result = vehicles.Select(MapVehicleDtoImageUrl).ToList();
             return Ok(result);

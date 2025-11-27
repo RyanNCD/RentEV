@@ -365,7 +365,9 @@ namespace Service.Services
             rental.ReceivedAt = receivedAt;
             rental.ReceivedByStaffId = staffId;
             rental.ReturnCondition = returnCondition;
-            rental.Status = "COMPLETED";
+            // KHÔNG set status = "COMPLETED" ở đây
+            // Giữ status = "IN_PROGRESS" để user có thể xác nhận trả xe
+            // Status sẽ được set thành "COMPLETED" khi user gọi confirmReturn
 
             await _rentalRepo.UpdateAsync(rental);
             

@@ -768,14 +768,16 @@ export default function CheckinManagement() {
   // - Tiền cọc: 30% của tiền thuê (ví dụ: 1.350.000 ₫)
   // - Tổng thanh toán nếu trả trước: tiền thuê + cọc (ví dụ: 5.850.000 ₫)
   // - Nếu chỉ trả cọc: đã trả cọc, còn phải trả tiền thuê xe
+  // LƯU Ý: Không dựa vào rental.status vì backend set status = "PAID" ngay cả khi chỉ trả cọc
+  // Phải kiểm tra số tiền thực tế đã trả
   const getPaymentStatus = (rental: IRentalHistoryItem) => {
     const upperStatus = rental.status?.toUpperCase() || "";
     
-    // Nếu rental status là PAID hoặc COMPLETED thì coi như đã thanh toán đủ/hoàn tất
-    if (upperStatus === "PAID" || upperStatus === "COMPLETED") {
+    // Chỉ COMPLETED mới chắc chắn đã hoàn tất (không kiểm tra số tiền)
+    if (upperStatus === "COMPLETED") {
       return { 
         type: "full", 
-        label: upperStatus === "COMPLETED" ? "Đã hoàn tất" : "Đã trả đủ", 
+        label: "Đã hoàn tất", 
         color: "#059669",
         remaining: 0,
         rentalCost: rental.totalCost || 0,
@@ -799,7 +801,8 @@ export default function CheckinManagement() {
     const totalPaid = depositAmount + totalPaidFromPayments;
     
     // Nếu đã trả >= tổng (tiền thuê + cọc) thì đã trả đủ
-    if (totalPaid >= totalPaymentRequired) {
+    // Sử dụng tolerance nhỏ để tránh lỗi làm tròn số
+    if (totalPaid >= totalPaymentRequired - 0.01) {
       return { 
         type: "full", 
         label: "Đã trả đủ", 
@@ -820,7 +823,8 @@ export default function CheckinManagement() {
       remaining: rentalCost, // Còn phải trả tiền thuê xe
       depositAmount: depositAmount,
       rentalCost: rentalCost,
-      totalPaymentRequired: totalPaymentRequired
+      totalPaymentRequired: totalPaymentRequired,
+      totalPaid: totalPaid
     };
   };
 

@@ -47,8 +47,21 @@ export const getFeaturedVehicles = async (): Promise<IVehicle[]> => {
 };
 
 // 2b. Lấy xe CÓ SẴN để thuê (Public API - không cần auth)
-export const getAvailableVehicles = async (): Promise<IVehicle[]> => {
-  const response = await http.get<IVehicle[]>("/api/vehicle/available");
+// Nếu có startTime và endTime, sẽ lọc các xe đã được đặt trong khoảng thời gian đó
+export const getAvailableVehicles = async (startTime?: Date | string, endTime?: Date | string): Promise<IVehicle[]> => {
+  const params: Record<string, string> = {};
+  
+  if (startTime) {
+    const start = typeof startTime === 'string' ? startTime : startTime.toISOString();
+    params.startTime = start;
+  }
+  
+  if (endTime) {
+    const end = typeof endTime === 'string' ? endTime : endTime.toISOString();
+    params.endTime = end;
+  }
+  
+  const response = await http.get<IVehicle[]>("/api/vehicle/available", { params });
   return response.data;
 };
 

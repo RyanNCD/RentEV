@@ -343,13 +343,17 @@ export default function ProfilePage() {
                         ✓ Đã yêu cầu trả xe sớm
                       </span>
                     )}
+                    {/* Hiển thị nút "Xác nhận trả xe" khi:
+                        1. Status = "IN_PROGRESS" (đang thuê)
+                        2. Backend sẽ kiểm tra staff đã checkout chưa (receivedAt có giá trị)
+                    */}
                     {status === "IN_PROGRESS" && (
                       <button
                         onClick={async () => {
-                          if (window.confirm("Bạn có chắc chắn muốn xác nhận trả xe không? Vui lòng đến trạm để hoàn tất thủ tục.")) {
+                          if (window.confirm("Bạn có chắc chắn muốn xác nhận trả xe không?")) {
                             try {
                               await confirmReturn(item.rentalId);
-                              alert("Xác nhận trả xe thành công! Vui lòng đến trạm để hoàn tất thủ tục.");
+                              alert("Xác nhận trả xe thành công!");
                               await loadHistory();
                             } catch (err: any) {
                               alert(err.response?.data?.message || "Không thể xác nhận trả xe.");

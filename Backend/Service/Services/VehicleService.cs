@@ -122,9 +122,9 @@ namespace Service.Services
             return await _vehicleRepository.GetFeaturedVehiclesAsync(topCount);
         }
 
-        public async Task<List<VehicleDto>> GetAvailableVehiclesAsync()
+        public async Task<List<VehicleDto>> GetAvailableVehiclesAsync(DateTime? startTime = null, DateTime? endTime = null)
         {
-            return await _vehicleRepository.GetAvailableVehiclesAsync();
+            return await _vehicleRepository.GetAvailableVehiclesAsync(startTime, endTime);
         }
 
         public async Task<VehicleDto?> GetAvailableVehicleByIdAsync(Guid id)
