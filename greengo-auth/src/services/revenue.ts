@@ -66,11 +66,17 @@ export const getDailyRevenue = async (
   return response.data;
 };
 
-// Get recent payments
-export const getRecentPayments = async (limit: number = 10): Promise<IRecentPayment[]> => {
-  const response = await http.get<IRecentPayment[]>("/api/revenue/recent", {
-    params: { limit }
-  });
+// Get recent payments (with optional date filter)
+export const getRecentPayments = async (
+  limit: number = 10,
+  startDate?: string,
+  endDate?: string
+): Promise<IRecentPayment[]> => {
+  const params: any = { limit };
+  if (startDate) params.startDate = startDate;
+  if (endDate) params.endDate = endDate;
+  
+  const response = await http.get<IRecentPayment[]>("/api/revenue/recent", { params });
   return response.data;
 };
 

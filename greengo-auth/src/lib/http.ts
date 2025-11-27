@@ -4,7 +4,7 @@ import axios, { type InternalAxiosRequestConfig } from "axios";
 
 const baseURL =
   import.meta.env?.VITE_API_BASE_URL?.trim() ||
-  "https://rentev-b7ee.onrender.com";
+  "https://rentev-b7ee.onrender.com/swagger/index.html" || "http://localhost:7049";
 
 const http = axios.create({
   baseURL,

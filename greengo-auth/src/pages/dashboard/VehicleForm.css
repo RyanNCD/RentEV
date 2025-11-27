@@ -20,12 +20,14 @@
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .modal-header {
   padding: 1.5rem 2rem;
   border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0;
+  text-align: center;
 }
 
 .modal-header h2 {
@@ -33,6 +35,17 @@
   font-size: 1.5rem;
   font-weight: 600;
   color: #1a202c;
+}
+
+/* For forms without modal-header (legacy support) */
+.modal-content > h2 {
+  margin: 0;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1a202c;
+  text-align: center;
 }
 
 .modal-body {
@@ -83,6 +96,7 @@
   border-radius: 6px;
   box-sizing: border-box;
   font-size: 0.875rem;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   transition: border-color 0.2s;
 }
 
@@ -126,7 +140,8 @@
   border: none;
   border-radius: 6px;
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -158,6 +173,16 @@
   background-color: #f7fafc;
   color: #a0aec0;
   cursor: not-allowed;
+}
+
+/* Modal actions for forms without modal-footer */
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
 }
 
 /* Responsive: chuyển sang 1 cột khi màn hình nhỏ */

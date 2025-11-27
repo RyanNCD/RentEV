@@ -47,8 +47,23 @@ export default function CarDetailPage() {
       try {
         setLoading(true);
         setError(null);
+        // Force fresh data by adding timestamp to bypass cache
+        const timestamp = new Date().getTime();
         const data = await getVehicleById(id);
+        console.log(`[CarDetail] Loaded vehicle ${id} at ${timestamp}:`, {
+          vehicleId: data.vehicleId,
+          vehicleName: data.vehicleName,
+          status: data.status,
+          pricePerDay: data.pricePerDay
+        });
         setVehicle(data);
+        
+        // Kiểm tra status ngay sau khi load
+        if (data.status?.toUpperCase() !== "AVAILABLE") {
+          console.warn(`[CarDetail] ⚠️ Vehicle ${id} is NOT available! Status: ${data.status}`);
+        } else {
+          console.log(`[CarDetail] ✓ Vehicle ${id} is available`);
+        }
       } catch (err: any) {
         console.error("Error loading vehicle:", err);
         setError("Không tìm thấy xe hoặc có lỗi xảy ra.");
@@ -57,7 +72,17 @@ export default function CarDetailPage() {
       }
     };
 
+    // Force immediate fetch (no debounce)
     fetchVehicle();
+    
+    // BONUS: Auto refresh every 30 seconds khi đang xem trang
+    const refreshInterval = setInterval(() => {
+      console.log(`[CarDetail] Auto-refreshing vehicle ${id}...`);
+      fetchVehicle();
+    }, 30000); // 30 giây
+    
+    // Cleanup interval khi unmount
+    return () => clearInterval(refreshInterval);
   }, [id]);
 
   // Load feedbacks and check eligibility
@@ -139,9 +164,21 @@ export default function CarDetailPage() {
   };
 
   const handleBookNow = () => {
-    if (vehicle) {
-      navigate("/checkout", { state: { car: vehicle } });
+    if (!vehicle) return;
+    
+    // Kiểm tra xe có sẵn không
+    if (vehicle.status?.toUpperCase() !== "AVAILABLE") {
+      alert("Xe này hiện không có sẵn để thuê!");
+      return;
     }
+    
+    // Kiểm tra xe có giá hợp lệ không
+    if (!vehicle.pricePerDay || vehicle.pricePerDay <= 0) {
+      alert("Xe chưa có giá. Vui lòng liên hệ để biết thêm thông tin.");
+      return;
+    }
+    
+    navigate("/checkout", { state: { car: vehicle } });
   };
 
   const handleSubmitReview = async (e: React.FormEvent) => {
@@ -337,28 +374,31 @@ export default function CarDetailPage() {
 
             {/* Action buttons */}
             <div className="car-detail-actions">
-              {vehicle.status === "Available" && vehicle.pricePerDay && vehicle.pricePerDay > 0 ? (
+              {vehicle.status?.toUpperCase() === "AVAILABLE" && vehicle.pricePerDay && vehicle.pricePerDay > 0 ? (
                 <button
                   onClick={handleBookNow}
                   className="btn btn--primary car-detail-book-btn"
                 >
                   Thuê ngay
                 </button>
-              ) : vehicle.status === "Available" && (!vehicle.pricePerDay || vehicle.pricePerDay <= 0) ? (
+              ) : vehicle.status?.toUpperCase() === "AVAILABLE" && (!vehicle.pricePerDay || vehicle.pricePerDay <= 0) ? (
                 <p className="car-detail-unavailable-message">
                   Xe chưa có giá. Vui lòng liên hệ để biết thêm thông tin.
                 </p>
               ) : (
                 <>
-                  <button
-                    onClick={handleBookNow}
-                    className="btn btn--primary car-detail-book-btn"
-                    disabled
+                  <div className="btn btn--primary car-detail-book-btn" 
+                    style={{ 
+                      opacity: 0.5, 
+                      cursor: "not-allowed",
+                      pointerEvents: "none",
+                      background: "#ccc"
+                    }}
                   >
                     Không có sẵn
-                  </button>
-                  <p className="car-detail-unavailable-message">
-                    Xe hiện không có sẵn để thuê
+                  </div>
+                  <p className="car-detail-unavailable-message" style={{ color: "#dc3545", fontWeight: "600" }}>
+                    ⚠️ Xe hiện không có sẵn để thuê (Trạng thái: {vehicle.status})
                   </p>
                 </>
               )}

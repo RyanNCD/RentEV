@@ -1,13 +1,13 @@
 // File: src/lib/pages/public/CheckoutPage.tsx (Bản V8 - Full - Đã có "Lính gác")
 
 import { useState, useEffect } from "react"; 
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { type IVehicle, type IRentalRequest, type IPaymentRequest, type IStation } from "../../types"; 
 import { createRental } from "../../services/rental"; 
 import { createPaymentRequest, confirmPayment } from "../../services/payment";
 import { getAllStations } from "../../services/station";
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+
 import { getPenalties } from "../../services/penalty";
 import { type IPenalty } from "../../types";
 import { DatePicker, TimePicker, ConfigProvider } from "antd";
@@ -28,8 +28,11 @@ export default function CheckoutPage() {
 
   const location = useLocation();
   const navigate = useNavigate();
-  // (Biến "car" CÓ THỂ BỊ NULL)
-  const car = location.state?.car as IVehicle | null;
+  // (Biến "car" ban đầu từ location.state)
+  const initialCar = location.state?.car as IVehicle | null;
+  
+  // 🆕 Dùng state để có thể cập nhật xe khi auto-refresh
+  const [car, setCar] = useState<IVehicle | null>(initialCar);
 
   // Configure dayjs locale
   dayjs.locale("vi");
@@ -227,7 +230,7 @@ export default function CheckoutPage() {
   const depositAmount = costCalculation.deposit;
   const { user } = useAuth();
 
-  // (Hàm handleSubmit 5 món - giữ nguyên)
+  // (Hàm handleSubmit 5 món - Thêm re-fetch vehicle để đảm bảo status mới nhất)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -248,8 +251,63 @@ export default function CheckoutPage() {
       return;
     }
     
+    // (Lính gác #3 - Kiểm tra xe còn available không)
+    if (car.status?.toUpperCase() !== "AVAILABLE") {
+      setError(`Xe này hiện không có sẵn để thuê (Trạng thái: ${car.status}). Vui lòng chọn xe khác.`);
+      return;
+    }
+    
+    // (Lính gác #4 - Kiểm tra ngày không được trong quá khứ)
+    const now = new Date();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (start < now) {
+      setError("Ngày nhận xe không được trong quá khứ!");
+      return;
+    }
+    
+    if (end <= start) {
+      setError("Ngày trả xe phải sau ngày nhận xe!");
+      return;
+    }
+    
     setLoading(true);
     setError(null);
+    
+    // 🔒 LÍNH GÁC #5 - RE-FETCH XE TỪ API ĐỂ KIỂM TRA STATUS MỚI NHẤT
+    try {
+      console.log(`[Checkout] Re-fetching vehicle ${car.vehicleId} to verify current status...`);
+      const { getVehicleById } = await import("../../services/vehicle");
+      const freshVehicle = await getVehicleById(car.vehicleId);
+      
+      console.log(`[Checkout] Fresh vehicle data:`, {
+        vehicleId: freshVehicle.vehicleId,
+        status: freshVehicle.status,
+        pricePerDay: freshVehicle.pricePerDay
+      });
+      
+      // Kiểm tra lại status từ API mới nhất
+      if (freshVehicle.status?.toUpperCase() !== "AVAILABLE") {
+        setLoading(false);
+        setError(`⚠️ Xe này vừa được cập nhật trạng thái thành "${freshVehicle.status}". Không thể tiếp tục thanh toán. Vui lòng chọn xe khác.`);
+        console.error(`[Checkout] Vehicle ${car.vehicleId} is no longer available! Status: ${freshVehicle.status}`);
+        return;
+      }
+      
+      if (!freshVehicle.pricePerDay || freshVehicle.pricePerDay <= 0) {
+        setLoading(false);
+        setError("Xe chưa có giá hợp lệ. Vui lòng chọn xe khác.");
+        return;
+      }
+      
+      console.log(`[Checkout] ✓ Vehicle ${car.vehicleId} is confirmed available. Proceeding...`);
+    } catch (err: any) {
+      setLoading(false);
+      setError("Không thể xác minh trạng thái xe. Vui lòng thử lại.");
+      console.error("[Checkout] Error re-fetching vehicle:", err);
+      return;
+    }
     
     try {
       // 1. TẠO DATA BƯỚC 1 (5 MÓN)
@@ -402,6 +460,21 @@ export default function CheckoutPage() {
       <div style={{ padding: "2rem", maxWidth: "600px", margin: "auto" }}>
       <h1>Xác nhận Thuê xe & Thanh toán</h1>
       
+      {/* Warning nếu xe không available */}
+      {car.status?.toUpperCase() !== "AVAILABLE" && (
+        <div style={{ 
+          padding: "1rem", 
+          marginBottom: "1rem", 
+          background: "#fee", 
+          border: "1px solid #fcc", 
+          borderRadius: "8px", 
+          color: "#c33" 
+        }}>
+          <strong>⚠️ Cảnh báo:</strong> Xe này hiện không có sẵn để thuê (Trạng thái: {car.status}). 
+          Bạn không thể tiếp tục thanh toán. Vui lòng <Link to="/home" style={{ color: "#c33", textDecoration: "underline" }}>chọn xe khác</Link>.
+        </div>
+      )}
+      
       <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
         <img 
             src={"/images/car-vf7.jpg"} // (DÙNG TẠM)
@@ -413,6 +486,15 @@ export default function CheckoutPage() {
             {formatPrice(car.pricePerDay)}
             {car.pricePerDay != null ? " /ngày" : ""}
           </p>
+          {car.status && (
+            <p style={{ 
+              fontSize: "0.875rem", 
+              color: car.status?.toUpperCase() === "AVAILABLE" ? "#16a34a" : "#dc3545",
+              fontWeight: "600"
+            }}>
+              Trạng thái: {car.status?.toUpperCase() === "AVAILABLE" ? "✓ Có sẵn" : `✗ ${car.status}`}
+            </p>
+          )}
         </div>
       </div>
       
@@ -451,6 +533,34 @@ export default function CheckoutPage() {
           </select>
         </div>
       
+        {/* (Input Ngày giờ - Đã thêm min để chặn ngày quá khứ) */}
+        <div className="form-group" style={{ marginTop: "1rem" }}>
+          <label>Nhận xe (Từ ngày)</label>
+          <input 
+            type="datetime-local" 
+            value={startDate} 
+            onChange={e => setStartDate(e.target.value)}
+            min={new Date().toISOString().slice(0, 16)} // Chặn ngày quá khứ
+            required
+            style={{ width: "100%", padding: "0.5rem" }}
+          />
+          <small style={{ color: "#666", fontSize: "0.875rem" }}>
+            * Không thể chọn ngày trong quá khứ
+          </small>
+        </div>
+        <div className="form-group" style={{ marginTop: "1rem" }}>
+          <label>Trả xe (Đến ngày)</label>
+          <input 
+            type="datetime-local" 
+            value={endDate} 
+            onChange={e => setEndDate(e.target.value)}
+            min={startDate || new Date().toISOString().slice(0, 16)} // Phải sau ngày nhận
+            required
+            style={{ width: "100%", padding: "0.5rem" }}
+          />
+          <small style={{ color: "#666", fontSize: "0.875rem" }}>
+            * Phải sau ngày nhận xe
+          </small>
         {/* Date and Time Selection with Ant Design */}
         <div className="form-group" style={{ marginTop: "1rem" }}>
           <label>Nhận xe (Từ ngày)</label>
@@ -825,36 +935,36 @@ export default function CheckoutPage() {
         {error && <p style={{ color: "red", marginBottom: "12px" }}>{error}</p>}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || car.status?.toUpperCase() !== "AVAILABLE"}
           className="btn-primary"
           style={{
             padding: "1rem 1.5rem",
             fontSize: "1.125rem",
             width: "100%",
-            background: loading ? "#9ca3af" : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+            background: (loading || car.status?.toUpperCase() !== "AVAILABLE") ? "#9ca3af" : "linear-gradient(135deg, #10b981 0%, #059669 100%)",
             color: "#fff",
             border: "none",
             borderRadius: "8px",
-            cursor: loading ? "not-allowed" : "pointer",
+            cursor: (loading || car.status?.toUpperCase() !== "AVAILABLE") ? "not-allowed" : "pointer",
             transition: "all 0.3s ease",
-            boxShadow: loading ? "none" : "0 4px 14px 0 rgba(16, 185, 129, 0.35)",
+            boxShadow: (loading || car.status?.toUpperCase() !== "AVAILABLE") ? "none" : "0 4px 14px 0 rgba(16, 185, 129, 0.35)",
             fontWeight: 600,
             letterSpacing: "0.5px",
           }}
           onMouseEnter={(e) => {
-            if (!loading) {
+            if (!loading && car.status?.toUpperCase() === "AVAILABLE") {
               e.currentTarget.style.transform = "translateY(-2px)";
               e.currentTarget.style.boxShadow = "0 6px 18px 0 rgba(16, 185, 129, 0.45)";
             }
           }}
           onMouseLeave={(e) => {
-            if (!loading) {
+            if (!loading && car.status?.toUpperCase() === "AVAILABLE") {
               e.currentTarget.style.transform = "translateY(0)";
               e.currentTarget.style.boxShadow = "0 4px 14px 0 rgba(16, 185, 129, 0.35)";
             }
           }}
         >
-          {loading ? "Đang xử lý..." : "Tiến hành Thanh toán"}
+          {loading ? "Đang xử lý..." : car.status?.toUpperCase() !== "AVAILABLE" ? "Xe không có sẵn" : "Tiến hành Thanh toán"}
         </button>
         {/* Modal Dialog hiển thị QR PayOS */}
         {showPayOSDialog && (

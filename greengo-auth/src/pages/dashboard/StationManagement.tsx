@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { type IStation } from "../../types";
 import { getAllStations, createStation, updateStation, deleteStation } from "../../services/station";
 import StationForm from "../dashboard/StationForm";
+import "./StationManagement.css";
 
 export default function StationManagement() {
   const [stations, setStations] = useState<IStation[]>([]);
@@ -68,42 +69,68 @@ export default function StationManagement() {
     }
   };
 
-  if (loading) return <div>Đang tải danh sách trạm...</div>;
-  if (error) return <div style={{ color: "red" }}>{error}</div>;
+  if (loading) {
+    return <div className="station-management-loading">Đang tải danh sách trạm...</div>;
+  }
+
+  if (error) {
+    return <div className="station-management-error">{error}</div>;
+  }
 
   return (
-    <div>
-      <h1>Quản lý Trạm (Admin)</h1>
-      <button onClick={handleCreate} className="btn-primary" style={{ marginBottom: "1rem" }}>
-        + Thêm trạm mới
-      </button>
+    <div className="station-management-container">
+      <div className="station-management-header">
+        <h1>Quản lý Trạm (Admin)</h1>
+        <button onClick={handleCreate} className="btn btn--primary">
+          + Thêm trạm mới
+        </button>
+      </div>
 
-      {/* === SỬA LẠI BẢNG (TABLE) === */}
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr style={{ background: "#eee" }}>
-            <th style={{ padding: "8px", border: "1px solid #ddd" }}>Tên trạm</th>
-            <th style={{ padding: "8px", border: "1px solid #ddd" }}>Địa chỉ</th>
-            <th style={{ padding: "8px", border: "1px solid #ddd" }}>Vĩ độ (Lat)</th>
-            <th style={{ padding: "8px", border: "1px solid #ddd" }}>Kinh độ (Long)</th>
-            <th style={{ padding: "8px", border: "1px solid #ddd" }}>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {stations.map(station => (
-            <tr key={station.stationId}>
-              <td style={{ padding: "8px", border: "1px solid #ddd" }}>{station.stationName}</td>
-              <td style={{ padding: "8px", border: "1px solid #ddd" }}>{station.address}</td>
-              <td style={{ padding: "8px", border: "1px solid #ddd" }}>{station.latitude}</td>
-              <td style={{ padding: "8px", border: "1px solid #ddd" }}>{station.longitude}</td>
-              <td style={{ padding: "8px", border: "1px solid #ddd" }}>
-                <button onClick={() => handleEdit(station)} style={{ marginRight: "8px" }}>Sửa</button>
-                <button onClick={() => handleDelete(station.stationId)} style={{ color: "red" }}>Xóa</button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {stations.length === 0 ? (
+        <div className="station-management-empty">
+          Chưa có trạm nào.
+        </div>
+      ) : (
+        <div className="station-management-table-container">
+          <table className="station-management-table">
+            <thead>
+              <tr>
+                <th>Tên trạm</th>
+                <th>Địa chỉ</th>
+                <th>Vĩ độ (Lat)</th>
+                <th>Kinh độ (Long)</th>
+                <th>Hành động</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stations.map(station => (
+                <tr key={station.stationId}>
+                  <td>{station.stationName}</td>
+                  <td>{station.address}</td>
+                  <td>{station.latitude}</td>
+                  <td>{station.longitude}</td>
+                  <td>
+                    <div className="action-buttons">
+                      <button 
+                        onClick={() => handleEdit(station)} 
+                        className="btn btn--sm btn--primary"
+                      >
+                        Sửa
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(station.stationId)} 
+                        className="btn btn--sm btn--danger"
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Modal Form (Giữ nguyên) */}
       {isModalOpen && (

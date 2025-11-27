@@ -136,8 +136,15 @@ export default function HomePage() {
     const fetchInitialVehicles = async () => {
       try {
         setLoading(true);
+        const timestamp = new Date().getTime();
+        console.log(`[HomePage] Fetching available vehicles at ${timestamp}...`);
+        
         // Gọi API available để lấy danh sách xe có sẵn để thuê
         const data = await getAvailableVehicles(); 
+        
+        console.log(`[HomePage] Loaded ${data.length} available vehicles:`, 
+          data.map(v => ({ id: v.vehicleId, name: v.vehicleName, status: v.status }))
+        );
         
         // Map station info to vehicles
         const vehiclesWithStation: IVehicleWithStation[] = data.map(vehicle => {
@@ -168,13 +175,22 @@ export default function HomePage() {
           setMaxPrice(roundedMax);
         }
       } catch (err: any) {
-        console.error("Error loading vehicles:", err);
+        console.error("[HomePage] Error loading vehicles:", err);
         setError("Không thể tải danh sách xe. Vui lòng thử lại sau."); 
       } finally {
         setLoading(false);
       }
     };
+    
     fetchInitialVehicles();
+    
+    // BONUS: Auto refresh mỗi 60 giây để đồng bộ với admin updates
+    const refreshInterval = setInterval(() => {
+      console.log("[HomePage] Auto-refreshing vehicle list...");
+      fetchInitialVehicles();
+    }, 60000); // 60 giây
+    
+    return () => clearInterval(refreshInterval);
   }, [stations]); // Re-run when stations are loaded
 
   // Hàm handleSearch - lọc xe theo địa điểm và khoảng giá

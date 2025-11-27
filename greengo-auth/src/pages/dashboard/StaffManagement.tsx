@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getStaffList, revokeStaffRole, getStations, updateStaffStation, getRoles, createUser, updateUser } from "../../services/admin";
 import { type IUser, type IStation, type IRole } from "../../types";
 import { translateRole } from "../../utils/roleTranslations";
+import "./StaffManagement.css";
 
 export default function StaffManagement() {
   const [staffList, setStaffList] = useState<IUser[]>([]);

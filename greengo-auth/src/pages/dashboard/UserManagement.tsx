@@ -3,6 +3,7 @@ import { getCustomerUsers, createUser, updateUser, banUser, updateUserRole, getR
 import { type IUser } from "../../types";
 import UserForm from "./UserForm";
 import { translateRole } from "../../utils/roleTranslations";
+import "./UserManagement.css";
 
 export default function UserManagement() {
   const [users, setUsers] = useState<IUser[]>([]);
@@ -89,123 +90,99 @@ export default function UserManagement() {
     }
   };
 
-  if (loading) return <div style={{ padding: "24px" }}>Đang tải danh sách...</div>;
-  if (error) return <div style={{ padding: "24px", color: "red" }}>{error}</div>;
+  if (loading) {
+    return <div className="user-management-loading">Đang tải danh sách...</div>;
+  }
+
+  if (error) {
+    return <div className="user-management-error">{error}</div>;
+  }
 
   return (
-    <div style={{ padding: "24px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+    <div className="user-management-container">
+      <div className="user-management-header">
         <h1>Quản lý Người dùng</h1>
-        <button 
-          onClick={handleCreate} 
-          style={{ 
-            padding: "10px 20px", 
-            backgroundColor: "#4CAF50", 
-            color: "white", 
-            border: "none", 
-            borderRadius: "4px", 
-            cursor: "pointer",
-            fontSize: "16px"
-          }}
-        >
+        <button onClick={handleCreate} className="btn btn--primary">
           + Thêm người dùng mới
         </button>
       </div>
       
       {users.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "40px", color: "#666" }}>
+        <div className="user-management-empty">
           Chưa có người dùng nào.
         </div>
       ) : (
-        <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "white", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
-          <thead>
-            <tr style={{ backgroundColor: "#f5f5f5" }}>
-              <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>Họ tên</th>
-              <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>Email</th>
-              <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>Số điện thoại</th>
-              <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "left" }}>Quyền</th>
-              <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>Blacklist</th>
-              <th style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((user) => (
-              <tr key={user.userId} style={{ borderBottom: "1px solid #eee" }}>
-                <td style={{ padding: "12px", border: "1px solid #ddd" }}>{user.fullName}</td>
-                <td style={{ padding: "12px", border: "1px solid #ddd" }}>{user.email}</td>
-                <td style={{ padding: "12px", border: "1px solid #ddd" }}>{user.phone || "-"}</td>
-                <td style={{ padding: "12px", border: "1px solid #ddd" }}>
-                  {editingRole?.userId === user.userId ? (
-                    <select
-                      value={editingRole.roleId}
-                      onChange={(e) => setEditingRole({ userId: user.userId, roleId: e.target.value })}
-                      onBlur={() => handleRoleChange(user.userId, editingRole.roleId)}
-                      style={{ padding: "4px 8px", borderRadius: "4px", border: "1px solid #ddd" }}
-                      autoFocus
-                    >
-                      {roles.map(role => (
-                        <option key={role.roleId} value={role.roleId}>
-                          {translateRole(role.roleName)}
-                        </option>
-                      ))}
-                    </select>
-                  ) : (
-                    <span 
-                      onClick={() => setEditingRole({ userId: user.userId, roleId: user.roleId })}
-                      style={{ cursor: "pointer", padding: "4px 8px", borderRadius: "4px", backgroundColor: "#e9ecef" }}
-                    >
-                      {translateRole(user.roleName || user.role)}
-                    </span>
-                  )}
-                </td>
-                <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>
-                  {user.isBlacklisted ? (
-                    <span style={{ 
-                      padding: "4px 8px", 
-                      borderRadius: "4px", 
-                      backgroundColor: "#dc3545", 
-                      color: "white",
-                      fontSize: "12px"
-                    }}>
-                      Đã cấm
-                    </span>
-                  ) : (
-                    <button
-                      onClick={() => handleBanUser(user.userId)}
-                      style={{
-                        padding: "4px 12px",
-                        borderRadius: "4px",
-                        border: "none",
-                        cursor: "pointer",
-                        backgroundColor: "#dc3545",
-                        color: "white",
-                        fontSize: "12px"
-                      }}
-                    >
-                      Cấm
-                    </button>
-                  )}
-                </td>
-                <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "center" }}>
-                  <button
-                    onClick={() => handleEdit(user)}
-                    style={{
-                      padding: "6px 12px",
-                      backgroundColor: "#007bff",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                      marginRight: "8px"
-                    }}
-                  >
-                    Sửa
-                  </button>
-                </td>
+        <div className="user-management-table-container">
+          <table className="user-management-table">
+            <thead>
+              <tr>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>Số điện thoại</th>
+                <th>Quyền</th>
+                <th style={{ textAlign: "center" }}>Blacklist</th>
+                <th style={{ textAlign: "center" }}>Hành động</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user.userId}>
+                  <td>{user.fullName}</td>
+                  <td>{user.email}</td>
+                  <td>{user.phone || "-"}</td>
+                  <td>
+                    {editingRole?.userId === user.userId ? (
+                      <select
+                        value={editingRole.roleId}
+                        onChange={(e) => setEditingRole({ userId: user.userId, roleId: e.target.value })}
+                        onBlur={() => handleRoleChange(user.userId, editingRole.roleId)}
+                        className="role-select"
+                        autoFocus
+                      >
+                        {roles.map(role => (
+                          <option key={role.roleId} value={role.roleId}>
+                            {translateRole(role.roleName)}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span 
+                        onClick={() => setEditingRole({ userId: user.userId, roleId: user.roleId })}
+                        className="role-badge"
+                      >
+                        {translateRole(user.roleName || user.role)}
+                      </span>
+                    )}
+                  </td>
+                  <td style={{ textAlign: "center" }}>
+                    {user.isBlacklisted ? (
+                      <span className="blacklist-badge">
+                        Đã cấm
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleBanUser(user.userId)}
+                        className="btn btn--sm btn--danger"
+                      >
+                        Cấm
+                      </button>
+                    )}
+                  </td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        onClick={() => handleEdit(user)}
+                        className="btn btn--sm btn--primary"
+                      >
+                        Sửa
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* Modal Form */}

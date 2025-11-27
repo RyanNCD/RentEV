@@ -15,25 +15,48 @@ export default function RevenueDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
+      setError(null);
+      
+      console.log("[Revenue] Fetching data with filters:", { startDate, endDate });
+      
+      // Validate dates
+      if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+        setError("Ngày bắt đầu phải trước ngày kết thúc!");
+        setLoading(false);
+        return;
+      }
+      
       const [summaryData, dailyData, recentData, stationData] = await Promise.all([
         getRevenueSummary(startDate || undefined, endDate || undefined),
         getDailyRevenue(startDate || undefined, endDate || undefined),
-        getRecentPayments(10),
+        getRecentPayments(10, startDate || undefined, endDate || undefined), // Thêm filter cho recent payments
         getRevenueByStation(startDate || undefined, endDate || undefined)
       ]);
+      
+      console.log("[Revenue] Data loaded:", {
+        totalRevenue: summaryData.totalRevenue,
+        totalPayments: summaryData.totalPayments,
+        stationsCount: stationData.length,
+        recentPaymentsCount: recentData.length
+      });
+      
       setSummary(summaryData);
       setDailyRevenue(dailyData);
       setRecentPayments(recentData);
       setRevenueByStation(stationData);
     } catch (err: any) {
-      setError(err.message || "Không thể tải dữ liệu doanh thu");
+      console.error("[Revenue] Error loading data:", err);
+      const errorMsg = err.response?.data?.message || err.message || "Không thể tải dữ liệu doanh thu";
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    console.log("[Revenue] Filters changed, reloading data...");
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate]);
 
   const formatCurrency = (amount: number) => {
@@ -57,8 +80,46 @@ export default function RevenueDashboard() {
     return methodMap[method] || method;
   };
 
-  if (loading) return <div style={{ padding: "24px" }}>Đang tải dữ liệu...</div>;
-  if (error) return <div style={{ padding: "24px", color: "red" }}>{error}</div>;
+  if (loading) {
+    return (
+      <div style={{ padding: "24px", textAlign: "center" }}>
+        <div style={{ fontSize: "16px", color: "#666" }}>⏳ Đang tải dữ liệu doanh thu...</div>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div style={{ padding: "24px" }}>
+        <h1 style={{ marginBottom: "24px" }}>Báo cáo Doanh thu</h1>
+        <div style={{ 
+          padding: "20px", 
+          backgroundColor: "#f8d7da", 
+          color: "#721c24",
+          border: "1px solid #f5c6cb",
+          borderRadius: "8px",
+          marginBottom: "16px"
+        }}>
+          <strong>❌ Lỗi:</strong> {error}
+        </div>
+        <button
+          onClick={fetchData}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#007bff",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "14px"
+          }}
+        >
+          🔄 Thử lại
+        </button>
+      </div>
+    );
+  }
+  
   if (!summary) return null;
 
   return (
@@ -66,35 +127,100 @@ export default function RevenueDashboard() {
       <h1 style={{ marginBottom: "24px" }}>Báo cáo Doanh thu</h1>
 
       {/* Date Filter */}
-      <div style={{ marginBottom: "24px", display: "flex", gap: "16px", alignItems: "center" }}>
-        <label>
-          Từ ngày:
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            style={{ marginLeft: "8px", padding: "8px", border: "1px solid #ddd", borderRadius: "4px" }}
-          />
-        </label>
-        <label>
-          Đến ngày:
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-            style={{ marginLeft: "8px", padding: "8px", border: "1px solid #ddd", borderRadius: "4px" }}
-          />
-        </label>
-        <button
-          onClick={() => {
-            setStartDate("");
-            setEndDate("");
-          }}
-          style={{ padding: "8px 16px", backgroundColor: "#6c757d", color: "white", border: "none", borderRadius: "4px", cursor: "pointer" }}
-        >
-          Xóa bộ lọc
-        </button>
+      <div style={{ 
+        marginBottom: "24px", 
+        padding: "20px", 
+        backgroundColor: "#f8f9fa", 
+        borderRadius: "8px",
+        border: "1px solid #dee2e6"
+      }}>
+        <div style={{ display: "flex", gap: "16px", alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <label style={{ fontWeight: "600", fontSize: "14px" }}>Từ ngày:</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                console.log("[Revenue] Start date changed:", e.target.value);
+              }}
+              style={{ 
+                padding: "8px 12px", 
+                border: "1px solid #ced4da", 
+                borderRadius: "4px",
+                fontSize: "14px"
+              }}
+            />
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+            <label style={{ fontWeight: "600", fontSize: "14px" }}>Đến ngày:</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => {
+                setEndDate(e.target.value);
+                console.log("[Revenue] End date changed:", e.target.value);
+              }}
+              style={{ 
+                padding: "8px 12px", 
+                border: "1px solid #ced4da", 
+                borderRadius: "4px",
+                fontSize: "14px"
+              }}
+            />
+          </div>
+          <div style={{ display: "flex", gap: "8px", alignItems: "flex-end" }}>
+            <button
+              onClick={() => {
+                console.log("[Revenue] Clearing filters...");
+                setStartDate("");
+                setEndDate("");
+              }}
+              style={{ 
+                padding: "8px 16px", 
+                backgroundColor: "#6c757d", 
+                color: "white", 
+                border: "none", 
+                borderRadius: "4px", 
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "500",
+                transition: "background-color 0.2s"
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = "#5a6268"}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = "#6c757d"}
+            >
+              Xóa bộ lọc
+            </button>
+            {(startDate || endDate) && (
+              <span style={{ 
+                padding: "8px 12px", 
+                backgroundColor: "#d4edda", 
+                color: "#155724",
+                borderRadius: "4px",
+                fontSize: "13px",
+                fontWeight: "500"
+              }}>
+                ✓ Đang lọc {startDate && endDate ? `từ ${startDate} đến ${endDate}` : startDate ? `từ ${startDate}` : `đến ${endDate}`}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
+
+      {/* Warning if no data in selected range */}
+      {summary.totalPayments === 0 && (startDate || endDate) && (
+        <div style={{ 
+          padding: "16px", 
+          backgroundColor: "#fff3cd", 
+          color: "#856404",
+          border: "1px solid #ffeaa7",
+          borderRadius: "8px",
+          marginBottom: "24px"
+        }}>
+          ⚠️ Không có giao dịch nào trong khoảng thời gian đã chọn. Hãy thử điều chỉnh bộ lọc hoặc xóa bộ lọc để xem tất cả dữ liệu.
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "16px", marginBottom: "24px" }}>
@@ -114,7 +240,22 @@ export default function RevenueDashboard() {
 
       {/* Revenue by Station */}
       <div style={{ marginBottom: "24px" }}>
-        <h2 style={{ marginBottom: "16px" }}>Doanh thu theo trạm</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <h2 style={{ margin: 0 }}>Doanh thu theo trạm</h2>
+          {(startDate || endDate) && (
+            <span style={{ 
+              fontSize: "14px", 
+              color: "#666",
+              fontStyle: "italic"
+            }}>
+              {startDate && endDate 
+                ? `Từ ${startDate} đến ${endDate}` 
+                : startDate 
+                  ? `Từ ${startDate}` 
+                  : `Đến ${endDate}`}
+            </span>
+          )}
+        </div>
         <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "white", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
           <thead>
             <tr style={{ backgroundColor: "#f5f5f5" }}>
@@ -149,7 +290,22 @@ export default function RevenueDashboard() {
 
       {/* Revenue by Method */}
       <div style={{ marginBottom: "24px" }}>
-        <h2 style={{ marginBottom: "16px" }}>Doanh thu theo phương thức thanh toán</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <h2 style={{ margin: 0 }}>Doanh thu theo phương thức thanh toán</h2>
+          {(startDate || endDate) && (
+            <span style={{ 
+              fontSize: "14px", 
+              color: "#666",
+              fontStyle: "italic"
+            }}>
+              {startDate && endDate 
+                ? `Từ ${startDate} đến ${endDate}` 
+                : startDate 
+                  ? `Từ ${startDate}` 
+                  : `Đến ${endDate}`}
+            </span>
+          )}
+        </div>
         <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "white", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
           <thead>
             <tr style={{ backgroundColor: "#f5f5f5" }}>
@@ -174,7 +330,22 @@ export default function RevenueDashboard() {
 
       {/* Recent Payments */}
       <div>
-        <h2 style={{ marginBottom: "16px" }}>Giao dịch gần đây</h2>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+          <h2 style={{ margin: 0 }}>Giao dịch gần đây</h2>
+          {(startDate || endDate) && (
+            <span style={{ 
+              fontSize: "14px", 
+              color: "#666",
+              fontStyle: "italic"
+            }}>
+              {startDate && endDate 
+                ? `Từ ${startDate} đến ${endDate}` 
+                : startDate 
+                  ? `Từ ${startDate}` 
+                  : `Đến ${endDate}`}
+            </span>
+          )}
+        </div>
         <table style={{ width: "100%", borderCollapse: "collapse", backgroundColor: "white", boxShadow: "0 2px 4px rgba(0,0,0,0.1)" }}>
           <thead>
             <tr style={{ backgroundColor: "#f5f5f5" }}>
@@ -186,17 +357,26 @@ export default function RevenueDashboard() {
             </tr>
           </thead>
           <tbody>
-            {recentPayments.map((payment) => (
-              <tr key={payment.paymentId} style={{ borderBottom: "1px solid #eee" }}>
-                <td style={{ padding: "12px", border: "1px solid #ddd" }}>{formatDate(payment.paymentDate)}</td>
-                <td style={{ padding: "12px", border: "1px solid #ddd" }}>{payment.userName}</td>
-                <td style={{ padding: "12px", border: "1px solid #ddd" }}>{payment.vehicleName}</td>
-                <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "right", fontWeight: "bold" }}>
-                  {formatCurrency(payment.amount)}
+            {recentPayments.length === 0 ? (
+              <tr>
+                <td colSpan={5} style={{ padding: "32px", border: "1px solid #ddd", textAlign: "center", color: "#666" }}>
+                  Chưa có giao dịch nào
                 </td>
                 <td style={{ padding: "12px", border: "1px solid #ddd" }}>{translatePaymentMethod(payment.paymentMethod)}</td>
               </tr>
-            ))}
+            ) : (
+              recentPayments.map((payment) => (
+                <tr key={payment.paymentId} style={{ borderBottom: "1px solid #eee" }}>
+                  <td style={{ padding: "12px", border: "1px solid #ddd" }}>{formatDate(payment.paymentDate)}</td>
+                  <td style={{ padding: "12px", border: "1px solid #ddd" }}>{payment.userName}</td>
+                  <td style={{ padding: "12px", border: "1px solid #ddd" }}>{payment.vehicleName}</td>
+                  <td style={{ padding: "12px", border: "1px solid #ddd", textAlign: "right", fontWeight: "bold" }}>
+                    {formatCurrency(payment.amount)}
+                  </td>
+                  <td style={{ padding: "12px", border: "1px solid #ddd" }}>{payment.paymentMethod}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
